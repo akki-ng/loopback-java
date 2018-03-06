@@ -2,7 +2,9 @@ package com.flipkart.loopback.connector;
 
 import com.flipkart.loopback.constants.IDType;
 import com.flipkart.loopback.filter.Filter;
+import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.Model;
+import com.flipkart.loopback.model.PersistedModel;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +17,7 @@ public interface Connector {
     return IDType.NUMBER;
   }
 
-  <M extends Model, F extends Filter>  int count(M model, F filter);
+  <M extends Model, F extends Filter>  int count(Class<M> modelClass, F filter);
 
   <M extends Model> M create(M model);
 
@@ -25,32 +27,33 @@ public interface Connector {
 
   <M extends Model> M patchOrCreateWithWhere(M model, Map<String, Object> data);
 
-  <M extends Model, F extends Filter> M upsertWithWhere(M model, F filter, Map<String, Object>
+  <M extends Model, W extends WhereFilter> M upsertWithWhere(Class<M> modelClass, W filter,
+                                                             Map<String, Object>
       data);
 
-  <M extends Model, F extends Filter> M findOrCreate(M model, F filter, Map<String, Object>
+  <M extends Model, F extends Filter> M findOrCreate(Class<M> modelClass, F filter, Map<String, Object>
       data);
 
   <M extends Model> M save(M model);
 
-  <M extends Model, F extends Filter> List<M> updateAll(M model, F filter, Map<String, Object>
+  <M extends Model, W extends WhereFilter> int updateAll(M model, W filter, Map<String, Object>
       data);
 
   <M extends Model, F extends Filter> M updateAttributes(M model, F filter, Map<String, Object>
       data);
 
-  <M extends Model> boolean replaceById(M model, Object id);
+  <M extends PersistedModel> M replaceById(M model, Object id);
 
-  <M extends Model> boolean replaceOrCreate(M model, Object id);
+  <M extends Model> M replaceOrCreate(M model);
 
 
-  <M extends Model> boolean exists(M model, Object id);
+  <M extends Model> boolean exists(Class<M> modelClass, Object id);
 
-  <M extends Model, F extends Filter> List<M> find(M model, F filter);
+  <M extends Model, F extends Filter> List<M> find(Class<M> modelClass, F filter);
 
-  <M extends Model> M findById(M model, Object id);
+  <M extends Model> M findById(Class<M> modelClass, Object id);
 
-  <M extends Model, F extends Filter> M findOne(M model, F filter);
+  <M extends Model, F extends Filter> M findOne(Class<M> modelClass, F filter);
 
 
 
@@ -59,5 +62,5 @@ public interface Connector {
 
   <M extends Model, F extends Filter> int destroyAll(M model, F filter);
 
-  <M extends Model> int destroyById(M model, Object id);
+  <M extends Model> void destroyById(Class<M> modelClass, Object id);
 }

@@ -12,6 +12,7 @@
         <module>sampleproject</module>
         <module>core</module>
         <module>common</module>
+        <module>dropwizard</module>
     </modules>
 
     <properties>
@@ -29,6 +30,7 @@
         <dep.jaxb-annotation.version>2.7.6</dep.jaxb-annotation.version>
         <dep.ws-rs.version>2.1</dep.ws-rs.version>
         <dep.commons-lang3.version>3.4</dep.commons-lang3.version>
+        <dep.guava.version>24.0-jre</dep.guava.version>
     </properties>
 
     <dependencyManagement>
@@ -109,6 +111,12 @@
                 <version>${dep.commons-lang3.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${dep.guava.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>io.loopback</groupId>
                 <artifactId>common</artifactId>
                 <version>${project.version}</version>
@@ -116,6 +124,11 @@
             <dependency>
                 <groupId>io.loopback</groupId>
                 <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.loopback</groupId>
+                <artifactId>dropwizard</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

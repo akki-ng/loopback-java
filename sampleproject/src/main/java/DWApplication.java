@@ -6,12 +6,14 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import java.util.List;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MediaType;
 import org.glassfish.jersey.process.Inflector;
 import org.glassfish.jersey.server.model.Resource;
 import org.glassfish.jersey.server.model.ResourceMethod;
 import resource.HelloResource;
+import resource.TempResource;
 import resource.TestResource;
 
 /**
@@ -20,17 +22,17 @@ import resource.TestResource;
 
 public class DWApplication extends Application<DWConfiguration> {
   public static void main(String[] args) throws Exception, LoopbackException {
-//    new DWApplication().run(args);
-    TestModel a = TestModel.builder()
-        .id(22L)
-        .inVisible("IamInvisible")
-        .name("Akshay")
-        .oldName("Sharma")
-        .build();
-    System.out.println(a);
-
-    a.setAttribute("id", 24L);
-    System.out.println(a);
+    new DWApplication().run(args);
+//    TestModel a = TestModel.builder()
+//        .id(22L)
+//        .inVisible("IamInvisible")
+//        .name("Akshay")
+//        .oldName("Sharma")
+//        .build();
+//    System.out.println(a);
+//
+//    a.setAttribute("id", 24L);
+//    System.out.println(a);
   }
 
   @Override
@@ -55,8 +57,8 @@ public class DWApplication extends Application<DWConfiguration> {
         dwConfiguration.getDefaultName()
     );
 
-    final TestResource t1 = new TestResource(dwConfiguration.getTemplate(), dwConfiguration
-        .getDefaultName());
+    final TestResource t1 = new TestResource();
+    final TempResource t2 = new TempResource();
 
 //    Resource.Builder rb = Resource.builder();
 ////    rb.path()
@@ -70,5 +72,6 @@ public class DWApplication extends Application<DWConfiguration> {
 //        })
     environment.jersey().register(resource);
     environment.jersey().register(t1);
+    environment.jersey().register(t2);
   }
 }

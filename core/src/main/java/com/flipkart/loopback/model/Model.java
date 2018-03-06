@@ -1,6 +1,7 @@
 package com.flipkart.loopback.model;
 
 import com.flipkart.loopback.connector.Connector;
+import com.flipkart.loopback.connector.MysqlConnector;
 import com.flipkart.loopback.filter.Filter;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,7 @@ import java.util.Map;
 
 public class Model<T extends Model<T>> {
 
-  public static <C extends Connector> C getConnector() {
-    return null;
+  public static Connector getConnector() {
+    return new MysqlConnector();
   }
 }

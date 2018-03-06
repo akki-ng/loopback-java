@@ -5,4 +5,6 @@ package com.flipkart.loopback.filter;
  */
 
 public class Filter {
+  public Filter(String data) {
+  }
 }
