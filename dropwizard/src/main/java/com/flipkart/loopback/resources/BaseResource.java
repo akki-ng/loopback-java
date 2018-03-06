@@ -91,4 +91,4 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
   public T upsertWithWhere(WhereFilter where, T model, HttpServletRequest request) {
     return (T) T.upsertWithWhere(getModelClass(), where, model.getFieldMap());
   }
-}it
+}
