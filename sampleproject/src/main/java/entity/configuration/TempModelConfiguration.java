@@ -32,7 +32,7 @@ public class TempModelConfiguration extends ModelConfigurationImpl<TempModelConf
 
   @Override
   public Connector getConnector() {
-    return new JPAConnector();
+    return JPAConnector.getInstance();
   }
 
   @Override
