@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 
 /**
  * Created by akshaya.sharma on 12/03/18
@@ -104,7 +105,10 @@ public class HibernateConnector implements Connector {
 
   @Override
   public <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass, F filter) {
-    return sessionFactory.getCurrentSession().createCriteria(modelClass).list();
+    Transaction tx = sessionFactory.getCurrentSession().beginTransaction();
+    List<M> list =  sessionFactory.getCurrentSession().createCriteria(modelClass).list();
+    tx.commit();
+    return list;
   }
 
   @Override

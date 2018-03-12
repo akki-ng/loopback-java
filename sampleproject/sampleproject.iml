@@ -11,6 +11,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="hibernateconnector" />
     <orderEntry type="library" name="Maven: io.dropwizard:dropwizard-core:1.0.0" level="project" />
     <orderEntry type="library" name="Maven: io.dropwizard:dropwizard-util:1.0.0" level="project" />
     <orderEntry type="library" name="Maven: joda-time:joda-time:2.9.4" level="project" />
@@ -157,6 +158,5 @@
     <orderEntry type="library" name="Maven: org.jibx.config.3rdparty.org.eclipse:org.eclipse.jdt.core:3.7.0.v_B61" level="project" />
     <orderEntry type="library" name="Maven: org.jibx.config.3rdparty.org.eclipse:org.eclipse.osgi:3.7.0.v20110613" level="project" />
     <orderEntry type="library" name="Maven: org.jibx.config.3rdparty.org.eclipse:org.eclipse.text:3.5.100.v20110505-0800" level="project" />
-    <orderEntry type="module" module-name="hibernateconnector" />
   </component>
 </module>
