@@ -29,6 +29,7 @@
             <property name="hibernate.c3p0.idleConnectionTestPeriod" value="1800"/> <!-- seconds -->
             <property name="hibernate.c3p0.maxConnectionAge" value="1000"/>
             <property name="hibernate.c3p0.maxIdleTimeExcessConnections" value="300"/>
+            <property name="hibernate.current_session_context_class" value="thread"/>
         </properties>
     </persistence-unit>
 </persistence>

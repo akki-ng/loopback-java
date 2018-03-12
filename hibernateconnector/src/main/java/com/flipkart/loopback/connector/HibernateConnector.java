@@ -17,7 +17,7 @@ public class HibernateConnector implements Connector {
   private static HibernateConnector instance = null;
   private static SessionFactory sessionFactory;
 
-  private HibernateConnector(SessionFactory sessionFactory) {
+  public HibernateConnector(SessionFactory sessionFactory) {
     this.sessionFactory = sessionFactory;
   }
 
