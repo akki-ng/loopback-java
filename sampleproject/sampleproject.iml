@@ -157,5 +157,12 @@
     <orderEntry type="library" name="Maven: org.jibx.config.3rdparty.org.eclipse:org.eclipse.jdt.core:3.7.0.v_B61" level="project" />
     <orderEntry type="library" name="Maven: org.jibx.config.3rdparty.org.eclipse:org.eclipse.osgi:3.7.0.v20110613" level="project" />
     <orderEntry type="library" name="Maven: org.jibx.config.3rdparty.org.eclipse:org.eclipse.text:3.5.100.v20110505-0800" level="project" />
+    <orderEntry type="library" name="Maven: io.dropwizard:dropwizard-hibernate:0.9.2" level="project" />
+    <orderEntry type="library" name="Maven: io.dropwizard:dropwizard-db:0.9.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.tomcat:tomcat-jdbc:8.0.28" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.tomcat:tomcat-juli:8.0.28" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-hibernate4:2.6.3" level="project" />
+    <orderEntry type="library" name="Maven: org.jadira.usertype:usertype.core:4.0.0.GA" level="project" />
+    <orderEntry type="library" name="Maven: org.jadira.usertype:usertype.spi:4.0.0.GA" level="project" />
   </component>
 </module>
