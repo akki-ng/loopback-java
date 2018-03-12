@@ -17,50 +17,48 @@ public interface Connector {
     return IDType.NUMBER;
   }
 
-  <M extends Model, F extends Filter>  int count(Class<M> modelClass, F filter);
+  <M extends PersistedModel, F extends Filter>  int count(Class<M> modelClass, F filter);
 
-  <M extends Model> M create(M model);
+  <M extends PersistedModel> M create(M model);
 
-  <M extends Model> List<M> create(List<? extends Model> models);
+  <M extends PersistedModel> List<M> create(List<? extends PersistedModel> models);
 
-  <M extends Model> M updateOrCreate(M model);
+  <M extends PersistedModel> M updateOrCreate(M model);
 
-  <M extends Model> M patchOrCreateWithWhere(M model, Map<String, Object> data);
+  <M extends PersistedModel> M patchOrCreateWithWhere(M model, Map<String, Object> data);
 
-  <M extends Model, W extends WhereFilter> M upsertWithWhere(Class<M> modelClass, W filter,
+  <M extends PersistedModel, W extends WhereFilter> M upsertWithWhere(Class<M> modelClass, W filter,
                                                              Map<String, Object>
       data);
 
-  <M extends Model, F extends Filter> M findOrCreate(Class<M> modelClass, F filter, Map<String, Object>
+  <M extends PersistedModel, F extends Filter> M findOrCreate(Class<M> modelClass, F filter, Map<String, Object>
       data);
 
-  <M extends Model> M save(M model);
+  <M extends PersistedModel> M save(M model);
 
-  <M extends Model, W extends WhereFilter> int updateAll(M model, W filter, Map<String, Object>
+  <M extends PersistedModel, W extends WhereFilter> int updateAll(Class<M> modelClass, W filter, Map<String, Object>
       data);
 
-  <M extends Model, F extends Filter> M updateAttributes(M model, F filter, Map<String, Object>
+  <M extends PersistedModel, F extends Filter> M updateAttributes(M model, F filter, Map<String, Object>
       data);
 
   <M extends PersistedModel> M replaceById(M model, Object id);
 
-  <M extends Model> M replaceOrCreate(M model);
+  <M extends PersistedModel> M replaceOrCreate(M model);
 
 
-  <M extends Model> boolean exists(Class<M> modelClass, Object id);
+  <M extends PersistedModel> boolean exists(Class<M> modelClass, Object id);
 
-  <M extends Model, F extends Filter> List<M> find(Class<M> modelClass, F filter);
+  <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass, F filter);
 
-  <M extends Model> M findById(Class<M> modelClass, Object id);
+  <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Object id);
 
-  <M extends Model, F extends Filter> M findOne(Class<M> modelClass, F filter);
-
-
+  <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass, F filter);
 
 
-  <M extends Model> boolean destroy(M model, Object id);
 
-  <M extends Model, F extends Filter> int destroyAll(M model, F filter);
 
-  <M extends Model> void destroyById(Class<M> modelClass, Object id);
+  <M extends PersistedModel> M destroy(M model);
+
+  <M extends PersistedModel, F extends Filter> int destroyAll(M model, F filter);
 }

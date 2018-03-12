@@ -1,11 +1,22 @@
 package com.flipkart.loopback.resources;
 
+import com.flipkart.loopback.configuration.ModelConfiguration;
+import com.flipkart.loopback.constants.RelationType;
 import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
+import com.flipkart.loopback.model.Model;
 import com.flipkart.loopback.model.PersistedModel;
+import com.flipkart.loopback.relation.Relation;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
+import javax.persistence.Id;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 
 /**
  * Created by akshaya.sharma on 06/03/18
@@ -15,32 +26,10 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
   public abstract <C extends PersistedModel> Class<C> getModelClass();
 
   @Override
-  public T patchOrInsert(T model) {
-    return T.updateOrCreate(model);
-  }
+  public T patchOrInsert(Map<String, Object> patchData, ContainerRequestContext requestContext) {
 
-  @Override
-  public List<T> getAll(Filter filter, HttpServletRequest request) {
-    return T.find(getModelClass(), filter);
-  }
-
-  @Override
-  public T replaceOrCreate(T model) {
-    return T.replaceOrCreate(model);
-  }
-
-  @Override
-  public T create(T model) {
-    return T.create(model);
-  }
-
-  @Override
-  public T updateAttributes(String id, T model) {
     try {
-      if(!model.getStringifiedId().equals(id)) {
-        throw new LoopbackException("id mismatch");
-      }
-      return (T)model.updateAttributes();
+      return T.updateOrCreate(getModelClass(), patchData);
     } catch (LoopbackException e) {
       e.printStackTrace();
     }
@@ -48,47 +37,137 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
   }
 
   @Override
-  public T findById(String id) {
-    return (T) T.findById(getModelClass(), id);
+  public List<T> getAll(Filter filter, ContainerRequestContext requestContext) {
+    return T.find(getModelClass(), filter);
   }
 
   @Override
-  public boolean existsByHead(String id) {
-    return exists(id);
+  public T replaceOrCreate(T model, ContainerRequestContext requestContext) {
+    return T.replaceOrCreate(model);
   }
 
   @Override
-  public boolean exists(String id) {
+  public T create(T model, ContainerRequestContext requestContext) {
+    return T.create(model);
+  }
+
+  @Override
+  public T updateAttributes(String id, Map<String, Object> patchData, ContainerRequestContext requestContext) {
+    try {
+      T model = T.findById(getModelClass(), null, id);
+      return (T)model.updateAttributes(patchData);
+    } catch (LoopbackException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  @Override
+  public T findById(String id, Filter filter, ContainerRequestContext requestContext) {
+    T model = T.findById(getModelClass(), filter, id);
+    if(model == null) {
+      // 404
+    }
+    return model;
+  }
+
+  @Override
+  public boolean existsByHead(String id, ContainerRequestContext requestContext) {
+    return exists(id, requestContext);
+  }
+
+  @Override
+  public boolean exists(String id, ContainerRequestContext requestContext) {
     return T.exists(getModelClass(), id);
   }
 
   @Override
-  public T replaceByPut(String id, T model) {
-    return replaceByPost(id, model);
+  public T replaceByPut(String id, T model, ContainerRequestContext requestContext) {
+    return replaceByPost(id, model, requestContext);
   }
 
   @Override
-  public T replaceByPost(String id, T model) {
-    return T.replaceById(model,id);
+  public T replaceByPost(String id, T model, ContainerRequestContext requestContext) {
+    return T.replaceById(model, id);
   }
 
   @Override
-  public void deleteById(String id) {
-    T.destroyById(getModelClass(), id);
+  public T deleteById(String id, ContainerRequestContext requestContext) {
+    return T.destroyById(getModelClass(), id);
   }
 
   @Override
-  public int count(Filter filter, HttpServletRequest request) {
+  public int count(Filter filter, ContainerRequestContext requestContext) {
     return T.count(getModelClass(), filter);
   }
 
   @Override
-  public int update(WhereFilter where, T model, HttpServletRequest request) {
-    return T.updateAll(model, where);
+  public int update(WhereFilter where, T model, ContainerRequestContext requestContext) {
+    return T.updateAll(model.getClass(), where, model.getFieldMap());
   }
 
   @Override
-  public T upsertWithWhere(WhereFilter where, T model, HttpServletRequest request) {
+  public T upsertWithWhere(WhereFilter where, T model, ContainerRequestContext requestContext) {
     return (T) T.upsertWithWhere(getModelClass(), where, model.getFieldMap());
+  }
+
+//  @Override
+//  public <R extends PersistedModel> R getHasOneRelatedModel(String id, String relationRestPath,
+//                                                ContainerRequestContext requestContext) {
+//    try {
+//      T model = findById(id, requestContext);
+//      Relation r = model.getRelationByRestPath(relationRestPath);
+//      return (R) model.getHasOneRelatedModel(r);
+//    }catch (Throwable e) {
+//      return  null;
+//    }
+//  }
+//
+//  @Override
+//  public <R extends PersistedModel> List<R> getHasManyRelatedModel(String id, String
+//      relationRestPath, Filter filter, ContainerRequestContext requestContext) {
+//    try {
+//      T model = findById(id, requestContext);
+//      Relation r = model.getRelationByRestPath(relationRestPath);
+//      return (List) null;
+//    }catch (Throwable e) {
+//      return  null;
+//    }
+//  }
+
+  @Override
+  public Object getOnRelatedModel(String id, String relationRestPath, Filter filter,
+                                  ContainerRequestContext
+      requestContext) {
+    try {
+      T model = findById(id, null, requestContext);
+      Relation r = model.getRelationByRestPath(relationRestPath);
+      if(r.getRelationType() == RelationType.HAS_ONE) {
+        return model.getHasOneRelatedModel(r);
+      }else if(r.getRelationType() == RelationType.HAS_MANY) {
+        List res = model.getHasManyRelatedModel(r, filter);
+        return res;
+      }
+      return null;
+    }catch (Throwable e) {
+      return  null;
+    }
+  }
+
+  public PersistedModel getOnRelatedModelEntity(String id, String relationRestPath,
+                                                              String fk, Filter filter,
+                                                              ContainerRequestContext
+                                                                  requestContext) {
+    try {
+      T model = findById(id, null, requestContext);
+      Relation r = model.getRelationByRestPath(relationRestPath);
+      if(r.getRelationType() == RelationType.HAS_MANY) {
+        Class<? extends PersistedModel> relModelClass = r.getRelatedModelClass();
+        return T.getProvider().findById(relModelClass, null, fk);
+      }
+      return null;
+    }catch (Throwable e) {
+      return  null;
+    }
   }
 }

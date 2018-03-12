@@ -2,10 +2,16 @@ package com.flipkart.loopback.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.flipkart.loopback.annotation.NonDB;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flipkart.loopback.configuration.ModelConfiguration;
+import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
+import com.flipkart.loopback.relation.Relation;
+import io.dropwizard.hibernate.UnitOfWork;
+import java.beans.Transient;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
@@ -17,87 +23,122 @@ import org.apache.commons.lang3.StringUtils;
  * Created by akshaya.sharma on 02/03/18
  */
 
-public abstract class PersistedModel<M extends PersistedModel<M>> extends Model<M>{
-  @JsonIgnore
-  public abstract <C extends PersistedModel> Class<C> getModelClass();
+public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
+    ModelConfigurationManager> extends Model<M, CM> {
 
-  public static <M extends Model, F extends Filter>  int count(Class<M> modelClass, F filter) {
-    return getConnector().count(modelClass, filter);
-  };
+  @Override
+  public ModelConfiguration getConfiguration() {
+    return M.getConfigurationManager().getModelConfiguration(this.getClass());
+  }
 
+  @UnitOfWork
+  public static <M extends PersistedModel, F extends Filter> int count(Class<M> modelClass, F filter) {
+    return getProvider().count(modelClass, filter);
+  }
+
+  @UnitOfWork
   public static <M extends PersistedModel> M create(M model) {
-    return getConnector().create(model);
+    return getProvider().create(model);
   }
 
-  public static <M extends PersistedModel<M>> List<M> create(List<M> models) {
-    return getConnector().create(models);
+  @UnitOfWork
+  public static <M extends PersistedModel> List<M> create(List<M> models) {
+    return getProvider().create(models);
   }
 
-  public static <M extends PersistedModel> M updateOrCreate(M model) {
-    return getConnector().updateOrCreate(model);
+  @UnitOfWork
+  public static <M extends PersistedModel> M updateOrCreate(Class<M> modelClass, Map<String,
+      Object> patchData) throws LoopbackException {
+    ModelConfiguration configuration = M.getConfigurationManager().getModelConfiguration(modelClass);
+    String idPropertyName = configuration.getIdPropertyName();
+    if(patchData.containsKey(idPropertyName) && patchData.get(idPropertyName) != null) {
+      // Id exists
+      M model = M.findById(modelClass,null, patchData.get(idPropertyName));
+      return (M) model.updateAttributes(patchData);
+    }else {
+      // Try create
+      ObjectMapper mapper = new ObjectMapper();
+      M model = mapper.convertValue(patchData, modelClass);
+      return M.create(model);
+    }
   }
 
-  public static <M extends PersistedModel<M>> M patchOrCreateWithWhere(M model, Map<String, Object> data) {
-    return getConnector().patchOrCreateWithWhere(model, data);
+  @UnitOfWork
+  public static <M extends PersistedModel> M patchOrCreateWithWhere(M model, Map<String,
+      Object> data) {
+    return getProvider().patchOrCreateWithWhere(model, data);
   }
 
+  @UnitOfWork
   public static <M extends PersistedModel, F extends WhereFilter> M upsertWithWhere(Class<M>
-                                                                                       modelClass, F filter,
-                                                                      Map<String, Object>
-                                                                          data) {
-    return getConnector().upsertWithWhere(modelClass, filter, data);
+                                                                                        modelClass, F filter,
+                                                                                    Map<String,
+                                                                                        Object>
+                                                                                        data) {
+    return getProvider().upsertWithWhere(modelClass, filter, data);
   }
 
-  public static <M extends PersistedModel<M>, F extends Filter> M findOrCreate(Class<M> modelClass, F filter, Map<String,
+  @UnitOfWork
+  public static <M extends PersistedModel, F extends Filter> M findOrCreate(Class<M>
+                                                                                   modelClass, F
+      filter, Map<String,
       Object>
       data) {
-    return getConnector().findOrCreate(modelClass, filter, data);
+    return getProvider().findOrCreate(modelClass, filter, data);
   }
 
-  public static <M extends PersistedModel<M>, W extends WhereFilter> int updateAll(M model, W
-      where) {
-    Map<String, Object> data = model.getFieldMap();
-    return getConnector().updateAll(model, where, data);
+  @UnitOfWork
+  public static <M extends PersistedModel, W extends WhereFilter> int updateAll(Class<M> modelClass, W
+      where, Map<String, Object> data) {
+    return getProvider().updateAll(modelClass, where, data);
   }
 
-
+  @UnitOfWork
   public static <M extends PersistedModel> M replaceById(M model, Object id) {
-    return getConnector().replaceById(model, id);
+    return getProvider().replaceById(model, id);
   }
 
+  @UnitOfWork
   public static <M extends PersistedModel> M replaceOrCreate(M model) {
-    return getConnector().replaceOrCreate(model);
+    return getProvider().replaceOrCreate(model);
   }
 
-
+  @UnitOfWork
   public static <M extends PersistedModel> boolean exists(Class<M> modelClass, Object id) {
-    return getConnector().exists(modelClass, id);
+    return getProvider().exists(modelClass, id);
   }
 
-  public static <M extends PersistedModel<M>, F extends Filter> List<M> find(Class<M> modelClass, F
+  @UnitOfWork
+  public static <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass, F
       filter) {
-    return getConnector().find(modelClass, filter);
+    return getProvider().find(modelClass, filter);
   }
 
-  public static <M extends PersistedModel> M findById(Class<M> modelClass, Object id) {
-    return getConnector().findById(modelClass, id);
+  @UnitOfWork
+  public static <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Object id) {
+    return getProvider().findById(modelClass, filter, id);
   }
 
+  @UnitOfWork
   public static <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass, F
       filter) {
-    return getConnector().findOne(modelClass, filter);
+    return getProvider().findOne(modelClass, filter);
   }
 
-  public static <M extends PersistedModel<M>, F extends Filter> int destroyAll(M model, F filter) {
-    return getConnector().destroyAll(model, filter);
+  @UnitOfWork
+  public static <M extends PersistedModel, F extends Filter> int destroyAll(M model, F filter) {
+    return getProvider().destroyAll(model, filter);
   }
 
-  public static <M extends PersistedModel> void destroyById(Class<M> modelClass, Object id) {
-    getConnector().destroyById(modelClass, id);
+  @UnitOfWork
+  public static <M extends PersistedModel> M destroyById(Class<M> modelClass, Object id) {
+    M model = M.findById(modelClass, null, id);
+    return (M) model.destroy();
   }
 
-  public boolean destroy() {
-    return getConnector().destroy(this, this.getId());
+  @UnitOfWork
+  public <M extends PersistedModel> M  destroy() {
+    return (M)getProvider().destroy(this);
   }
 
   @JsonIgnore
@@ -108,15 +149,21 @@ public abstract class PersistedModel<M extends PersistedModel<M>> extends Model<
     return String.valueOf(getId());
   }
 
-  @JsonIgnore
-  public abstract String getIdName();
-
+  @UnitOfWork
   public <M extends PersistedModel> M save() {
-    return getConnector().save((M)this);
+    return (M) getProvider().replaceOrCreate(this);
   }
 
+  @UnitOfWork
   public M reload() {
-    return getConnector().save((M)this);
+    return (M) getProvider().findById(this.getClass(), null, this.getId());
+  }
+
+  @JsonIgnore
+  public String getIdPropertyName() {
+    ModelConfiguration configuration = ModelConfigurationManager.getInstance()
+        .getModelConfiguration(this.getClass());
+    return configuration.getIdPropertyName();
   }
 
   @JsonIgnore
@@ -124,63 +171,73 @@ public abstract class PersistedModel<M extends PersistedModel<M>> extends Model<
     return false;
   }
 
-  public <M extends PersistedModel> M updateAttributes()
+  @UnitOfWork
+  public <M extends PersistedModel> M updateAttributes(Map<String, Object> data)
       throws LoopbackException {
-    String idName = this.getIdName();
-    if(StringUtils.isBlank(idName)) {
+    String idName = this.getIdPropertyName();
+    if (StringUtils.isBlank(idName)) {
       // Model requires an id field name
       throw new LoopbackException("ID field not defined for " + this
           .getClass());
     }
-    Map<String, Object> data = this.getFieldMap();
-    if(data.containsKey(idName)) {
-      M model = this.findOne(this.getModelClass(), null);
-      for (Map.Entry<String, Object> e : data.entrySet()) {
-        model.setAttribute(e.getKey(), e.getValue());
-      }
-      return (M)model.save();
-    }else {
-      // Patch on an instance needs idField
-      throw new LoopbackException(idName + " is required to patch an instance of " + this
+    System.out.println(getId());
+
+    if(data.containsKey(idName) && !getId().equals(data.get(idName))) {
+      // Model can not update ID
+      throw new LoopbackException("ID can not be updated " + this
           .getClass());
     }
+
+    for (Map.Entry<String, Object> e : data.entrySet()) {
+      this.setAttribute(e.getKey(), e.getValue());
+    }
+    return this.save();
   }
 
+  @UnitOfWork
   private M updateAttribute(String attributeName, Object
-  attributeValue) throws LoopbackException {
+      attributeValue) throws LoopbackException {
     return this.setAttribute(attributeName, attributeValue).save();
   }
 
   public <F extends Filter> M setAttribute(String attributeName, Object
       attributeValue) throws LoopbackException {
-    Field declaredField =  null;
+
     try {
+      for(Field declaredField : this.getClass().getDeclaredFields()) {
+        Transient aTransient = declaredField.getAnnotation(Transient.class);
+        if (aTransient != null) {
+          throw new LoopbackException("Attribute " + attributeName + " can be updated");
+        }
+        String fieldName = declaredField.getName();
+        JsonProperty property = declaredField.getAnnotation(JsonProperty.class);
+        if(property != null) {
+          fieldName = property.value();
+        }
 
-      declaredField = this.getClass().getDeclaredField(attributeName);
-      NonDB nonDB = declaredField.getAnnotation(NonDB.class);
-      if(nonDB != null) {
-        throw new LoopbackException("Attribute " + attributeName + " can be updated");
-      }
-      boolean accessible = declaredField.isAccessible();
-      declaredField.setAccessible(true);
-      Class toCast = declaredField.getType();
-      if(!toCast.isPrimitive()) {
-        declaredField.set(this, declaredField.getType().cast(attributeValue));
-      }else {
-        if("int".equals(toCast.getName())) {
-          int val = 0;
-          try {
-            val = Integer.parseInt(String.valueOf(attributeValue));
-          }catch(Exception e) {
+        if(fieldName.equals(attributeName)) {
+          boolean accessible = declaredField.isAccessible();
+          declaredField.setAccessible(true);
+          Class toCast = declaredField.getType();
+          if (!toCast.isPrimitive()) {
+            declaredField.set(this, declaredField.getType().cast(attributeValue));
+          } else {
+            if ("int".equals(toCast.getName())) {
+              int val = 0;
+              try {
+                val = Integer.parseInt(String.valueOf(attributeValue));
+              } catch (Exception e) {
 
+              }
+              declaredField.set(this, val);
+            }
+            // TODO
           }
-          declaredField.set(this, val);
+          declaredField.setAccessible(accessible);
         }
       }
-      declaredField.setAccessible(accessible);
-      return (M)this;
-    } catch (NoSuchFieldException
-        | SecurityException
+      return (M) this;
+    } catch (SecurityException
         | IllegalArgumentException
         | IllegalAccessException e) {
       throw new LoopbackException(e);
@@ -190,9 +247,10 @@ public abstract class PersistedModel<M extends PersistedModel<M>> extends Model<
   @JsonIgnore
   private String getFieldName(Field f) {
     JsonProperty property = f.getAnnotation(JsonProperty.class);
-    if(property != null)
+    if (property != null) {
       System.out.println(property);
-    if(property != null && StringUtils.isNotEmpty(property.value())) {
+    }
+    if (property != null && StringUtils.isNotEmpty(property.value())) {
       return property.value();
     }
     return f.getName();
@@ -210,5 +268,49 @@ public abstract class PersistedModel<M extends PersistedModel<M>> extends Model<
       declaredField.setAccessible(accessible);
     }
     return fieldData;
+  }
+
+  public Relation getRelationByName(String relationName) throws LoopbackException {
+    return getConfiguration().getRelationByName(relationName);
+  }
+
+  public Relation getRelationByRestPath(String restPath) throws LoopbackException {
+    return getConfiguration().getRelationByRestPath(restPath);
+  }
+
+  private Filter getScopeForRelatedMode(Relation relation) throws IOException, LoopbackException {
+    Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
+    return new Filter(null);
+  }
+
+  public <M extends PersistedModel> M getHasOneRelatedModel(String relationName) throws
+      LoopbackException {
+    Relation relation = getRelationByName(relationName);
+    return getHasOneRelatedModel(relation);
+  }
+
+  public <M extends PersistedModel> M getHasOneRelatedModel(Relation relation) throws
+      LoopbackException {
+    Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
+    Filter scope = null;
+    return (M) relatedModelClass.cast(getProvider().findOne(relatedModelClass, scope));
+  }
+
+  public <M extends PersistedModel> List<M> getHasManyRelatedModel(String relationName, Filter filter)
+      throws
+      LoopbackException {
+    Relation relation = getRelationByName(relationName);
+    return getHasManyRelatedModel(relation, filter);
+  }
+
+  public <M extends PersistedModel> List<M> getHasManyRelatedModel(Relation relation, Filter filter)
+      throws
+      LoopbackException {
+    Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
+    Filter scope = null;
+    /*
+      merge scope with filter
+     */
+    return (List<M>) getProvider().find(relatedModelClass, scope);
   }
 }

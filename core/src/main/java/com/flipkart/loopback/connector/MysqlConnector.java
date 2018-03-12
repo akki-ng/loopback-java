@@ -1,5 +1,8 @@
 package com.flipkart.loopback.connector;
 
+import com.flipkart.loopback.configuration.ModelConfiguration;
+import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
+import com.flipkart.loopback.connector.mysql.QueryGenerator;
 import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
@@ -15,50 +18,50 @@ import java.util.Map;
 
 public class MysqlConnector implements Connector {
   @Override
-  public <M extends Model, F extends Filter> int count(Class<M> modelClass, F filter) {
+  public <M extends PersistedModel, F extends Filter> int count(Class<M> modelClass, F filter) {
     return 10;
   }
 
   @Override
-  public <M extends Model> M create(M model) {
+  public <M extends PersistedModel> M create(M model) {
     return model;
   }
 
   @Override
-  public <M extends Model> List<M> create(List<? extends Model> models) {
+  public <M extends PersistedModel> List<M> create(List<? extends PersistedModel> models) {
     return null;
   }
 
   @Override
-  public <M extends Model> M updateOrCreate(M model) {
+  public <M extends PersistedModel> M updateOrCreate(M model) {
     return model;
   }
 
   @Override
-  public <M extends Model> M patchOrCreateWithWhere(M model, Map<String, Object> data) {
+  public <M extends PersistedModel> M patchOrCreateWithWhere(M model, Map<String, Object> data) {
     return null;
   }
 
   @Override
-  public <M extends Model, W extends WhereFilter> M upsertWithWhere(Class<M> modelClass, W where,
+  public <M extends PersistedModel, W extends WhereFilter> M upsertWithWhere(Class<M> modelClass, W where,
                                                                Map<String,
         Object> data) {
     return null;
   }
 
   @Override
-  public <M extends Model, F extends Filter> M findOrCreate(Class<M> modelClass, F filter, Map<String, Object
+  public <M extends PersistedModel, F extends Filter> M findOrCreate(Class<M> modelClass, F filter, Map<String, Object
         > data) {
     return null;
   }
 
   @Override
-  public <M extends Model> M save(M model) {
+  public <M extends PersistedModel> M save(M model) {
     return model;
   }
 
   @Override
-  public <M extends Model, W extends WhereFilter> int updateAll(M model, W filter, Map<String,
+  public <M extends PersistedModel, W extends WhereFilter> int updateAll(Class<M> modelClass, W filter, Map<String,
       Object>
       data) {
     try {
@@ -70,14 +73,14 @@ public class MysqlConnector implements Connector {
   }
 
   @Override
-  public <M extends Model, F extends Filter> M updateAttributes(M model, F filter, Map<String, Object> data) {
+  public <M extends PersistedModel, F extends Filter> M updateAttributes(M model, F filter, Map<String, Object> data) {
     return null;
   }
 
   @Override
   public <M extends PersistedModel> M replaceById(M model, Object id) {
     try {
-      return (M) model.setAttribute(model.getIdName(), id);
+      return (M) model.setAttribute(model.getIdPropertyName(), id);
     } catch (LoopbackException e) {
       e.printStackTrace();
     }
@@ -85,18 +88,21 @@ public class MysqlConnector implements Connector {
   }
 
   @Override
-  public <M extends Model> M replaceOrCreate(M model) {
+  public <M extends PersistedModel> M replaceOrCreate(M model) {
     return model;
   }
 
   @Override
-  public <M extends Model> boolean exists(Class<M> modelClass, Object id) {
+  public <M extends PersistedModel> boolean exists(Class<M> modelClass, Object id) {
     return false;
   }
 
   @Override
-  public <M extends Model, F extends Filter> List<M> find(Class<M> modelClass, F filter) {
+  public <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass, F filter) {
     try {
+      ModelConfiguration configuration = ModelConfigurationManager.getInstance()
+          .getModelConfiguration(modelClass);
+      String selectSql = QueryGenerator.getInstance().getSelectQuery(modelClass, (Filter) filter);
       return Lists.newArrayList(modelClass.newInstance());
     }catch (Exception ex) {
       ex.printStackTrace();
@@ -105,7 +111,7 @@ public class MysqlConnector implements Connector {
   }
 
   @Override
-  public <M extends Model> M findById(Class<M> modelClass, Object id) {
+  public <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Object id) {
     try {
       M model = modelClass.newInstance();
       return model;
@@ -118,7 +124,7 @@ public class MysqlConnector implements Connector {
   }
 
   @Override
-  public <M extends Model, F extends Filter> M findOne(Class<M> modelClass, F filter) {
+  public <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass, F filter) {
     try {
       return modelClass.newInstance();
     } catch (InstantiationException e) {
@@ -130,17 +136,13 @@ public class MysqlConnector implements Connector {
   }
 
   @Override
-  public <M extends Model> boolean destroy(M model, Object id) {
-    return false;
+  public <M extends PersistedModel> M destroy(M model) {
+    return model;
   }
 
   @Override
-  public <M extends Model, F extends Filter> int destroyAll(M model, F filter) {
+  public <M extends PersistedModel, F extends Filter> int destroyAll(M model, F filter) {
     return 0;
   }
 
-  @Override
-  public <M extends Model> void destroyById(Class<M> modelClass, Object id) {
-    return ;
-  }
 }

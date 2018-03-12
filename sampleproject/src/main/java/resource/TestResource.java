@@ -1,8 +1,6 @@
 package resource;
 
-import com.flipkart.loopback.annotation.NonDB;
 import com.flipkart.loopback.filter.Filter;
-import entity.TempModel;
 import entity.TestModel;
 import io.swagger.annotations.Api;
 import javax.servlet.http.HttpServletRequest;

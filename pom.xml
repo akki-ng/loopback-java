@@ -13,10 +13,11 @@
         <module>core</module>
         <module>common</module>
         <module>dropwizard</module>
+        <module>jpaconnector</module>
     </modules>
 
     <properties>
-        <dep.lombok.version>1.16.6</dep.lombok.version>
+        <dep.lombok.version>1.16.20</dep.lombok.version>
         <dep.rxjava-core.version>0.20.3</dep.rxjava-core.version>
         <dep.jackson.version>2.8.1</dep.jackson.version>
         <dep.slf4j.version>1.7.21</dep.slf4j.version>
@@ -31,6 +32,8 @@
         <dep.ws-rs.version>2.1</dep.ws-rs.version>
         <dep.commons-lang3.version>3.4</dep.commons-lang3.version>
         <dep.guava.version>24.0-jre</dep.guava.version>
+        <dep.javax.persistence-api.version>2.2</dep.javax.persistence-api.version>
+        <dep.jibx-tools.version>1.3.1</dep.jibx-tools.version>
     </properties>
 
     <dependencyManagement>
@@ -115,6 +118,16 @@
                 <artifactId>guava</artifactId>
                 <version>${dep.guava.version}</version>
             </dependency>
+            <dependency>
+                <groupId>javax.persistence</groupId>
+                <artifactId>javax.persistence-api</artifactId>
+                <version>${dep.javax.persistence-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jibx</groupId>
+                <artifactId>jibx-tools</artifactId>
+                <version>${dep.jibx-tools.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>io.loopback</groupId>
@@ -125,6 +138,11 @@
                 <groupId>io.loopback</groupId>
                 <artifactId>core</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.loopback</groupId>
+                <artifactId>jpa-connector</artifactId>
+                <version>${project.version</version>
             </dependency>
             <dependency>
                 <groupId>io.loopback</groupId>

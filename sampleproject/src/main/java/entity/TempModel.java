@@ -1,39 +1,44 @@
 package entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.flipkart.loopback.filter.Filter;
+import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.model.PersistedModel;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import lombok.Data;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import lombok.NoArgsConstructor;
 
-/**
- * Created by akshaya.sharma on 02/03/18
- */
-public class TempModel extends PersistedModel<TempModel> {
+
+@Entity(name = "temp")
+@NoArgsConstructor
+public class TempModel extends PersistedModel<TempModel, ModelConfigurationManager> {
+
 
   @JsonProperty("id")
-  private int id;
+  @Id //signifies the primary key
+  @Column(name = "id", nullable = false)
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Integer id1;
 
   @JsonProperty("akshay")
-  private String akshay;
+  @Column(name = "FIRST_NAME", nullable = false, length = 50)
+  private String firstName;
 
-  @Override
-  public Class getModelClass() {
-    return this.getClass();
-  }
+  @JsonProperty("lastName")
+  @Column(name = "LAST_NAME", nullable = false, length = 50)
+  private String lastName;
 
   @Override
   public Object getId() {
-    return id;
+    return id1;
   }
 
-  @Override
-  public String getIdName() {
-    return "id";
-  }
-
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "test_id")
+  private TestModel test;
 }

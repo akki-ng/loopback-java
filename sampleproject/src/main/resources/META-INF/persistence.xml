@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="2.0">
+    <persistence-unit name="DEFAULT_LOCAL" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <class>entity.TempModel</class>
+        <class>entity.TestModel</class>
+
+        <properties>
+            <property name="javax.persistence.jdbc.driver"
+                      value="com.mysql.jdbc.Driver"/>
+            <property name="javax.persistence.jdbc.url"
+                      value="jdbc:mysql://localhost:3306/loopback"/>
+            <property name="javax.persistence.jdbc.user" value="root"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <property name="hibernate.connection.autocommit" value="false"/>
+            <property name = "hibernate.show_sql" value = "true" />
+            <property name = "hibernate.id.new_generator_mappings" value="false" />
+
+            <property name="hibernate.connection.provider_class" value="org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider" /> <!-- hibernate 4.1.9 -->
+            <property name="hibernate.c3p0.acquireIncrement" value="3"/>
+            <property name="hibernate.c3p0.maxIdleTime" value="3600"/>
+            <property name="hibernate.c3p0.minPoolSize" value="1"/>
+            <property name="hibernate.c3p0.maxPoolSize" value="6"/>
+            <property name="hibernate.c3p0.maxStatements" value="20"/>
+            <property name="hibernate.c3p0.idleConnectionTestPeriod" value="1800"/> <!-- seconds -->
+            <property name="hibernate.c3p0.maxConnectionAge" value="1000"/>
+            <property name="hibernate.c3p0.maxIdleTimeExcessConnections" value="300"/>
+        </properties>
+    </persistence-unit>
+</persistence>

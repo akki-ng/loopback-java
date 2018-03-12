@@ -1,6 +1,9 @@
+import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.exception.LoopbackException;
 import entity.TempModel;
 import entity.TestModel;
+import entity.configuration.TempModelConfiguration;
+import entity.configuration.TestModelConfiguration;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -56,6 +59,14 @@ public class DWApplication extends Application<DWConfiguration> {
         dwConfiguration.getTemplate(),
         dwConfiguration.getDefaultName()
     );
+    ModelConfigurationManager cm = ModelConfigurationManager.getInstance();
+    try {
+      cm.configureModel(TempModel.class, new TempModelConfiguration());
+      cm.configureModel(TestModel.class, new TestModelConfiguration());
+    } catch (LoopbackException e) {
+      e.printStackTrace();
+    }
+
 
     final TestResource t1 = new TestResource();
     final TempResource t2 = new TempResource();
