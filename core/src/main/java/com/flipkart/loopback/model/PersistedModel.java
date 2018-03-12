@@ -11,6 +11,7 @@ import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.relation.Relation;
 import java.beans.Transient;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +53,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     String idPropertyName = configuration.getIdPropertyName();
     if(patchData.containsKey(idPropertyName) && patchData.get(idPropertyName) != null) {
       // Id exists
-      M model = M.findById(modelClass,null, patchData.get(idPropertyName));
+      M model = M.findById(modelClass,null, (Serializable) patchData.get(idPropertyName));
       return (M) model.updateAttributes(patchData);
     }else {
       // Try create
@@ -114,7 +115,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
 
-  public static <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Object id) {
+  public static <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Serializable id) {
     return getProvider().findById(modelClass, filter, id);
   }
 
@@ -130,7 +131,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
 
-  public static <M extends PersistedModel> M destroyById(Class<M> modelClass, Object id) {
+  public static <M extends PersistedModel> M destroyById(Class<M> modelClass, Serializable id) {
     M model = M.findById(modelClass, null, id);
     return (M) model.destroy();
   }
@@ -141,7 +142,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @JsonIgnore
-  public abstract Object getId();
+  public abstract Serializable getId();
 
   @JsonIgnore
   public String getStringifiedId() {

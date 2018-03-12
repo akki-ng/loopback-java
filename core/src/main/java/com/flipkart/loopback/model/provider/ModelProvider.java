@@ -7,6 +7,7 @@ import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.Model;
 import com.flipkart.loopback.model.PersistedModel;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
@@ -101,7 +102,7 @@ public class ModelProvider {
     return getConnectorFor(modelClass).find(modelClass, filter);
   }
 
-  public <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Object id) {
+  public <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Serializable id) {
     return getConnectorFor(modelClass).findById(modelClass, filter, id);
   }
 

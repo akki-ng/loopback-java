@@ -3,17 +3,19 @@ package com.flipkart.loopback.connector;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
+import io.dropwizard.hibernate.UnitOfWork;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created by akshaya.sharma on 12/03/18
  */
-
 public class HibernateConnector implements Connector {
   private static HibernateConnector instance = null;
   private static SessionFactory sessionFactory;
@@ -104,16 +106,21 @@ public class HibernateConnector implements Connector {
   }
 
   @Override
+  @UnitOfWork
+  @Transactional
   public <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass, F filter) {
     Transaction tx = sessionFactory.getCurrentSession().beginTransaction();
-    List<M> list =  sessionFactory.getCurrentSession().createCriteria(modelClass).list();
+    List<M> data = sessionFactory.getCurrentSession().createCriteria(modelClass).list();
     tx.commit();
-    return list;
+    return data;
   }
 
   @Override
-  public <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Object id) {
-    return null;
+  public <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Serializable id) {
+    Transaction tx = sessionFactory.getCurrentSession().beginTransaction();
+    M model = sessionFactory.getCurrentSession().get(modelClass, Integer.valueOf(id.toString()));
+    tx.commit();
+    return model;
   }
 
   @Override
@@ -123,7 +130,10 @@ public class HibernateConnector implements Connector {
 
   @Override
   public <M extends PersistedModel> M destroy(M model) {
-    return null;
+    Transaction tx = sessionFactory.getCurrentSession().beginTransaction();
+//    sessionFactory.getCurrentSession().delete(model);
+    tx.commit();
+    return model;
   }
 
   @Override

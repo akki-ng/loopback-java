@@ -6,9 +6,9 @@ import com.flipkart.loopback.connector.mysql.QueryGenerator;
 import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
-import com.flipkart.loopback.model.Model;
 import com.flipkart.loopback.model.PersistedModel;
 import com.google.common.collect.Lists;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -111,7 +111,7 @@ public class MysqlConnector implements Connector {
   }
 
   @Override
-  public <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Object id) {
+  public <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Serializable id) {
     try {
       M model = modelClass.newInstance();
       return model;

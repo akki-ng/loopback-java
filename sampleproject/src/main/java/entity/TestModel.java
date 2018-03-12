@@ -3,6 +3,7 @@ package entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.model.PersistedModel;
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,7 @@ public class TestModel extends PersistedModel<TestModel, ModelConfigurationManag
   private String inVisible;
 
   @Override
-  public Object getId() {
+  public Serializable getId() {
     return id;
   }
 }

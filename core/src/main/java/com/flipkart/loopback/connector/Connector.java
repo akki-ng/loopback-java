@@ -3,8 +3,9 @@ package com.flipkart.loopback.connector;
 import com.flipkart.loopback.constants.IDType;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
-import com.flipkart.loopback.model.Model;
 import com.flipkart.loopback.model.PersistedModel;
+import io.dropwizard.hibernate.UnitOfWork;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -49,9 +50,10 @@ public interface Connector {
 
   <M extends PersistedModel> boolean exists(Class<M> modelClass, Object id);
 
+  @UnitOfWork
   <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass, F filter);
 
-  <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Object id);
+  <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Serializable id);
 
   <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass, F filter);
 

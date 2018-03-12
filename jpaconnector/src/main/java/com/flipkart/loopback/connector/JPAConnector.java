@@ -8,6 +8,7 @@ import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
@@ -148,7 +149,7 @@ public class JPAConnector implements Connector {
   }
 
   @Override
-  public <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Object id) {
+  public <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Serializable id) {
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
         .getModelConfiguration(modelClass);
     try {

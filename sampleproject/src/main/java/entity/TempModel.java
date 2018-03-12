@@ -3,6 +3,7 @@ package entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.model.PersistedModel;
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -34,7 +35,7 @@ public class TempModel extends PersistedModel<TempModel, ModelConfigurationManag
   private String lastName;
 
   @Override
-  public Object getId() {
+  public Serializable getId() {
     return id1;
   }
 

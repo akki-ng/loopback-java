@@ -13,5 +13,7 @@
     <orderEntry type="module" module-name="core" />
     <orderEntry type="library" name="Maven: org.hibernate:hibernate-core:5.2.6.Final" level="project" />
     <orderEntry type="library" name="Maven: javax.persistence:javax.persistence-api:2.2" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-tx:5.0.4.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: io.dropwizard:dropwizard-hibernate:1.2.4" level="project" />
   </component>
 </module>
