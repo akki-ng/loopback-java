@@ -159,8 +159,8 @@ public class JPAConnector implements Connector {
   @Override
   public <M extends PersistedModel> M destroy(M model) {
     em.getTransaction().begin();
-    em.remove(model);
-//    em.remove(model) ? model : em.merge(model));
+//    em.remove(model);
+    em.remove(em.contains(model) ? model : em.merge(model));
     em.getTransaction().commit();
     return model;
   }
