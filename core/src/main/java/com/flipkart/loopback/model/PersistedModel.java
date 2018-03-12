@@ -9,7 +9,6 @@ import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.relation.Relation;
-import io.dropwizard.hibernate.UnitOfWork;
 import java.beans.Transient;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -31,22 +30,22 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return M.getConfigurationManager().getModelConfiguration(this.getClass());
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel, F extends Filter> int count(Class<M> modelClass, F filter) {
     return getProvider().count(modelClass, filter);
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel> M create(M model) {
     return getProvider().create(model);
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel> List<M> create(List<M> models) {
     return getProvider().create(models);
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel> M updateOrCreate(Class<M> modelClass, Map<String,
       Object> patchData) throws LoopbackException {
     ModelConfiguration configuration = M.getConfigurationManager().getModelConfiguration(modelClass);
@@ -63,13 +62,13 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     }
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel> M patchOrCreateWithWhere(M model, Map<String,
       Object> data) {
     return getProvider().patchOrCreateWithWhere(model, data);
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel, F extends WhereFilter> M upsertWithWhere(Class<M>
                                                                                         modelClass, F filter,
                                                                                     Map<String,
@@ -78,7 +77,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return getProvider().upsertWithWhere(modelClass, filter, data);
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel, F extends Filter> M findOrCreate(Class<M>
                                                                                    modelClass, F
       filter, Map<String,
@@ -87,56 +86,56 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return getProvider().findOrCreate(modelClass, filter, data);
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel, W extends WhereFilter> int updateAll(Class<M> modelClass, W
       where, Map<String, Object> data) {
     return getProvider().updateAll(modelClass, where, data);
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel> M replaceById(M model, Object id) {
     return getProvider().replaceById(model, id);
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel> M replaceOrCreate(M model) {
     return getProvider().replaceOrCreate(model);
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel> boolean exists(Class<M> modelClass, Object id) {
     return getProvider().exists(modelClass, id);
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass, F
       filter) {
     return getProvider().find(modelClass, filter);
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Object id) {
     return getProvider().findById(modelClass, filter, id);
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass, F
       filter) {
     return getProvider().findOne(modelClass, filter);
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel, F extends Filter> int destroyAll(M model, F filter) {
     return getProvider().destroyAll(model, filter);
   }
 
-  @UnitOfWork
+
   public static <M extends PersistedModel> M destroyById(Class<M> modelClass, Object id) {
     M model = M.findById(modelClass, null, id);
     return (M) model.destroy();
   }
 
-  @UnitOfWork
+
   public <M extends PersistedModel> M  destroy() {
     return (M)getProvider().destroy(this);
   }
@@ -149,12 +148,12 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return String.valueOf(getId());
   }
 
-  @UnitOfWork
+
   public <M extends PersistedModel> M save() {
     return (M) getProvider().replaceOrCreate(this);
   }
 
-  @UnitOfWork
+
   public M reload() {
     return (M) getProvider().findById(this.getClass(), null, this.getId());
   }
@@ -171,7 +170,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return false;
   }
 
-  @UnitOfWork
+
   public <M extends PersistedModel> M updateAttributes(Map<String, Object> data)
       throws LoopbackException {
     String idName = this.getIdPropertyName();
@@ -194,7 +193,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return this.save();
   }
 
-  @UnitOfWork
+
   private M updateAttribute(String attributeName, Object
       attributeValue) throws LoopbackException {
     return this.setAttribute(attributeName, attributeValue).save();

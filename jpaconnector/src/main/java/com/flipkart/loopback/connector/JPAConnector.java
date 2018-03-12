@@ -21,8 +21,7 @@ import javax.persistence.TypedQuery;
  */
 
 public class JPAConnector implements Connector {
-  EntityManagerFactory entityManagerFactory =  Persistence.createEntityManagerFactory("DEFAULT_LOCAL");
-  EntityManager em = entityManagerFactory.createEntityManager();
+
 
   @Override
   public <M extends PersistedModel, F extends Filter> int count(Class<M> modelClass, F filter) {
@@ -34,6 +33,8 @@ public class JPAConnector implements Connector {
     if(model.getId() != null) {
 
     }
+    EntityManagerFactory entityManagerFactory =  Persistence.createEntityManagerFactory("DEFAULT_LOCAL");
+    EntityManager em = entityManagerFactory.createEntityManager();
     em.getTransaction().begin();
     em.persist(model);
     em.getTransaction().commit();
@@ -88,6 +89,8 @@ public class JPAConnector implements Connector {
 
   @Override
   public <M extends PersistedModel> M replaceById(M model, Object id) {
+    EntityManagerFactory entityManagerFactory =  Persistence.createEntityManagerFactory("DEFAULT_LOCAL");
+    EntityManager em = entityManagerFactory.createEntityManager();
     em.getTransaction().begin();
     em.merge(model);
     em.getTransaction().commit();
@@ -105,6 +108,8 @@ public class JPAConnector implements Connector {
 
   @Override
   public <M extends PersistedModel> boolean exists(Class<M> modelClass, Object id) {
+    EntityManagerFactory entityManagerFactory =  Persistence.createEntityManagerFactory("DEFAULT_LOCAL");
+    EntityManager em = entityManagerFactory.createEntityManager();
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
         .getModelConfiguration(modelClass);
     try {
@@ -127,6 +132,8 @@ public class JPAConnector implements Connector {
 
   @Override
   public <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass, F filter) {
+    EntityManagerFactory entityManagerFactory =  Persistence.createEntityManagerFactory("DEFAULT_LOCAL");
+    EntityManager em = entityManagerFactory.createEntityManager();
     TypedQuery<M> typedQuery = QueryGenerator.getInstance().getSelectTypedQuery(em, modelClass,
         filter);
     List<M> data = typedQuery.getResultList();
@@ -135,6 +142,8 @@ public class JPAConnector implements Connector {
 
   @Override
   public <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Object id) {
+    EntityManagerFactory entityManagerFactory =  Persistence.createEntityManagerFactory("DEFAULT_LOCAL");
+    EntityManager em = entityManagerFactory.createEntityManager();
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
         .getModelConfiguration(modelClass);
     try {
@@ -158,6 +167,8 @@ public class JPAConnector implements Connector {
 
   @Override
   public <M extends PersistedModel> M destroy(M model) {
+    EntityManagerFactory entityManagerFactory =  Persistence.createEntityManagerFactory("DEFAULT_LOCAL");
+    EntityManager em = entityManagerFactory.createEntityManager();
     em.getTransaction().begin();
 //    em.remove(model);
     em.remove(em.contains(model) ? model : em.merge(model));
