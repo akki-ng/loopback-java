@@ -1,0 +1,55 @@
+{
+  "appConf.backupBucketFilePath": "/tmp/dev-local-all-config.json",
+  "appConf.yamlContent": {
+    "server": {
+      "type": "default",
+      "requestLog": {
+        "appenders": [
+          {
+            "type": "console"
+          }
+        ]
+      },
+      "adminMinThreads": 8,
+      "adminMaxThreads": 8,
+      "applicationConnectors": [
+        {
+          "type": "http",
+          "port": 3000,
+          "acceptorThreads": 1,
+          "selectorThreads": 1
+        }
+      ],
+      "adminConnectors": [
+        {
+          "type": "http",
+          "port": 21218,
+          "acceptorThreads": 1,
+          "selectorThreads": 1
+        }
+      ]
+    },
+    "logging": {
+      "level": "INFO",
+      "loggers": {
+        "io.dropwizard": "INFO"
+      },
+      "appenders": [
+        {
+          "type": "console"
+        }
+      ]
+    },
+    "swagger": {
+      "resourcePackage": "com.flipkart.fdp.resources,com.flipkart.nine3by4.server.resources"
+    }
+  },
+  "appConf.path": "/tmp/ssi-config.yml",
+  "gringottsDB.server" : "localhost",
+  "gringottsDB.password" : "",
+  "gringottsDB.user" : "root",
+  "gringottsDB.port" : 3306,
+  "gringottsDB.dbName" : "gringotts_test",
+  "health.oorFlagFilePath": "remove-this-file-to-bbr",
+  "mail.server.host": ""
+}
