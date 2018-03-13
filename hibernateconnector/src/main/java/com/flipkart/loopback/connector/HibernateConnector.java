@@ -7,7 +7,9 @@ import io.dropwizard.hibernate.UnitOfWork;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -16,21 +18,36 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Created by akshaya.sharma on 12/03/18
  */
-public class HibernateConnector implements Connector {
+public class HibernateConnector extends Connector {
   private static HibernateConnector instance = null;
   private static SessionFactory sessionFactory;
 
-  public HibernateConnector(SessionFactory sessionFactory) {
-    this.sessionFactory = sessionFactory;
+  public HibernateConnector(String persistenceUnit) {
+    super(persistenceUnit);
   }
 
-  public static HibernateConnector getInstance() {
+  public static HibernateConnector getInstance(final String persistenceUnit) {
     if (instance == null) {
       EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory
           ("DEFAULT_LOCAL");
-      instance = new HibernateConnector(entityManagerFactory.unwrap(SessionFactory.class));
+      instance = new HibernateConnector(persistenceUnit);
     }
     return instance;
+  }
+
+  @Override
+  public EntityManager getEntityManager() {
+    return null;
+  }
+
+  @Override
+  public EntityTransaction getCurrentTransaction() {
+    return null;
+  }
+
+  @Override
+  public void clearEntityManager() {
+
   }
 
   @Override
