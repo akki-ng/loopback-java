@@ -4,13 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.connector.Connector;
-import com.flipkart.loopback.connector.MysqlConnector;
-import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.model.provider.ModelProvider;
-import com.flipkart.loopback.relation.Relation;
-import java.util.List;
-import javax.persistence.Id;
-import lombok.NoArgsConstructor;
 
 /**
  * Created by akshaya.sharma on 02/03/18
