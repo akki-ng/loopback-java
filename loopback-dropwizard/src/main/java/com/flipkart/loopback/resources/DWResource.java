@@ -53,6 +53,13 @@ public interface DWResource<T extends PersistedModel> {
   public T create(T model, @Context ContainerRequestContext requestContext);
 
   /*
+    Create bulk instances of the model and persist them into the data source.
+   */
+  @POST
+  @Path("/bulk")
+  public List<T> create(List<T> models, @Context ContainerRequestContext requestContext);
+
+  /*
     Patch attributes for a model instance and persist it into the data source.
    */
   @PATCH

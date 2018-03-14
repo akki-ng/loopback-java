@@ -9,6 +9,7 @@ import com.flipkart.loopback.relation.Relation;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 
 /**
  * Created by akshaya.sharma on 06/03/18
@@ -41,6 +42,11 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
   @Override
   public T create(T model, ContainerRequestContext requestContext) {
     return T.create(model);
+  }
+
+  @Override
+  public List<T> create(List<T> models, ContainerRequestContext requestContext) {
+    return T.create(models);
   }
 
   @Override

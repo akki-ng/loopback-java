@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -74,6 +75,14 @@ public class JPAConnector extends Connector {
 
   @Override
   public <M extends PersistedModel> List<M> create(List<? extends PersistedModel> models) {
+    if(models != null) {
+      List<M> persisted =  models.stream()
+          .map(model -> {
+            return (M) this.create(model);
+          })
+          .collect(Collectors.toList());
+      return persisted;
+    }
     return null;
   }
 
