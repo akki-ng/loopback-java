@@ -143,36 +143,37 @@ public class QueryGenerator {
       WhereFilter where = filter.getWhere();
       if (where != null) {
         JsonNode w = where.getValue();
-        Iterator<Map.Entry<String, JsonNode>> fieldItr = w.fields();
-        while (fieldItr.hasNext()) {
-          Map.Entry<String, JsonNode> fieldCondition = fieldItr.next();
-          if (properties.containsKey(fieldCondition.getKey())) {
-            Field field = properties.get(fieldCondition.getKey());
-            String columnName = field.getName();
-//          getColumnName(field);
-            JsonNode value = fieldCondition.getValue();
-            if (value.isValueNode()) {
-
-              Object convertedValue = mapper.convertValue(value, field.getType());
-              predicates.add(cb.equal(root.get(columnName), convertedValue));
-
-            } else if (value.isObject()) {
-              Iterator<Map.Entry<String, JsonNode>> keyValueItr = value.fields();
-              while (keyValueItr.hasNext()) {
-                Map.Entry<String, JsonNode> fieldEntry = keyValueItr.next();
-//                QueryOperator queryOp = QueryOperator.fromValue(fieldEntry.getKey());
-//                if(queryOp == null) {
-//                  throw new LoopbackException("Invalid query op in where filter");
-//                }
-//                if(fieldEntry.getValue().isArray() || fieldEntry.getValue().isObject()) {
-//                  throw new LoopbackException("Invalid query op value in where filter");
-//                }
-              }
-            }
-          } else {
-            // TODO no field property with this name
-          }
-        }
+        predicates = getWherePredicates(root, query, cb, modelClass, where);
+//        Iterator<Map.Entry<String, JsonNode>> fieldItr = w.fields();
+//        while (fieldItr.hasNext()) {
+//          Map.Entry<String, JsonNode> fieldCondition = fieldItr.next();
+//          if (properties.containsKey(fieldCondition.getKey())) {
+//            Field field = properties.get(fieldCondition.getKey());
+//            String columnName = field.getName();
+////          getColumnName(field);
+//            JsonNode value = fieldCondition.getValue();
+//            if (value.isValueNode()) {
+//
+//              Object convertedValue = mapper.convertValue(value, field.getType());
+//              predicates.add(cb.equal(root.get(columnName), convertedValue));
+//
+//            } else if (value.isObject()) {
+//              Iterator<Map.Entry<String, JsonNode>> keyValueItr = value.fields();
+//              while (keyValueItr.hasNext()) {
+//                Map.Entry<String, JsonNode> fieldEntry = keyValueItr.next();
+////                QueryOperator queryOp = QueryOperator.fromValue(fieldEntry.getKey());
+////                if(queryOp == null) {
+////                  throw new LoopbackException("Invalid query op in where filter");
+////                }
+////                if(fieldEntry.getValue().isArray() || fieldEntry.getValue().isObject()) {
+////                  throw new LoopbackException("Invalid query op value in where filter");
+////                }
+//              }
+//            }
+//          } else {
+//            // TODO no field property with this name
+//          }
+//        }
         if (predicates.size() > 0) {
           query.where(predicates.toArray(new Predicate[] {}));
         }
@@ -198,5 +199,52 @@ public class QueryGenerator {
     query.select(root);
     TypedQuery<M> typedQuery = em.createQuery(query);
     return typedQuery;
+  }
+
+  public <M extends PersistedModel> List<Predicate> getWherePredicates(Root<M> root,
+                                                                       CriteriaQuery<M> query,
+                                                                       CriteriaBuilder cb, Class<M>
+      modelClass, WhereFilter where) {
+    List<Predicate> predicates = new ArrayList<Predicate>();
+    if (where != null) {
+
+      ObjectMapper mapper = new ObjectMapper();
+      ModelConfiguration configuration = ModelConfigurationManager.getInstance()
+          .getModelConfiguration(modelClass);
+      Map<String, Field> properties = configuration.getProperties();
+
+
+      JsonNode w = where.getValue();
+      Iterator<Map.Entry<String, JsonNode>> fieldItr = w.fields();
+      while (fieldItr.hasNext()) {
+        Map.Entry<String, JsonNode> fieldCondition = fieldItr.next();
+        if (properties.containsKey(fieldCondition.getKey())) {
+          Field field = properties.get(fieldCondition.getKey());
+          String columnName = field.getName();
+//          getColumnName(field);
+          JsonNode value = fieldCondition.getValue();
+          if (value.isValueNode()) {
+
+            Object convertedValue = mapper.convertValue(value, field.getType());
+            predicates.add(cb.equal(root.get(columnName), convertedValue));
+          } else if (value.isObject()) {
+            Iterator<Map.Entry<String, JsonNode>> keyValueItr = value.fields();
+            while (keyValueItr.hasNext()) {
+              Map.Entry<String, JsonNode> fieldEntry = keyValueItr.next();
+//                QueryOperator queryOp = QueryOperator.fromValue(fieldEntry.getKey());
+//                if(queryOp == null) {
+//                  throw new LoopbackException("Invalid query op in where filter");
+//                }
+//                if(fieldEntry.getValue().isArray() || fieldEntry.getValue().isObject()) {
+//                  throw new LoopbackException("Invalid query op value in where filter");
+//                }
+            }
+          }
+        } else {
+          // TODO no field property with this name
+        }
+      }
+    }
+    return predicates;
   }
 }

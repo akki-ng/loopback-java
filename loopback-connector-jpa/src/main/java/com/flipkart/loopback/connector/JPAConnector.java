@@ -92,11 +92,6 @@ public class JPAConnector extends Connector {
     return null;
   }
 
-  @Override
-  public <M extends PersistedModel, F extends Filter> M findOrCreate(Class<M> modelClass, F filter,
-                                                                     Map<String, Object> data) {
-    return null;
-  }
 
   @Override
   public <M extends PersistedModel> M save(M model) {
@@ -123,15 +118,6 @@ public class JPAConnector extends Connector {
     em.merge(model);
 //    em.getTransaction().commit();
     return model;
-  }
-
-  @Override
-  public <M extends PersistedModel> M replaceOrCreate(M model) {
-    if(model.getId() == null) {
-      return create(model);
-    }else {
-      return replaceById(model, model.getId());
-    }
   }
 
   @Override
