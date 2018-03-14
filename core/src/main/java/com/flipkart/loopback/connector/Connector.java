@@ -39,13 +39,11 @@ public abstract class Connector {
 
   public abstract <M extends PersistedModel> M updateOrCreate(M model);
 
-  public abstract <M extends PersistedModel> M patchOrCreateWithWhere(M model, Map<String, Object> data);
+  public abstract <M extends PersistedModel> int patchMultipleWithWhere(Class<M> modelClass, WhereFilter
+      where, Map<String, Object> data);
 
   public abstract <M extends PersistedModel, W extends WhereFilter> M upsertWithWhere(Class<M> modelClass, W filter,
                                                              Map<String, Object>
-      data);
-
-  public abstract <M extends PersistedModel, F extends Filter> M findOrCreate(Class<M> modelClass, F filter, Map<String, Object>
       data);
 
   public abstract <M extends PersistedModel> M save(M model);
@@ -57,8 +55,6 @@ public abstract class Connector {
       data);
 
   public abstract <M extends PersistedModel> M replaceById(M model, Object id);
-
-  public abstract <M extends PersistedModel> M replaceOrCreate(M model);
 
 
   public abstract <M extends PersistedModel> boolean exists(Class<M> modelClass, Object id);

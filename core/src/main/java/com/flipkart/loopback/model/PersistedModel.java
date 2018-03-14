@@ -104,27 +104,32 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   @Transaction
   public static <M extends PersistedModel> M updateOrCreate(Class<M> modelClass, Map<String,
       Object> patchData) throws LoopbackException {
+    beginTransaction(modelClass);
     ModelConfiguration configuration = M.getConfigurationManager().getModelConfiguration(modelClass);
     String idPropertyName = configuration.getIdPropertyName();
+    M model = null;
     if(patchData.containsKey(idPropertyName) && patchData.get(idPropertyName) != null) {
       // Id exists
-      M model = M.findById(modelClass,null, (Serializable) patchData.get(idPropertyName));
-      return (M) model.updateAttributes(patchData);
+      model = M.findById(modelClass,null, (Serializable) patchData.get(idPropertyName));
+      model = (M) model.updateAttributes(patchData);
     }else {
       // Try create
       ObjectMapper mapper = new ObjectMapper();
-      M model = mapper.convertValue(patchData, modelClass);
-      return M.create(model);
+      model = mapper.convertValue(patchData, modelClass);
+      model = M.create(model);
     }
+    commitTransaction(modelClass);
+    return model;
   }
 
   @Transaction
-  public static <M extends PersistedModel> M patchOrCreateWithWhere(M model, Map<String,
+  public static <M extends PersistedModel> int patchMultipleWithWhere(Class<M> modelClass,
+                                                                    WhereFilter where, Map<String,
       Object> data) {
-    beginTransaction(model.getClass());
-    model = getProvider().patchOrCreateWithWhere(model, data);
-    commitTransaction(model.getClass());
-    return model;
+    beginTransaction(modelClass);
+    int count = getProvider().patchMultipleWithWhere(modelClass, where, data);
+    commitTransaction(modelClass);
+    return count;
   }
 
   @Transaction
@@ -259,11 +264,17 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
 
   @JsonIgnore
   public boolean isNewRecord() {
+    // TODO -> modelProvider will set
     return false;
   }
 
   @Transaction
   public <M extends PersistedModel> M updateAttributes(Map<String, Object> data)
+      throws LoopbackException {
+    return (M) this.setAttributes(data).save();
+  }
+
+  public <M extends PersistedModel> M setAttributes(Map<String, Object> data)
       throws LoopbackException {
     String idName = this.getIdPropertyName();
     if (StringUtils.isBlank(idName)) {
@@ -282,7 +293,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     for (Map.Entry<String, Object> e : data.entrySet()) {
       this.setAttribute(e.getKey(), e.getValue());
     }
-    return this.save();
+    return (M) this;
   }
 
   @Transaction
@@ -291,7 +302,6 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return this.setAttribute(attributeName, attributeValue).save();
   }
 
-  @Transaction
   public <F extends Filter> M setAttribute(String attributeName, Object
       attributeValue) throws LoopbackException {
 

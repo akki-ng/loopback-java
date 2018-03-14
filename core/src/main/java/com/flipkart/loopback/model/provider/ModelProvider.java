@@ -3,11 +3,13 @@ package com.flipkart.loopback.model.provider;
 import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.connector.Connector;
+import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.Model;
 import com.flipkart.loopback.model.PersistedModel;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
@@ -61,9 +63,9 @@ public class ModelProvider {
 //    return getConnectorFor(model.getClass()).updateOrCreate(model);
 //  }
 
-  public <M extends PersistedModel> M patchOrCreateWithWhere(M model, Map<String,
-      Object> data) {
-    return getConnectorFor(model.getClass()).patchOrCreateWithWhere(model, data);
+  public <M extends PersistedModel> int patchMultipleWithWhere(Class<M> modelClass, WhereFilter
+      where, Map<String, Object> data) {
+    return getConnectorFor(modelClass).patchMultipleWithWhere(modelClass, where, data);
   }
 
   public <M extends PersistedModel, F extends WhereFilter> M upsertWithWhere(Class<M> modelClass,
@@ -75,7 +77,27 @@ public class ModelProvider {
 
   public <M extends PersistedModel, F extends Filter> M findOrCreate(Class<M> modelClass, F
       filter, Map<String, Object> data) {
-    return getConnectorFor(modelClass).findOrCreate(modelClass, filter, data);
+    M model = null;
+
+    try {
+        model = getConnectorFor(modelClass).findOne(modelClass, filter);
+        if(model == null) {
+          model = modelClass.getConstructor().newInstance();
+          model = (M) model.setAttributes(data);
+          model = M.create(model);
+        }
+      } catch (InstantiationException e) {
+        e.printStackTrace();
+      } catch (IllegalAccessException e) {
+        e.printStackTrace();
+      } catch (InvocationTargetException e) {
+        e.printStackTrace();
+      } catch (NoSuchMethodException e) {
+        e.printStackTrace();
+      } catch (LoopbackException e) {
+      e.printStackTrace();
+    }
+    return model;
   }
 
   public <M extends PersistedModel, W extends WhereFilter> int updateAll(Class<M> modelClass, W
@@ -89,7 +111,19 @@ public class ModelProvider {
   }
 
   public <M extends PersistedModel> M replaceOrCreate(M model) {
-    return getConnectorFor(model.getClass()).replaceOrCreate(model);
+    M persisted = (M) getConnectorFor(model.getClass()).findById(model.getClass(), null, model
+        .getId());
+    try {
+      if(persisted != null) {
+        persisted = getConnectorFor(model.getClass()).replaceById(model, persisted.getId());
+      }else {
+        model.setAttribute(model.getIdPropertyName(), null);
+        persisted = getConnectorFor(model.getClass()).create(model);
+      }
+    }catch (Throwable e) {
+      e.printStackTrace();
+    }
+    return persisted;
   }
 
 

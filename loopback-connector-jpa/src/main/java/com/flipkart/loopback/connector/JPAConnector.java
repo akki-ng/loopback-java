@@ -80,8 +80,9 @@ public class JPAConnector extends Connector {
   }
 
   @Override
-  public <M extends PersistedModel> M patchOrCreateWithWhere(M model, Map<String, Object> data) {
-    return null;
+  public <M extends PersistedModel> int patchMultipleWithWhere(Class<M> modelClass, WhereFilter
+      where, Map<String, Object> data) {
+    return 0;
   }
 
   @Override
