@@ -45,8 +45,6 @@ public abstract class Connector {
       where, Map<String, Object> data);
 
 
-  public abstract <M extends PersistedModel> M save(M model);
-
   public abstract <M extends PersistedModel, W extends WhereFilter> long updateAll(Class<M> modelClass, W filter, Map<String, Object>
       data);
 

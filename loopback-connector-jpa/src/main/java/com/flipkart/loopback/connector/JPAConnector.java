@@ -94,11 +94,6 @@ public class JPAConnector extends Connector {
   }
 
   @Override
-  public <M extends PersistedModel> M save(M model) {
-    return null;
-  }
-
-  @Override
   public <M extends PersistedModel, W extends WhereFilter> long updateAll(Class<M> modelClass,
                                                                          W filter,
                                                                          Map<String, Object> data) {
@@ -108,6 +103,7 @@ public class JPAConnector extends Connector {
   @Override
   public <M extends PersistedModel, F extends Filter> M updateAttributes(M model, F filter,
                                                                          Map<String, Object> data) {
+    // TODO must be implemented by connector only
     return null;
   }
 
@@ -126,18 +122,11 @@ public class JPAConnector extends Connector {
         .getModelConfiguration(modelClass);
     EntityManager em = getEntityManager();
     try {
-      Filter filter = new Filter("{\"where\": {\"" + configuration.getIdPropertyName() + "\": "
-          + id +  "}}");
-
-      TypedQuery<M> typedQuery = QueryGenerator.getInstance().getSelectTypedQuery(em, modelClass,
-          filter);
-      return typedQuery.getSingleResult() != null;
+      WhereFilter where = new WhereFilter("{\"" + configuration.getIdPropertyName() + "\": "
+          + id +  "}");
+      long count = count(modelClass, where);
+      return count > 0;
     } catch(NoResultException e) {
-      e.printStackTrace();
-      return false;
-    } catch(IOException e) {
-      e.printStackTrace();
-    } catch (LoopbackException e) {
       e.printStackTrace();
     }
     return false;
