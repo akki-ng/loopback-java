@@ -162,7 +162,10 @@ public class JPAConnector extends Connector {
 
   @Override
   public <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass, F filter) {
-    return null;
+    EntityManager em = getEntityManager();
+    TypedQuery<M> typedQuery = QueryGenerator.getInstance().getSelectTypedQuery(em, modelClass,
+        filter);
+    return typedQuery.getSingleResult();
   }
 
   @Override
@@ -177,6 +180,7 @@ public class JPAConnector extends Connector {
 
   @Override
   public <M extends PersistedModel, F extends Filter> long destroyAll(M model, F filter) {
+    // TODO
     return 0;
   }
 }
