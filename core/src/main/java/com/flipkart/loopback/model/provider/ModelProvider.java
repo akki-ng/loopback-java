@@ -44,8 +44,9 @@ public class ModelProvider {
     return getConfigurationFor(modelClass).getConnector();
   }
 
-  public <M extends PersistedModel, F extends Filter> long count(Class<M> modelClass, F filter) {
-    return getConnectorFor(modelClass).count(modelClass, filter);
+  public <M extends PersistedModel, W extends WhereFilter> long count(Class<M> modelClass, W
+      where) {
+    return getConnectorFor(modelClass).count(modelClass, where);
   }
 
   public <M extends PersistedModel> M create(M model) {
@@ -68,17 +69,37 @@ public class ModelProvider {
     return getConnectorFor(modelClass).patchMultipleWithWhere(modelClass, where, data);
   }
 
-  public <M extends PersistedModel, F extends WhereFilter> M upsertWithWhere(Class<M> modelClass,
-                                                                             F filter, Map<String,
-      Object>
-                                                                                 data) {
-    return getConnectorFor(modelClass).upsertWithWhere(modelClass, filter, data);
+  public <M extends PersistedModel, W extends WhereFilter> M upsertWithWhere(Class<M> modelClass,
+                                                                             W where, Map<String,
+      Object> data) {
+    try {
+      long count = getConnectorFor(modelClass).count(modelClass, where);
+      if(count > 1) {
+        // Abort if multiple found
+      }else if( count == 1){
+        // update
+        Filter filter = new Filter("{}");
+        filter.setWhere(where);
+        M model = getConnectorFor(modelClass).findOne(modelClass, filter);
+        model.setAttributes(data);
+        model = getConnectorFor(modelClass).replaceById(model, model.getId());
+        return model;
+      }else {
+        // create
+        M model = modelClass.getConstructor().newInstance();
+        model = (M) model.setAttributes(data);
+        model = M.create(model);
+        return model;
+      }
+    }catch (Throwable e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
   public <M extends PersistedModel, F extends Filter> M findOrCreate(Class<M> modelClass, F
       filter, Map<String, Object> data) {
     M model = null;
-
     try {
         model = getConnectorFor(modelClass).findOne(modelClass, filter);
         if(model == null) {

@@ -164,7 +164,7 @@ public class QueryGenerator {
   }
 
   public <M extends PersistedModel> TypedQuery<Long> getCountTypedQuery(EntityManager em, Class<M>
-      modelClass, Filter filter) {
+      modelClass, WhereFilter where) {
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
         .getModelConfiguration(modelClass);
 
@@ -176,8 +176,7 @@ public class QueryGenerator {
     query.select(cb.count(root));
     ParameterExpression<Integer> exp = cb.parameter(Integer.class);
 
-    if (filter != null) {
-      WhereFilter where = filter.getWhere();
+    if (where != null) {
       List<Predicate> predicates = getWherePredicates(root, query, cb, modelClass, where);
       if (predicates.size() > 0) {
         query.where(predicates.toArray(new Predicate[] {}));

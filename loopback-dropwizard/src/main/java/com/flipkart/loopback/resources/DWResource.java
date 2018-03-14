@@ -122,7 +122,7 @@ public interface DWResource<T extends PersistedModel> {
    */
   @GET
   @Path("/count")
-  public long count(@QueryParam("filter") Filter filter, @Context ContainerRequestContext
+  public long count(@QueryParam("filter") WhereFilter where, @Context ContainerRequestContext
       requestContext);
 
   /*

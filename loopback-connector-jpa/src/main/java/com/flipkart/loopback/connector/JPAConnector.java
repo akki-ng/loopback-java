@@ -54,10 +54,11 @@ public class JPAConnector extends Connector {
   }
 
   @Override
-  public <M extends PersistedModel, F extends Filter> long count(Class<M> modelClass, F filter) {
+  public <M extends PersistedModel, W extends WhereFilter> long count(Class<M> modelClass, W
+      where) {
     EntityManager em = getEntityManager();
     TypedQuery<Long> typedQuery = QueryGenerator.getInstance().getCountTypedQuery(em, modelClass,
-        filter);
+        where);
     return typedQuery.getSingleResult();
   }
 
@@ -91,14 +92,6 @@ public class JPAConnector extends Connector {
       where, Map<String, Object> data) {
     return 0;
   }
-
-  @Override
-  public <M extends PersistedModel, W extends WhereFilter> M upsertWithWhere(Class<M> modelClass,
-                                                                             W filter,
-                                                                             Map<String, Object> data) {
-    return null;
-  }
-
 
   @Override
   public <M extends PersistedModel> M save(M model) {

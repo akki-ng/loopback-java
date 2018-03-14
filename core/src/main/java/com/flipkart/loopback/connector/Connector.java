@@ -30,8 +30,8 @@ public abstract class Connector {
 //    return IDType.NUMBER;
 //  }
 
-  public abstract <M extends PersistedModel, F extends Filter>  long count(Class<M> modelClass, F
-      filter);
+  public abstract <M extends PersistedModel, W extends WhereFilter>  long count(Class<M> modelClass, W
+      where);
 
   public abstract <M extends PersistedModel> M create(M model);
 
@@ -44,9 +44,6 @@ public abstract class Connector {
                                                                       WhereFilter
       where, Map<String, Object> data);
 
-  public abstract <M extends PersistedModel, W extends WhereFilter> M upsertWithWhere(Class<M> modelClass, W filter,
-                                                             Map<String, Object>
-      data);
 
   public abstract <M extends PersistedModel> M save(M model);
 

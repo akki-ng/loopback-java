@@ -78,9 +78,9 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @Transaction
-  public static <M extends PersistedModel, F extends Filter> long count(Class<M> modelClass, F
-      filter) {
-    return getProvider().count(modelClass, filter);
+  public static <M extends PersistedModel, W extends WhereFilter> long count(Class<M> modelClass, W
+      where) {
+    return getProvider().count(modelClass, where);
   }
 
   @Transaction
@@ -134,13 +134,13 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @Transaction
-  public static <M extends PersistedModel, F extends WhereFilter> M upsertWithWhere(Class<M>
-                                                                                        modelClass, F filter,
+  public static <M extends PersistedModel, W extends WhereFilter> M upsertWithWhere(Class<M>
+                                                                                        modelClass, W where,
                                                                                     Map<String,
                                                                                         Object>
                                                                                         data) {
     beginTransaction(modelClass);
-    M model = getProvider().upsertWithWhere(modelClass, filter, data);
+    M model = getProvider().upsertWithWhere(modelClass, where, data);
     commitTransaction(modelClass);
     return model;
   }
