@@ -63,7 +63,7 @@ public class ModelProvider {
 //    return getConnectorFor(model.getClass()).updateOrCreate(model);
 //  }
 
-  public <M extends PersistedModel> int patchMultipleWithWhere(Class<M> modelClass, WhereFilter
+  public <M extends PersistedModel> long patchMultipleWithWhere(Class<M> modelClass, WhereFilter
       where, Map<String, Object> data) {
     return getConnectorFor(modelClass).patchMultipleWithWhere(modelClass, where, data);
   }
@@ -100,7 +100,7 @@ public class ModelProvider {
     return model;
   }
 
-  public <M extends PersistedModel, W extends WhereFilter> int updateAll(Class<M> modelClass, W
+  public <M extends PersistedModel, W extends WhereFilter> long updateAll(Class<M> modelClass, W
       where, Map<String, Object> data) {
     return getConnectorFor(modelClass).updateAll(modelClass, where, data);
   }
@@ -145,7 +145,7 @@ public class ModelProvider {
     return getConnectorFor(modelClass).findOne(modelClass, filter);
   }
 
-  public <M extends PersistedModel, F extends Filter> int destroyAll(M model, F filter) {
+  public <M extends PersistedModel, F extends Filter> long destroyAll(M model, F filter) {
     return getConnectorFor(model.getClass()).destroyAll(model, filter);
   }
 

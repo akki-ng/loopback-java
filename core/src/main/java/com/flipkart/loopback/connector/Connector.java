@@ -37,9 +37,11 @@ public abstract class Connector {
 
   public abstract <M extends PersistedModel> List<M> create(List<M> models);
 
-  public abstract <M extends PersistedModel> M updateOrCreate(M model);
+//  public abstract <M extends PersistedModel> M updateOrCreate(M model);
+//  Handled at provider
 
-  public abstract <M extends PersistedModel> int patchMultipleWithWhere(Class<M> modelClass, WhereFilter
+  public abstract <M extends PersistedModel> long patchMultipleWithWhere(Class<M> modelClass,
+                                                                      WhereFilter
       where, Map<String, Object> data);
 
   public abstract <M extends PersistedModel, W extends WhereFilter> M upsertWithWhere(Class<M> modelClass, W filter,
@@ -48,7 +50,7 @@ public abstract class Connector {
 
   public abstract <M extends PersistedModel> M save(M model);
 
-  public abstract <M extends PersistedModel, W extends WhereFilter> int updateAll(Class<M> modelClass, W filter, Map<String, Object>
+  public abstract <M extends PersistedModel, W extends WhereFilter> long updateAll(Class<M> modelClass, W filter, Map<String, Object>
       data);
 
   public abstract <M extends PersistedModel, F extends Filter> M updateAttributes(M model, F filter, Map<String, Object>
@@ -70,5 +72,5 @@ public abstract class Connector {
 
   public abstract <M extends PersistedModel> M destroy(M model);
 
-  public abstract <M extends PersistedModel, F extends Filter> int destroyAll(M model, F filter);
+  public abstract <M extends PersistedModel, F extends Filter> long destroyAll(M model, F filter);
 }

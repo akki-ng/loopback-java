@@ -87,12 +87,7 @@ public class JPAConnector extends Connector {
   }
 
   @Override
-  public <M extends PersistedModel> M updateOrCreate(M model) {
-    return null;
-  }
-
-  @Override
-  public <M extends PersistedModel> int patchMultipleWithWhere(Class<M> modelClass, WhereFilter
+  public <M extends PersistedModel> long patchMultipleWithWhere(Class<M> modelClass, WhereFilter
       where, Map<String, Object> data) {
     return 0;
   }
@@ -111,7 +106,7 @@ public class JPAConnector extends Connector {
   }
 
   @Override
-  public <M extends PersistedModel, W extends WhereFilter> int updateAll(Class<M> modelClass,
+  public <M extends PersistedModel, W extends WhereFilter> long updateAll(Class<M> modelClass,
                                                                          W filter,
                                                                          Map<String, Object> data) {
     return 0;
@@ -199,7 +194,7 @@ public class JPAConnector extends Connector {
   }
 
   @Override
-  public <M extends PersistedModel, F extends Filter> int destroyAll(M model, F filter) {
+  public <M extends PersistedModel, F extends Filter> long destroyAll(M model, F filter) {
     return 0;
   }
 }

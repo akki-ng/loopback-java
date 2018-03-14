@@ -130,7 +130,7 @@ public interface DWResource<T extends PersistedModel> {
    */
   @POST
   @Path("/update")
-  public int update(@QueryParam("where") WhereFilter where, T model, @Context ContainerRequestContext requestContext);
+  public long update(@QueryParam("where") WhereFilter where, T model, @Context ContainerRequestContext requestContext);
 
   /*
     Update an existing model instance or insert a new one into the data source based on the where criteria.

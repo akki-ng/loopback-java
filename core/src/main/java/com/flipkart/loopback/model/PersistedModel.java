@@ -124,11 +124,11 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @Transaction
-  public static <M extends PersistedModel> int patchMultipleWithWhere(Class<M> modelClass,
+  public static <M extends PersistedModel> long patchMultipleWithWhere(Class<M> modelClass,
                                                                     WhereFilter where, Map<String,
       Object> data) {
     beginTransaction(modelClass);
-    int count = getProvider().patchMultipleWithWhere(modelClass, where, data);
+    long count = getProvider().patchMultipleWithWhere(modelClass, where, data);
     commitTransaction(modelClass);
     return count;
   }
@@ -158,10 +158,10 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @Transaction
-  public static <M extends PersistedModel, W extends WhereFilter> int updateAll(Class<M> modelClass, W
+  public static <M extends PersistedModel, W extends WhereFilter> long updateAll(Class<M> modelClass, W
       where, Map<String, Object> data) {
     beginTransaction(modelClass);
-    int count =  getProvider().updateAll(modelClass, where, data);
+    long count =  getProvider().updateAll(modelClass, where, data);
     commitTransaction(modelClass);
     return count;
   }
@@ -217,9 +217,9 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @Transaction
-  public static <M extends PersistedModel, F extends Filter> int destroyAll(M model, F filter) {
+  public static <M extends PersistedModel, F extends Filter> long destroyAll(M model, F filter) {
     beginTransaction(model.getClass());
-    int count = getProvider().destroyAll(model, filter);
+    long count = getProvider().destroyAll(model, filter);
     commitTransaction(model.getClass());
     return count;
   }

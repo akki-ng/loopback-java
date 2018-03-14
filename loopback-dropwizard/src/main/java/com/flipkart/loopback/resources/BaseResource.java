@@ -101,7 +101,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
   }
 
   @Override
-  public int update(WhereFilter where, T model, ContainerRequestContext requestContext) {
+  public long update(WhereFilter where, T model, ContainerRequestContext requestContext) {
     return T.updateAll(model.getClass(), where, model.getFieldMap());
   }
 
