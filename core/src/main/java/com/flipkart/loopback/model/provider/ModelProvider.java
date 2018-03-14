@@ -44,7 +44,7 @@ public class ModelProvider {
     return getConfigurationFor(modelClass).getConnector();
   }
 
-  public <M extends PersistedModel, F extends Filter> int count(Class<M> modelClass, F filter) {
+  public <M extends PersistedModel, F extends Filter> long count(Class<M> modelClass, F filter) {
     return getConnectorFor(modelClass).count(modelClass, filter);
   }
 

@@ -30,7 +30,7 @@ public abstract class Connector {
 //    return IDType.NUMBER;
 //  }
 
-  public abstract <M extends PersistedModel, F extends Filter>  int count(Class<M> modelClass, F
+  public abstract <M extends PersistedModel, F extends Filter>  long count(Class<M> modelClass, F
       filter);
 
   public abstract <M extends PersistedModel> M create(M model);

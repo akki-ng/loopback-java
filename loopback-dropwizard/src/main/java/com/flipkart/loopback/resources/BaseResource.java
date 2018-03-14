@@ -90,7 +90,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
   }
 
   @Override
-  public int count(Filter filter, ContainerRequestContext requestContext) {
+  public long count(Filter filter, ContainerRequestContext requestContext) {
     return T.count(getModelClass(), filter);
   }
 

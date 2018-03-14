@@ -19,6 +19,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
@@ -132,62 +133,23 @@ public class QueryGenerator {
     CriteriaQuery<M> query = cb.createQuery(modelClass);
     Root<M> root = query.from(modelClass);
 
-    List<Predicate> predicates = new ArrayList<Predicate>();
 
-//    query.w
-
-    ObjectMapper mapper = new ObjectMapper();
     if (filter != null) {
-      Map<String, Field> properties = configuration.getProperties();
-
       WhereFilter where = filter.getWhere();
-      if (where != null) {
-        JsonNode w = where.getValue();
-        predicates = getWherePredicates(root, query, cb, modelClass, where);
-//        Iterator<Map.Entry<String, JsonNode>> fieldItr = w.fields();
-//        while (fieldItr.hasNext()) {
-//          Map.Entry<String, JsonNode> fieldCondition = fieldItr.next();
-//          if (properties.containsKey(fieldCondition.getKey())) {
-//            Field field = properties.get(fieldCondition.getKey());
-//            String columnName = field.getName();
-////          getColumnName(field);
-//            JsonNode value = fieldCondition.getValue();
-//            if (value.isValueNode()) {
-//
-//              Object convertedValue = mapper.convertValue(value, field.getType());
-//              predicates.add(cb.equal(root.get(columnName), convertedValue));
-//
-//            } else if (value.isObject()) {
-//              Iterator<Map.Entry<String, JsonNode>> keyValueItr = value.fields();
-//              while (keyValueItr.hasNext()) {
-//                Map.Entry<String, JsonNode> fieldEntry = keyValueItr.next();
-////                QueryOperator queryOp = QueryOperator.fromValue(fieldEntry.getKey());
-////                if(queryOp == null) {
-////                  throw new LoopbackException("Invalid query op in where filter");
-////                }
-////                if(fieldEntry.getValue().isArray() || fieldEntry.getValue().isObject()) {
-////                  throw new LoopbackException("Invalid query op value in where filter");
-////                }
-//              }
-//            }
-//          } else {
-//            // TODO no field property with this name
-//          }
-//        }
-        if (predicates.size() > 0) {
-          query.where(predicates.toArray(new Predicate[] {}));
-        }
+      List<Predicate> predicates = getWherePredicates(root, query, cb, modelClass, where);
+      if (predicates.size() > 0) {
+        query.where(predicates.toArray(new Predicate[] {}));
       }
 
       ArrayList<String> selectFields = filter.getFields();
       if (selectFields != null && selectFields.size() > 0) {
-        List multiSelect = selectFields.stream()
-            .map(fieldName -> {
-              Field field = properties.get(fieldName);
-              String columnName = field.getName();
-              return root.get(columnName);
-            })
-            .collect(Collectors.toList());
+//        List multiSelect = selectFields.stream()
+//            .map(fieldName -> {
+//              Field field = properties.get(fieldName);
+//              String columnName = field.getName();
+//              return root.get(columnName);
+//            })
+//            .collect(Collectors.toList());
 //        if(multiSelect.size() > 0) {
 //          query.select(root).multiselect(multiSelect);
 //        }else {
@@ -201,8 +163,33 @@ public class QueryGenerator {
     return typedQuery;
   }
 
+  public <M extends PersistedModel> TypedQuery<Long> getCountTypedQuery(EntityManager em, Class<M>
+      modelClass, Filter filter) {
+    ModelConfiguration configuration = ModelConfigurationManager.getInstance()
+        .getModelConfiguration(modelClass);
+
+
+    CriteriaBuilder cb = em.getCriteriaBuilder();
+    CriteriaQuery<Long> query = cb.createQuery(Long.class);
+    Root<M> root = query.from(modelClass);
+
+    query.select(cb.count(root));
+    ParameterExpression<Integer> exp = cb.parameter(Integer.class);
+
+    if (filter != null) {
+      WhereFilter where = filter.getWhere();
+      List<Predicate> predicates = getWherePredicates(root, query, cb, modelClass, where);
+      if (predicates.size() > 0) {
+        query.where(predicates.toArray(new Predicate[] {}));
+      }
+
+    }
+    TypedQuery<Long> typedQuery = em.createQuery(query);
+    return typedQuery;
+  }
+
   public <M extends PersistedModel> List<Predicate> getWherePredicates(Root<M> root,
-                                                                       CriteriaQuery<M> query,
+                                                                       CriteriaQuery query,
                                                                        CriteriaBuilder cb, Class<M>
       modelClass, WhereFilter where) {
     List<Predicate> predicates = new ArrayList<Predicate>();

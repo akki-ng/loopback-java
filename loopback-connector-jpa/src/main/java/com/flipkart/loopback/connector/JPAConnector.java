@@ -53,8 +53,11 @@ public class JPAConnector extends Connector {
   }
 
   @Override
-  public <M extends PersistedModel, F extends Filter> int count(Class<M> modelClass, F filter) {
-    return 0;
+  public <M extends PersistedModel, F extends Filter> long count(Class<M> modelClass, F filter) {
+    EntityManager em = getEntityManager();
+    TypedQuery<Long> typedQuery = QueryGenerator.getInstance().getCountTypedQuery(em, modelClass,
+        filter);
+    return typedQuery.getSingleResult();
   }
 
   @Override

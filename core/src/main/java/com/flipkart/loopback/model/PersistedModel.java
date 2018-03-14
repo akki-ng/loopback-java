@@ -78,7 +78,8 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @Transaction
-  public static <M extends PersistedModel, F extends Filter> int count(Class<M> modelClass, F filter) {
+  public static <M extends PersistedModel, F extends Filter> long count(Class<M> modelClass, F
+      filter) {
     return getProvider().count(modelClass, filter);
   }
 
