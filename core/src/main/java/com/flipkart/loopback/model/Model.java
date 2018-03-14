@@ -12,7 +12,7 @@ import com.flipkart.loopback.model.provider.ModelProvider;
   public abstract class Model<T extends Model<T, CM>, CM extends ModelConfigurationManager> {
 
   @JsonIgnore
-  private static Connector getConnector(Class<? extends Model> modelClass) {
+  protected static Connector getConnector(Class<? extends Model> modelClass) {
     return ModelProvider.getInstance().getConnectorFor(modelClass);
   }
 

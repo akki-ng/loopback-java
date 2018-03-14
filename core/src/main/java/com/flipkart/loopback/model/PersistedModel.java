@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flipkart.loopback.annotation.Transaction;
 import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
+import com.flipkart.loopback.connector.Connector;
 import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
@@ -17,6 +18,8 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,6 +29,48 @@ import org.apache.commons.lang3.StringUtils;
 
 public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     ModelConfigurationManager> extends Model<M, CM> {
+
+  protected static <M extends PersistedModel> void beginTransaction(Class<M> modelClass) {
+    Connector connector = getConnector(modelClass);
+    EntityManager em = connector.getEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    boolean newEm = !tx.isActive() || !em.isOpen();
+    if (!newEm) {
+      em.joinTransaction();
+    } else {
+      em.getTransaction().begin();
+    }
+  }
+
+  protected static <M extends PersistedModel> void commitTransaction(Class<M> modelClass) {
+    Connector connector = getConnector(modelClass);
+    EntityManager em = connector.getEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    boolean newEm = !tx.isActive() || !em.isOpen();
+
+    try
+    {
+      if (em.isOpen() && tx.isActive()) {
+        tx.commit();
+      }
+    }
+    catch (Throwable e)
+    {
+      if (tx.isActive()) {
+        em.getTransaction().rollback();
+      }
+      throw e;
+    }
+    finally
+    {
+      if (newEm)
+      {
+        connector.clearEntityManager();
+        if (em.isOpen())
+          em.close();
+      }
+    }
+  }
 
   @Override
   public ModelConfiguration getConfiguration() {
@@ -39,13 +84,21 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
 
   @Transaction
   public static <M extends PersistedModel> M create(M model) {
-    return getProvider().create(model);
+    beginTransaction(model.getClass());
+    model = getProvider().create(model);
+    commitTransaction(model.getClass());
+    return model;
   }
 
 
   @Transaction
   public static <M extends PersistedModel> List<M> create(List<M> models) {
-    return getProvider().create(models);
+    if(models != null && models.size() > 0) {
+      beginTransaction(models.get(0).getClass());
+      models = getProvider().create(models);
+      commitTransaction(models.get(0).getClass());
+    }
+    return models;
   }
 
   @Transaction
@@ -68,7 +121,10 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   @Transaction
   public static <M extends PersistedModel> M patchOrCreateWithWhere(M model, Map<String,
       Object> data) {
-    return getProvider().patchOrCreateWithWhere(model, data);
+    beginTransaction(model.getClass());
+    model = getProvider().patchOrCreateWithWhere(model, data);
+    commitTransaction(model.getClass());
+    return model;
   }
 
   @Transaction
@@ -77,7 +133,10 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
                                                                                     Map<String,
                                                                                         Object>
                                                                                         data) {
-    return getProvider().upsertWithWhere(modelClass, filter, data);
+    beginTransaction(modelClass);
+    M model = getProvider().upsertWithWhere(modelClass, filter, data);
+    commitTransaction(modelClass);
+    return model;
   }
 
   @Transaction
@@ -86,56 +145,86 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
       filter, Map<String,
       Object>
       data) {
-    return getProvider().findOrCreate(modelClass, filter, data);
+    beginTransaction(modelClass);
+    M model = getProvider().findOrCreate(modelClass, filter, data);
+    commitTransaction(modelClass);
+    return model;
   }
 
   @Transaction
   public static <M extends PersistedModel, W extends WhereFilter> int updateAll(Class<M> modelClass, W
       where, Map<String, Object> data) {
-    return getProvider().updateAll(modelClass, where, data);
+    beginTransaction(modelClass);
+    int count =  getProvider().updateAll(modelClass, where, data);
+    commitTransaction(modelClass);
+    return count;
   }
 
   @Transaction
   public static <M extends PersistedModel> M replaceById(M model, Object id) {
-    return getProvider().replaceById(model, id);
+    beginTransaction(model.getClass());
+    model = getProvider().replaceById(model, id);
+    commitTransaction(model.getClass());
+    return model;
   }
 
   @Transaction
   public static <M extends PersistedModel> M replaceOrCreate(M model) {
-    return getProvider().replaceOrCreate(model);
+    beginTransaction(model.getClass());
+    model = getProvider().replaceOrCreate(model);
+    commitTransaction(model.getClass());
+    return model;
   }
 
   @Transaction
   public static <M extends PersistedModel> boolean exists(Class<M> modelClass, Object id) {
-    return getProvider().exists(modelClass, id);
+    beginTransaction(modelClass);
+    boolean exists = getProvider().exists(modelClass, id);
+    commitTransaction(modelClass);
+    return exists;
   }
 
   @Transaction
   public static <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass, F
       filter) {
-    return getProvider().find(modelClass, filter);
+    beginTransaction(modelClass);
+    List<M> models = getProvider().find(modelClass, filter);
+    commitTransaction(modelClass);
+    return models;
   }
 
   @Transaction
   public static <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Serializable id) {
-    return getProvider().findById(modelClass, filter, id);
+    beginTransaction(modelClass);
+    M model = getProvider().findById(modelClass, filter, id);
+    commitTransaction(modelClass);
+    return model;
   }
 
   @Transaction
   public static <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass, F
       filter) {
-    return getProvider().findOne(modelClass, filter);
+    beginTransaction(modelClass);
+    M model = getProvider().findOne(modelClass, filter);
+    commitTransaction(modelClass);
+    return model;
   }
 
   @Transaction
   public static <M extends PersistedModel, F extends Filter> int destroyAll(M model, F filter) {
-    return getProvider().destroyAll(model, filter);
+    beginTransaction(model.getClass());
+    int count = getProvider().destroyAll(model, filter);
+    commitTransaction(model.getClass());
+    return count;
   }
 
   @Transaction
   public static <M extends PersistedModel> M destroyById(Class<M> modelClass, Serializable id) {
+    beginTransaction(modelClass);
     M model = M.findById(modelClass, null, id);
-    return (M) model.destroy();
+    model = (M) model.destroy();
+    commitTransaction(modelClass);
+    return model;
   }
 
   @Transaction

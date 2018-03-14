@@ -37,7 +37,8 @@ public class EMProvider {
       emStore.set(new ConcurrentHashMap<String,
           ThreadLocal<EntityManager>>());
     }
-    if(!emStore.get().containsKey(persistenceUnit) || emStore.get().get(persistenceUnit) == null) {
+    if(!emStore.get().containsKey(persistenceUnit) || emStore.get().get(persistenceUnit) == null
+        || emStore.get().get(persistenceUnit).get() == null) {
       EntityManagerFactory emf = getEMFactory(persistenceUnit);
       ThreadLocal<EntityManager> localEm = new ThreadLocal<EntityManager>();
       localEm.set(emf.createEntityManager());

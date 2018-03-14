@@ -3,6 +3,7 @@ package com.flipkart.sample.aspect.persistence;
 import com.flipkart.loopback.annotation.Transaction;
 import com.flipkart.loopback.connector.Connector;
 import com.flipkart.loopback.model.Model;
+import java.util.Arrays;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -30,41 +31,45 @@ public class TransactionAspect {
       System.out.println(thisJoinPoint.getSignature().toLongString());
       Object target = thisJoinPoint.getTarget();
       System.out.println(target);
-      System.out.println("Starting Transaction Aspect2");
-      if(target instanceof Model) {
-        Connector connector = ((Model) target).getConnector();
-        EntityManager em = connector.getEntityManager();
-        EntityTransaction tx = connector.getCurrentTransaction();
-        boolean newEm = !tx.isActive() || !em.isOpen();
-
-        if (!newEm) {
-          em.joinTransaction();
-        } else {
-          em.getTransaction().begin();
-        }
-        try
-        {
-          o = thisJoinPoint.proceed();
-          if (newEm && em.getTransaction().isActive()) {
-            em.getTransaction().commit();
+      if(target != null) {
+        System.out.println("Starting Transaction Aspect2");
+        if(target instanceof Model) {
+          Connector connector = ((Model) target).getConnector();
+          EntityManager em = connector.getEntityManager();
+          EntityTransaction tx = connector.getCurrentTransaction();
+          boolean newEm = !tx.isActive() || !em.isOpen();
+          if (!newEm) {
+            em.joinTransaction();
+          } else {
+            em.getTransaction().begin();
           }
-        }
-        catch (Throwable e)
-        {
-          if (em.getTransaction().isActive()) {
-            em.getTransaction().rollback();
-          }
-          throw e;
-        }
-        finally
-        {
-          if (newEm)
+          try
           {
-            connector.clearEntityManager();
-            if (em.isOpen())
-              em.close();
+            o = thisJoinPoint.proceed();
+            if (newEm && em.getTransaction().isActive()) {
+              em.getTransaction().commit();
+            }
           }
+          catch (Throwable e)
+          {
+            if (em.getTransaction().isActive()) {
+              em.getTransaction().rollback();
+            }
+            throw e;
+          }
+          finally
+          {
+            if (newEm)
+            {
+              connector.clearEntityManager();
+              if (em.isOpen())
+                em.close();
+            }
+          }
+        }else {
+          o = thisJoinPoint.proceed();
         }
+
       }else {
         o = thisJoinPoint.proceed();
       }
