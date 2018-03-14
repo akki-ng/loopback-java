@@ -35,7 +35,7 @@ public abstract class Connector {
 
   public abstract <M extends PersistedModel> M create(M model);
 
-  public abstract <M extends PersistedModel> List<M> create(List<? extends PersistedModel> models);
+  public abstract <M extends PersistedModel> List<M> create(List<M> models);
 
   public abstract <M extends PersistedModel> M updateOrCreate(M model);
 

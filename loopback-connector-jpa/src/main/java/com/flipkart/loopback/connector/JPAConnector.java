@@ -74,7 +74,7 @@ public class JPAConnector extends Connector {
   }
 
   @Override
-  public <M extends PersistedModel> List<M> create(List<? extends PersistedModel> models) {
+  public <M extends PersistedModel> List<M> create(List<M> models) {
     if(models != null) {
       List<M> persisted =  models.stream()
           .map(model -> {
@@ -83,7 +83,7 @@ public class JPAConnector extends Connector {
           .collect(Collectors.toList());
       return persisted;
     }
-    return null;
+    return models;
   }
 
   @Override
