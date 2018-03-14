@@ -3,6 +3,7 @@ package com.flipkart.loopback.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flipkart.loopback.annotation.Transaction;
 import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.exception.LoopbackException;
@@ -31,22 +32,23 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return M.getConfigurationManager().getModelConfiguration(this.getClass());
   }
 
-
+  @Transaction
   public static <M extends PersistedModel, F extends Filter> int count(Class<M> modelClass, F filter) {
     return getProvider().count(modelClass, filter);
   }
 
-
+  @Transaction
   public static <M extends PersistedModel> M create(M model) {
     return getProvider().create(model);
   }
 
 
+  @Transaction
   public static <M extends PersistedModel> List<M> create(List<M> models) {
     return getProvider().create(models);
   }
 
-
+  @Transaction
   public static <M extends PersistedModel> M updateOrCreate(Class<M> modelClass, Map<String,
       Object> patchData) throws LoopbackException {
     ModelConfiguration configuration = M.getConfigurationManager().getModelConfiguration(modelClass);
@@ -63,13 +65,13 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     }
   }
 
-
+  @Transaction
   public static <M extends PersistedModel> M patchOrCreateWithWhere(M model, Map<String,
       Object> data) {
     return getProvider().patchOrCreateWithWhere(model, data);
   }
 
-
+  @Transaction
   public static <M extends PersistedModel, F extends WhereFilter> M upsertWithWhere(Class<M>
                                                                                         modelClass, F filter,
                                                                                     Map<String,
@@ -78,7 +80,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return getProvider().upsertWithWhere(modelClass, filter, data);
   }
 
-
+  @Transaction
   public static <M extends PersistedModel, F extends Filter> M findOrCreate(Class<M>
                                                                                    modelClass, F
       filter, Map<String,
@@ -87,56 +89,56 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return getProvider().findOrCreate(modelClass, filter, data);
   }
 
-
+  @Transaction
   public static <M extends PersistedModel, W extends WhereFilter> int updateAll(Class<M> modelClass, W
       where, Map<String, Object> data) {
     return getProvider().updateAll(modelClass, where, data);
   }
 
-
+  @Transaction
   public static <M extends PersistedModel> M replaceById(M model, Object id) {
     return getProvider().replaceById(model, id);
   }
 
-
+  @Transaction
   public static <M extends PersistedModel> M replaceOrCreate(M model) {
     return getProvider().replaceOrCreate(model);
   }
 
-
+  @Transaction
   public static <M extends PersistedModel> boolean exists(Class<M> modelClass, Object id) {
     return getProvider().exists(modelClass, id);
   }
 
-
+  @Transaction
   public static <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass, F
       filter) {
     return getProvider().find(modelClass, filter);
   }
 
-
+  @Transaction
   public static <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Serializable id) {
     return getProvider().findById(modelClass, filter, id);
   }
 
-
+  @Transaction
   public static <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass, F
       filter) {
     return getProvider().findOne(modelClass, filter);
   }
 
-
+  @Transaction
   public static <M extends PersistedModel, F extends Filter> int destroyAll(M model, F filter) {
     return getProvider().destroyAll(model, filter);
   }
 
-
+  @Transaction
   public static <M extends PersistedModel> M destroyById(Class<M> modelClass, Serializable id) {
     M model = M.findById(modelClass, null, id);
     return (M) model.destroy();
   }
 
-
+  @Transaction
   public <M extends PersistedModel> M  destroy() {
     return (M)getProvider().destroy(this);
   }
@@ -149,12 +151,12 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return String.valueOf(getId());
   }
 
-
+  @Transaction
   public <M extends PersistedModel> M save() {
     return (M) getProvider().replaceOrCreate(this);
   }
 
-
+  @Transaction
   public M reload() {
     return (M) getProvider().findById(this.getClass(), null, this.getId());
   }
@@ -171,7 +173,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return false;
   }
 
-
+  @Transaction
   public <M extends PersistedModel> M updateAttributes(Map<String, Object> data)
       throws LoopbackException {
     String idName = this.getIdPropertyName();
@@ -194,12 +196,13 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return this.save();
   }
 
-
+  @Transaction
   private M updateAttribute(String attributeName, Object
       attributeValue) throws LoopbackException {
     return this.setAttribute(attributeName, attributeValue).save();
   }
 
+  @Transaction
   public <F extends Filter> M setAttribute(String attributeName, Object
       attributeValue) throws LoopbackException {
 
@@ -283,12 +286,14 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return new Filter(null);
   }
 
+  @Transaction
   public <M extends PersistedModel> M getHasOneRelatedModel(String relationName) throws
       LoopbackException {
     Relation relation = getRelationByName(relationName);
     return getHasOneRelatedModel(relation);
   }
 
+  @Transaction
   public <M extends PersistedModel> M getHasOneRelatedModel(Relation relation) throws
       LoopbackException {
     Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
@@ -296,6 +301,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return (M) relatedModelClass.cast(getProvider().findOne(relatedModelClass, scope));
   }
 
+  @Transaction
   public <M extends PersistedModel> List<M> getHasManyRelatedModel(String relationName, Filter filter)
       throws
       LoopbackException {
@@ -303,6 +309,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return getHasManyRelatedModel(relation, filter);
   }
 
+  @Transaction
   public <M extends PersistedModel> List<M> getHasManyRelatedModel(Relation relation, Filter filter)
       throws
       LoopbackException {
