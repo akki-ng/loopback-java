@@ -5,6 +5,7 @@
 
         <class>com.flipkart.sample.entity.TempModel</class>
         <class>com.flipkart.sample.entity.TestModel</class>
+        <class>com.flipkart.sample.entity.HasManyModel</class>
 
         <properties>
             <property name="javax.persistence.jdbc.driver"

@@ -1,9 +1,14 @@
 package com.flipkart.sample;
 
+import com.flipkart.loopback.configuration.ModelConfigurationImpl;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
+import com.flipkart.loopback.connector.Connector;
 import com.flipkart.loopback.exception.LoopbackException;
+import com.flipkart.loopback.model.PersistedModel;
+import com.flipkart.sample.entity.HasManyModel;
 import com.flipkart.sample.entity.TempModel;
 import com.flipkart.sample.entity.TestModel;
+import com.flipkart.sample.entity.configuration.HasManyModelConfiguration;
 import com.flipkart.sample.entity.configuration.TempModelConfiguration;
 import com.flipkart.sample.entity.configuration.TestModelConfiguration;
 import com.google.common.collect.Lists;
@@ -28,6 +33,7 @@ public class AppModule extends AbstractModule {
     try {
       cm.configureModel(TempModel.class, new TempModelConfiguration());
       cm.configureModel(TestModel.class, new TestModelConfiguration());
+      cm.configureModel(HasManyModel.class, new HasManyModelConfiguration());
     } catch (LoopbackException e) {
       e.printStackTrace();
     }
