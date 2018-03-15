@@ -1,8 +1,11 @@
 package com.flipkart.sample.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
+import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.model.PersistedModel;
+import com.sun.tools.javac.util.List;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -39,7 +42,16 @@ public class TempModel extends PersistedModel<TempModel, ModelConfigurationManag
     return id1;
   }
 
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "test_id")
-  private TestModel test;
+//  @OneToOne(fetch = FetchType.LAZY)
+//  @JoinColumn(name = "test_id")
+//  @JsonProperty("test_id")
+//  @JsonIgnore
+//  private TestModel test;
+
+  @JsonProperty("testId")
+  @Column(name = "test_id", nullable = false, length = 50)
+  private Long testId;
+
+
+
 }

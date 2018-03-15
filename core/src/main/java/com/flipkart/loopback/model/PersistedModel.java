@@ -373,6 +373,15 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return fieldData;
   }
 
+  @JsonIgnore
+  public Object getFieldValue(Field field) throws IllegalAccessException {
+    boolean accessible = field.isAccessible();
+    field.setAccessible(true);
+    Object value = field.get(this);
+    field.setAccessible(accessible);
+    return value;
+  }
+
   public Relation getRelationByName(String relationName) throws LoopbackException {
     return getConfiguration().getRelationByName(relationName);
   }
@@ -381,23 +390,37 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return getConfiguration().getRelationByRestPath(restPath);
   }
 
-  private Filter getScopeForRelatedMode(Relation relation) throws IOException, LoopbackException {
+  private Filter getScopeForRelatedMode(Relation relation) throws IOException, LoopbackException,
+      IllegalAccessException {
     Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
-    return new Filter(null);
+    ModelConfiguration relConfig = getConfiguration(relatedModelClass);
+    Map<String, Field> properties = getConfiguration().getProperties();
+    Field relatedField = properties.get(relation.getForeignKey());
+    Object value = this.getFieldValue(relatedField);
+
+    String filterString = "{\"where\": {\"" + relConfig.getIdPropertyName() +  "\" : " +
+        value.toString() + "}}";
+    return new Filter(filterString);
   }
 
   @Transaction
   public <M extends PersistedModel> M getHasOneRelatedModel(String relationName) throws
-      LoopbackException {
+      LoopbackException, IOException, IllegalAccessException {
     Relation relation = getRelationByName(relationName);
     return getHasOneRelatedModel(relation);
   }
 
   @Transaction
   public <M extends PersistedModel> M getHasOneRelatedModel(Relation relation) throws
-      LoopbackException {
+      LoopbackException, IOException, IllegalAccessException {
     Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
-    Filter scope = null;
+    Map<String, Field> properties = getConfiguration().getProperties();
+    Field relatedField = properties.get(relation.getForeignKey());
+    if(this.getFieldValue(relatedField) == null) {
+      return null;
+    }
+
+    Filter scope = getScopeForRelatedMode(relation);
     return (M) relatedModelClass.cast(getProvider().findOne(relatedModelClass, scope));
   }
 

@@ -27,7 +27,7 @@ import com.flipkart.loopback.model.provider.ModelProvider;
   }
 
   @JsonIgnore
-  private static ModelConfiguration getConfiguration(Class<? extends Model> modelClass) {
+  protected static ModelConfiguration getConfiguration(Class<? extends Model> modelClass) {
     return ModelProvider.getInstance().getConfigurationFor(modelClass);
   }
 

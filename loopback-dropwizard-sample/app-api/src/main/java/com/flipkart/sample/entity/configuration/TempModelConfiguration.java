@@ -27,7 +27,8 @@ public class TempModelConfiguration extends ModelConfigurationImpl<TempModelConf
         Relation.builder()
             .name("test")
             .relatedModelClass(TestModel.class)
-            .relationType(RelationType.HAS_MANY)
+            .relationType(RelationType.HAS_ONE)
+            .foreignKey("test_id")
             .build()
     );
   }
