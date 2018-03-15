@@ -172,4 +172,6 @@ public interface DWResource<T extends PersistedModel> {
                                               String fk, @QueryParam("filter") Filter filter,
                                         @Context
                                       ContainerRequestContext requestContext);
+
+  // TODO findOne
 }
