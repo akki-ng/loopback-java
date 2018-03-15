@@ -18,10 +18,11 @@ import org.jibx.schema.codegen.extend.NameConverter;
 @AllArgsConstructor
 @Builder
 public class Relation {
+//  <R extends PersistedModel>
   private final RelationType relationType;
   private final Filter scope;
-  private final String foreignKey;
-  private final String primaryKey;
+  private final String fromPropertyName;
+  private final String toPropertyName;
   private final String name;
   private final String restPath;
   private Class<? extends PersistedModel> relatedModelClass;

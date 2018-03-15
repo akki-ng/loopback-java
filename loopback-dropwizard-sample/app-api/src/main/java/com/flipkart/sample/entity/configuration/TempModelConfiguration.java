@@ -23,14 +23,14 @@ public class TempModelConfiguration extends ModelConfigurationImpl<TempModelConf
 
   @Override
   protected void configure() throws LoopbackException {
-    this.addRelation(
-        Relation.builder()
-            .name("test")
-            .relatedModelClass(TestModel.class)
-            .relationType(RelationType.HAS_ONE)
-            .foreignKey("test_id")
-            .build()
-    );
+//    this.addRelation(
+//        Relation.builder()
+//            .name("test")
+//            .relatedModelClass(TestModel.class)
+//            .relationType(RelationType.HAS_ONE)
+//            .foreignKey("test_id")
+//            .build()
+//    );
   }
 
   @Override

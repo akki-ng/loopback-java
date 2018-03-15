@@ -7,10 +7,12 @@ import com.flipkart.loopback.annotation.Transaction;
 import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.connector.Connector;
+import com.flipkart.loopback.constants.RelationType;
 import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.relation.Relation;
+import com.google.common.collect.Maps;
 import java.beans.Transient;
 import java.io.IOException;
 import java.io.Serializable;
@@ -18,6 +20,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import lombok.SneakyThrows;
@@ -29,6 +32,10 @@ import org.apache.commons.lang3.StringUtils;
 
 public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     ModelConfigurationManager> extends Model<M, CM> {
+
+  @JsonIgnore
+  protected abstract List<Relation> getRelations();
+
 
   protected static <M extends PersistedModel> void beginTransaction(Class<M> modelClass) {
     Connector connector = getConnector(modelClass);
@@ -382,25 +389,80 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return value;
   }
 
-  public Relation getRelationByName(String relationName) throws LoopbackException {
-    return getConfiguration().getRelationByName(relationName);
+  public Relation getRelationByName(String relationName) throws
+      LoopbackException {
+    List<Relation> relations = getRelations();
+    if(relations == null) {
+      return null;
+    }
+    Optional<Relation> relationOp = relations.stream()
+        .filter(rel -> rel.getName().equals(relationName))
+        .findFirst();
+    return relationOp.isPresent() ? relationOp.get() : null;
   }
+
 
   public Relation getRelationByRestPath(String restPath) throws LoopbackException {
-    return getConfiguration().getRelationByRestPath(restPath);
+    List<Relation> relations = getRelations();
+    if(relations == null) {
+      return null;
+    }
+    Optional<Relation> relOp = this.getRelations().stream()
+        .filter(rel -> rel.getRestPath().equals(restPath))
+        .findFirst();
+    return relOp.isPresent() ? (Relation)relOp.get() : null;
   }
 
-  private Filter getScopeForRelatedMode(Relation relation) throws IOException, LoopbackException,
+  @JsonIgnore
+  public static <M extends PersistedModel> Map<String, Field> getProperties(Class<M> modelCass) {
+    Map<String, Field> properties = Maps.newConcurrentMap();
+    Field[] var2 = modelCass.getDeclaredFields();
+    int var3 = var2.length;
+
+    for(int var4 = 0; var4 < var3; ++var4) {
+      Field declaredField = var2[var4];
+      Transient aTransient = (Transient)declaredField.getAnnotation(Transient.class);
+      if (aTransient == null) {
+        String propertyName = declaredField.getName();
+        JsonProperty jsonProperty = (JsonProperty)declaredField.getAnnotation(JsonProperty.class);
+        if (jsonProperty != null) {
+          propertyName = jsonProperty.value();
+        }
+
+        properties.put(propertyName, declaredField);
+      }
+    }
+
+    return properties;
+  }
+
+  @JsonIgnore
+  public Map<String, Field> getProperties() {
+    return getProperties(this.getClass());
+  }
+
+  private Filter getScopeForRelatedModel(Relation relation) throws IOException, LoopbackException,
       IllegalAccessException {
     Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
-    ModelConfiguration relConfig = getConfiguration(relatedModelClass);
-    Map<String, Field> properties = getConfiguration().getProperties();
-    Field relatedField = properties.get(relation.getForeignKey());
+    Map<String, Field> properties = this.getProperties();
+
+    Field relatedField = properties.get(relation.getFromPropertyName());
     Object value = this.getFieldValue(relatedField);
 
-    String filterString = "{\"where\": {\"" + relConfig.getIdPropertyName() +  "\" : " +
-        value.toString() + "}}";
-    return new Filter(filterString);
+    if(relation.getRelationType() == RelationType.HAS_ONE || relation.getRelationType() ==
+        RelationType.HAS_MANY || relation.getRelationType() == RelationType.BELONGS_TO) {
+      String filterString = "{\"where\": {\"" + relation.getToPropertyName() +  "\" : " +
+          value.toString() + "}}";
+      return new Filter(filterString);
+    }else if(relation.getRelationType() == RelationType.HAS_MANY_THROUGH) {
+      // TODO
+      // Fetch through model
+      // For each fetch related entity
+      String filterString = "{\"where\": {\"" + relation.getToPropertyName() +  "\" : " +
+          value.toString() + "}}";
+      return new Filter(filterString);
+    }
+    throw new LoopbackException("Invalid relation");
   }
 
   @Transaction
@@ -415,12 +477,12 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
       LoopbackException, IOException, IllegalAccessException {
     Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
     Map<String, Field> properties = getConfiguration().getProperties();
-    Field relatedField = properties.get(relation.getForeignKey());
+    Field relatedField = properties.get(relation.getFromPropertyName());
     if(this.getFieldValue(relatedField) == null) {
       return null;
     }
 
-    Filter scope = getScopeForRelatedMode(relation);
+    Filter scope = getScopeForRelatedModel(relation);
     return (M) relatedModelClass.cast(getProvider().findOne(relatedModelClass, scope));
   }
 

@@ -2,10 +2,14 @@ package com.flipkart.sample.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
+import com.flipkart.loopback.constants.RelationType;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.model.PersistedModel;
-import com.sun.tools.javac.util.List;
+import com.flipkart.loopback.relation.Relation;
+import com.google.common.collect.Lists;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,12 +20,16 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 
 @Entity(name = "temp")
 @NoArgsConstructor
 public class TempModel extends PersistedModel<TempModel, ModelConfigurationManager> {
-
+  private static List<Relation> relations = Lists.<Relation>newArrayList(
+      Relation.builder().name("test").fromPropertyName("testId").toPropertyName("id")
+          .relatedModelClass(TestModel.class).relationType(RelationType.HAS_ONE).build()
+  );
 
   @JsonProperty("id")
   @Id //signifies the primary key
@@ -38,6 +46,11 @@ public class TempModel extends PersistedModel<TempModel, ModelConfigurationManag
   private String lastName;
 
   @Override
+  protected java.util.List<Relation> getRelations() {
+    return relations;
+  }
+
+  @Override
   public Serializable getId() {
     return id1;
   }
@@ -52,6 +65,9 @@ public class TempModel extends PersistedModel<TempModel, ModelConfigurationManag
   @Column(name = "test_id", nullable = false, length = 50)
   private Long testId;
 
-
-
+  public static void main(String[] args) throws JsonProcessingException {
+    ObjectMapper mapper = new ObjectMapper();
+    TempModel m = new TempModel();
+    System.out.println(mapper.writeValueAsString(m));
+  }
 }

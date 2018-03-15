@@ -21,13 +21,13 @@ public class TestModelConfiguration extends ModelConfigurationImpl<TestModelConf
 
   @Override
   protected void configure() throws LoopbackException {
-    this.addRelation(
-        Relation.builder()
-            .name("temp")
-            .relatedModelClass(TempModel.class)
-            .relationType(RelationType.BELONGS_TO)
-            .build()
-    );
+//    this.addRelation(
+//        Relation.builder()
+//            .name("temp")
+//            .relatedModelClass(TempModel.class)
+//            .relationType(RelationType.BELONGS_TO)
+//            .build()
+//    );
   }
 
   @Override
