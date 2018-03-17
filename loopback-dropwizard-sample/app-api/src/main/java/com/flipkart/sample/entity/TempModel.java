@@ -29,7 +29,7 @@ public class TempModel extends PersistedModel<TempModel, ModelConfigurationManag
   private static List<Relation> relations = Lists.<Relation>newArrayList(
       Relation.builder().name("test").fromPropertyName("testId").toPropertyName("id")
           .relatedModelClass(TestModel.class).relationType(RelationType.HAS_ONE).build(),
-      Relation.builder().name("many").fromPropertyName("id").toPropertyName("temp_id")
+      Relation.builder().name("many").fromPropertyName("id").toPropertyName("tempId")
           .relatedModelClass(HasManyModel.class).relationType(RelationType.HAS_MANY).build()
   );
 

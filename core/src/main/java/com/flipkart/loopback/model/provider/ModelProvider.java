@@ -127,7 +127,7 @@ public class ModelProvider {
   }
 
 
-  public <M extends PersistedModel> M replaceById(M model, Object id) {
+  public <M extends PersistedModel> M replaceById(M model, Serializable id) {
     return getConnectorFor(model.getClass()).replaceById(model, id);
   }
 
@@ -166,8 +166,8 @@ public class ModelProvider {
     return getConnectorFor(modelClass).findOne(modelClass, filter);
   }
 
-  public <M extends PersistedModel, F extends Filter> long destroyAll(M model, F filter) {
-    return getConnectorFor(model.getClass()).destroyAll(model, filter);
+  public <M extends PersistedModel, W extends WhereFilter> long destroyAll(Class<M> modelClass, W where) {
+    return getConnectorFor(modelClass).destroyAll(modelClass, where);
   }
 
   public <M extends PersistedModel> M destroy(M model) {

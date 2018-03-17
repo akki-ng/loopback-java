@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 public class TestModel extends PersistedModel<TestModel, ModelConfigurationManager> {
 
   @Id
+  @JsonProperty("id")
   private Long id;
 
   @JsonProperty("BigName")

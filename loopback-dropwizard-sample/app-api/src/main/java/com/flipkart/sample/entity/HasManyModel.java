@@ -33,6 +33,10 @@ public class HasManyModel extends PersistedModel<HasManyModel, ModelConfiguratio
   @Column(name = "book", nullable = false, length = 50)
   private String book;
 
+  @JsonProperty("tempId")
+  @Column(name = "temp_id", nullable = false, length = 50)
+  private Long tempId;
+
   @Override
   protected List<Relation> getRelations() {
     return null;
@@ -40,6 +44,6 @@ public class HasManyModel extends PersistedModel<HasManyModel, ModelConfiguratio
 
   @Override
   public Serializable getId() {
-    return null;
+    return id;
   }
 }

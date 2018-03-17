@@ -67,5 +67,6 @@ public abstract class Connector {
 
   public abstract <M extends PersistedModel> M destroy(M model);
 
-  public abstract <M extends PersistedModel, F extends Filter> long destroyAll(M model, F filter);
+  public abstract <M extends PersistedModel, W extends WhereFilter> long destroyAll(Class<M> modelClass, W
+      where);
 }

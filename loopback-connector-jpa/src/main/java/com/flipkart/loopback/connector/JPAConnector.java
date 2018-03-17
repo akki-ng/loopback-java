@@ -18,6 +18,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 /**
@@ -90,6 +91,7 @@ public class JPAConnector extends Connector {
   @Override
   public <M extends PersistedModel> long patchMultipleWithWhere(Class<M> modelClass, WhereFilter
       where, Map<String, Object> data) {
+    // TODO
     return 0;
   }
 
@@ -97,6 +99,7 @@ public class JPAConnector extends Connector {
   public <M extends PersistedModel, W extends WhereFilter> long updateAll(Class<M> modelClass,
                                                                          W filter,
                                                                          Map<String, Object> data) {
+    // TODO
     return 0;
   }
 
@@ -179,8 +182,11 @@ public class JPAConnector extends Connector {
   }
 
   @Override
-  public <M extends PersistedModel, F extends Filter> long destroyAll(M model, F filter) {
+  public <M extends PersistedModel, W extends WhereFilter> long destroyAll(Class<M> modelClass, W
+      where) {
     // TODO
-    return 0;
+    EntityManager em = getEntityManager();
+    Query query = QueryGenerator.getInstance().getDeleteQuery(em, modelClass, where);
+    return query.executeUpdate();
   }
 }

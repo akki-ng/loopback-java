@@ -16,19 +16,18 @@ import lombok.NoArgsConstructor;
 /**
  * Created by akshaya.sharma on 07/03/18
  */
-@NoArgsConstructor
 public class WhereFilter{
-  @Getter
-  private String raw;
-
   @Getter
   private JsonNode value;
 
+  public WhereFilter(){
+    this("{}");
+  }
+
   public WhereFilter(String whr) {
-    this.raw = whr;
     try {
       ObjectMapper mapper = new ObjectMapper();
-      value = mapper.readTree(this.raw);
+      value = mapper.readTree(whr);
       _validateWhereFilter();
     }catch (Throwable e) {
       e.printStackTrace();
@@ -112,13 +111,12 @@ public class WhereFilter{
   }
 
   public WhereFilter copy() {
-    return new WhereFilter(this.getRaw());
+    return new WhereFilter(this.value.toString());
   }
 
   public WhereFilter merge(WhereFilter where) {
     JsonNode mergedNode = _mergeNodes((ObjectNode) this.getValue(), (ObjectNode) where.getValue());
     value = mergedNode;
-    raw = mergedNode.toString();
     return this;
   }
 

@@ -16,8 +16,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CommonAbstractCriteria;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
@@ -174,7 +177,6 @@ public class QueryGenerator {
     Root<M> root = query.from(modelClass);
 
     query.select(cb.count(root));
-    ParameterExpression<Integer> exp = cb.parameter(Integer.class);
 
     if (where != null) {
       List<Predicate> predicates = getWherePredicates(root, query, cb, modelClass, where);
@@ -187,8 +189,30 @@ public class QueryGenerator {
     return typedQuery;
   }
 
+  public <M extends PersistedModel> Query getDeleteQuery(EntityManager em, Class<M>
+      modelClass, WhereFilter where) {
+    ModelConfiguration configuration = ModelConfigurationManager.getInstance()
+        .getModelConfiguration(modelClass);
+
+
+    CriteriaBuilder cb = em.getCriteriaBuilder();
+    CriteriaDelete<M> delete = cb.createCriteriaDelete(modelClass);
+    Root<M> root = delete.from(modelClass);
+
+
+    if (where != null) {
+      List<Predicate> predicates = getWherePredicates(root, delete, cb, modelClass, where);
+      if (predicates.size() > 0) {
+        delete.where(predicates.toArray(new Predicate[] {}));
+      }
+
+    }
+    Query query = em.createQuery(delete);
+    return query;
+  }
+
   public <M extends PersistedModel> List<Predicate> getWherePredicates(Root<M> root,
-                                                                       CriteriaQuery query,
+                                                                       CommonAbstractCriteria query,
                                                                        CriteriaBuilder cb, Class<M>
       modelClass, WhereFilter where) {
     List<Predicate> predicates = new ArrayList<Predicate>();

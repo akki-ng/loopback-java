@@ -1,8 +1,10 @@
 package com.flipkart.loopback.resources;
 
+import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.DELETE;
@@ -157,21 +159,79 @@ public interface DWResource<T extends PersistedModel> {
 //      ("relation") String relationRestPath, @QueryParam("filter") Filter filter, @Context
 //                                                                         ContainerRequestContext requestContext);
 
+  /*
+  Get related model instance/instances depending on hasOne or hasMany type relation
+   */
   @GET
   @Path("/{id}/{relation}")
   public Object getOnRelatedModel(@PathParam("id") String id,
                                                                @PathParam
-      ("relation") String relationRestPath, @QueryParam("filter") Filter filter, @Context
+      ("relation") String relationRestPath, @QueryParam("filter") Filter relatedModelfilter, @Context
                                         ContainerRequestContext requestContext);
 
   @GET
   @Path("/{id}/{relation}/{fk}")
-  public PersistedModel getOnRelatedModelEntity(@PathParam("id") String id,
-                                  @PathParam
-                                      ("relation") String relationRestPath, @PathParam("fk")
-                                              String fk, @QueryParam("filter") Filter filter,
-                                        @Context
-                                      ContainerRequestContext requestContext);
+  public PersistedModel fineOneRelatedModelEntity(@PathParam("id") String id,
+                                  @PathParam ("relation") String relationRestPath, @PathParam("fk")
+                                              String fk, @Context ContainerRequestContext
+                                                      requestContext);
 
-  // TODO findOne
+  /*
+   Create a new instance of the related model and persist it into the data source.
+  */
+  @POST
+  @Path("/{id}/{relation}")
+  public PersistedModel createRelatedEntity(@PathParam("id") String id,@PathParam
+      ("relation") String relationRestPath, Map<String, Object> data, @Context
+      ContainerRequestContext requestContext);
+
+  /*
+    Replace an existing related model instance or insert a new one into the data source.
+   */
+  @PUT
+  @Path("/{id}/{relation}")
+  //TODO
+  public PersistedModel patchOrInsertRelatedEntity(@PathParam("id") String id,@PathParam
+      ("relation") String relationRestPath, Map<String, Object> data, @Context ContainerRequestContext requestContext);
+
+
+  /*
+   Delete all instances of a relation.
+  */
+  @DELETE
+  @Path("/{id}/{relation}")
+  public long destroyAllRelatedEntities(@PathParam("id") String id,@PathParam
+      ("relation") String relationRestPath, @QueryParam("filter") WhereFilter where, Map<String,
+                                       Object> data,
+                                       @Context
+                                                ContainerRequestContext requestContext) throws LoopbackException, IOException, IllegalAccessException;
+
+  /*
+    Delete one related entity
+   */
+  @DELETE
+  @Path("/{id}/{relation}/{fk}")
+  public PersistedModel deleteOneRelatedModelEntity(@PathParam("id") String id,
+                                                  @PathParam ("relation") String relationRestPath, @PathParam("fk")
+                                                      String fk, @Context ContainerRequestContext
+                                                      requestContext);
+
+  /*
+   Replace an existing instance of the related model and persist it into the data source.
+  */
+  @PUT
+  @Path("/{id}/{relation}/{fk}")
+  public PersistedModel replaceRelatedEntity(@PathParam("id") String id,@PathParam
+      ("relation") String relationRestPath, @PathParam("fk")
+      String fk, Map<String, Object> data, @Context ContainerRequestContext requestContext);
+
+
+  /*
+   Replace an existing instance of the related model and persist it into the data source.
+  */
+  @PATCH
+  @Path("/{id}/{relation}/{fk}")
+  public PersistedModel patchRelatedEntity(@PathParam("id") String id,@PathParam
+      ("relation") String relationRestPath, @PathParam("fk")
+                                                 String fk, Map<String, Object> data, @Context ContainerRequestContext requestContext);
 }

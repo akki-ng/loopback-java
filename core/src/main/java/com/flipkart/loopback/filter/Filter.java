@@ -18,8 +18,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class Filter {
-  private String raw;
-  private JsonNode value;
 
   private WhereFilter where;
 
@@ -33,12 +31,11 @@ public class Filter {
   public Filter(String data) throws IOException, LoopbackException {
     System.out.println("asdas");
     ObjectMapper mapper = new ObjectMapper();
-    this.raw = data;
-    this.value = mapper.readTree(this.raw);
-    _validateFilter();
+    JsonNode value = mapper.readTree(data);
+    _validateFilter(value);
   }
 
-  private void _validateFilter() throws LoopbackException {
+  private void _validateFilter(JsonNode value) throws LoopbackException {
     if(value == null) {
       return;
     }
@@ -91,7 +88,7 @@ public class Filter {
 //    Filter f2 = new Filter(str2);
 //
 //    Filter f3 = f1.merge(f2);
-    System.out.println(f1.getValue());
+    System.out.println(f1);
 //    System.out.println(f2.getValue());
 //    System.out.println(f3.getValue());
   }

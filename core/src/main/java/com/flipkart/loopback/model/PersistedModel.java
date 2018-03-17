@@ -11,6 +11,7 @@ import com.flipkart.loopback.constants.RelationType;
 import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
+import com.flipkart.loopback.relation.RelatedModel;
 import com.flipkart.loopback.relation.Relation;
 import com.google.common.collect.Maps;
 import java.beans.Transient;
@@ -174,7 +175,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @Transaction
-  public static <M extends PersistedModel> M replaceById(M model, Object id) {
+  public static <M extends PersistedModel> M replaceById(M model, Serializable id) {
     beginTransaction(model.getClass());
     model = getProvider().replaceById(model, id);
     commitTransaction(model.getClass());
@@ -224,10 +225,11 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @Transaction
-  public static <M extends PersistedModel, F extends Filter> long destroyAll(M model, F filter) {
-    beginTransaction(model.getClass());
-    long count = getProvider().destroyAll(model, filter);
-    commitTransaction(model.getClass());
+  public static <M extends PersistedModel, W extends WhereFilter> long destroyAll(Class<M> modelClass, W
+      where) {
+    beginTransaction(modelClass);
+    long count = getProvider().destroyAll(modelClass, where);
+    commitTransaction(modelClass);
     return count;
   }
 
@@ -330,6 +332,20 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
           declaredField.setAccessible(true);
           Class toCast = declaredField.getType();
           if (!toCast.isPrimitive()) {
+            if(attributeValue != null) {
+              if(toCast == Integer.class) {
+                attributeValue = new Integer(attributeValue.toString());
+              }else if(toCast == Long.class) {
+                attributeValue = new Long(attributeValue.toString());
+              }else if(toCast == Float.class) {
+                attributeValue = new Float(attributeValue.toString());
+              }else if(toCast == Double.class) {
+                attributeValue = new Double(attributeValue.toString());
+              }else if(toCast == String.class) {
+                attributeValue = attributeValue.toString();
+              }
+            }
+
             declaredField.set(this, declaredField.getType().cast(attributeValue));
           } else {
             if ("int".equals(toCast.getName())) {
@@ -389,6 +405,13 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return value;
   }
 
+  @JsonIgnore
+  public Object getPropertyValue(String propertyName) throws IllegalAccessException {
+    Map<String, Field> properties = this.getProperties();
+    Field propertyField = properties.get(propertyName);
+    return getFieldValue(propertyField);
+  }
+
   public Relation getRelationByName(String relationName) throws
       LoopbackException {
     List<Relation> relations = getRelations();
@@ -441,68 +464,14 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return getProperties(this.getClass());
   }
 
-  private Filter getScopeForRelatedModel(Relation relation) throws IOException, LoopbackException,
-      IllegalAccessException {
-    Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
-    Map<String, Field> properties = this.getProperties();
-
-    Field relatedField = properties.get(relation.getFromPropertyName());
-    Object value = this.getFieldValue(relatedField);
-
-    if(relation.getRelationType() == RelationType.HAS_ONE || relation.getRelationType() ==
-        RelationType.HAS_MANY || relation.getRelationType() == RelationType.BELONGS_TO) {
-      String filterString = "{\"where\": {\"" + relation.getToPropertyName() +  "\" : " +
-          value.toString() + "}}";
-      return new Filter(filterString);
-    }else if(relation.getRelationType() == RelationType.HAS_MANY_THROUGH) {
-      // TODO
-      // Fetch through model
-      // For each fetch related entity
-      String filterString = "{\"where\": {\"" + relation.getToPropertyName() +  "\" : " +
-          value.toString() + "}}";
-      return new Filter(filterString);
-    }
-    throw new LoopbackException("Invalid relation");
-  }
-
-  @Transaction
-  public <M extends PersistedModel> M getHasOneRelatedModel(String relationName) throws
-      LoopbackException, IOException, IllegalAccessException {
+  @JsonIgnore
+  public RelatedModel getRelatedModel(String relationName) throws LoopbackException {
     Relation relation = getRelationByName(relationName);
-    return getHasOneRelatedModel(relation);
+    return getRelatedModel(relation);
   }
 
-  @Transaction
-  public <M extends PersistedModel> M getHasOneRelatedModel(Relation relation) throws
-      LoopbackException, IOException, IllegalAccessException {
-    Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
-    Map<String, Field> properties = getConfiguration().getProperties();
-    Field relatedField = properties.get(relation.getFromPropertyName());
-    if(this.getFieldValue(relatedField) == null) {
-      return null;
-    }
-
-    Filter scope = getScopeForRelatedModel(relation);
-    return (M) relatedModelClass.cast(getProvider().findOne(relatedModelClass, scope));
-  }
-
-  @Transaction
-  public <M extends PersistedModel> List<M> getHasManyRelatedModel(String relationName, Filter filter)
-      throws
-      LoopbackException {
-    Relation relation = getRelationByName(relationName);
-    return getHasManyRelatedModel(relation, filter);
-  }
-
-  @Transaction
-  public <M extends PersistedModel> List<M> getHasManyRelatedModel(Relation relation, Filter filter)
-      throws
-      LoopbackException {
-    Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
-    Filter scope = null;
-    /*
-      merge scope with filter
-     */
-    return (List<M>) getProvider().find(relatedModelClass, scope);
+  @JsonIgnore
+  public RelatedModel getRelatedModel(Relation relation) {
+    return new RelatedModel(this, relation);
   }
 }

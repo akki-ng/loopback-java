@@ -1,11 +1,16 @@
 package com.flipkart.loopback.resources;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flipkart.loopback.configuration.ModelConfiguration;
+import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.constants.RelationType;
 import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
+import com.flipkart.loopback.relation.RelatedModel;
 import com.flipkart.loopback.relation.Relation;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -135,36 +140,126 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
 //  }
 
   @Override
-  public Object getOnRelatedModel(String id, String relationRestPath, Filter filter,
+  public Object getOnRelatedModel(String id, String relationRestPath, Filter relatedModelfilter,
                                   ContainerRequestContext
                                       requestContext) {
     try {
       T model = findById(id, null, requestContext);
-      Relation r = model.getRelationByRestPath(relationRestPath);
-      if (r.getRelationType() == RelationType.HAS_ONE) {
-        return model.getHasOneRelatedModel(r);
-      } else if (r.getRelationType() == RelationType.HAS_MANY) {
-        List res = model.getHasManyRelatedModel(r, filter);
-        return res;
+      Relation relation = model.getRelationByRestPath(relationRestPath);
+      RelatedModel relatedModel = model.getRelatedModel(relation);
+      if(relatedModel.isManyRelation()) {
+        List<PersistedModel> result = relatedModel.find(relatedModelfilter);
+        return result;
       }
-      return null;
+      PersistedModel result = relatedModel.find(relatedModelfilter);
+      return result;
     } catch (Throwable e) {
       return null;
     }
   }
 
-  public PersistedModel getOnRelatedModelEntity(String id, String relationRestPath,
-                                                String fk, Filter filter,
-                                                ContainerRequestContext
-                                                    requestContext) {
+  @Override
+  public PersistedModel fineOneRelatedModelEntity(String id, String relationRestPath,
+                                                String fk, ContainerRequestContext requestContext) {
     try {
       T model = findById(id, null, requestContext);
-      Relation r = model.getRelationByRestPath(relationRestPath);
-      if (r.getRelationType() == RelationType.HAS_MANY) {
-        Class<? extends PersistedModel> relModelClass = r.getRelatedModelClass();
-        return T.getProvider().findById(relModelClass, null, fk);
+      Relation relation = model.getRelationByRestPath(relationRestPath);
+      RelatedModel relatedModel = model.getRelatedModel(relation);
+      if(relatedModel.isManyRelation()) {
+        return relatedModel.findById(fk);
       }
+      throw new LoopbackException("Its not a many relation");
+    } catch (Throwable e) {
       return null;
+    }
+  }
+
+  @Override
+  public PersistedModel createRelatedEntity(String id, String relationRestPath,
+                                                          Map<String, Object> data,
+                                                          ContainerRequestContext requestContext) {
+    try {
+      T model = findById(id, null, requestContext);
+      Relation relation = model.getRelationByRestPath(relationRestPath);
+      RelatedModel relatedModel = model.getRelatedModel(relation);
+
+      PersistedModel transientInstance = relatedModel.getRelation().getInstance(data);
+      transientInstance = relatedModel.create(transientInstance);
+      return transientInstance;
+    } catch (Throwable e) {
+      return null;
+    }
+  }
+
+  @Override
+  public PersistedModel patchOrInsertRelatedEntity(String id, String relationRestPath, Map<String, Object> data,
+                           ContainerRequestContext requestContext) {
+    try {
+      T model = findById(id, null, requestContext);
+      Relation relation = model.getRelationByRestPath(relationRestPath);
+      RelatedModel relatedModel = model.getRelatedModel(relation);
+      PersistedModel relatedInstance = relatedModel.updateOrCreate(data);
+      return relatedInstance;
+    } catch (Throwable e) {
+      return null;
+    }
+  }
+
+  @Override
+  public long destroyAllRelatedEntities(String id, String relationRestPath, WhereFilter where,
+                                       Map<String, Object> data,
+                                       ContainerRequestContext requestContext) throws
+      LoopbackException, IOException, IllegalAccessException {
+    T model = findById(id, null, requestContext);
+    Relation relation = model.getRelationByRestPath(relationRestPath);
+    RelatedModel relatedModel = model.getRelatedModel(relation);
+    return relatedModel.destroyAll(where);
+  }
+
+  @Override
+  public PersistedModel deleteOneRelatedModelEntity(String id, String relationRestPath, String fk,
+                                                    ContainerRequestContext requestContext) {
+    try {
+      T model = findById(id, null, requestContext);
+      Relation relation = model.getRelationByRestPath(relationRestPath);
+      RelatedModel relatedModel = model.getRelatedModel(relation);
+      if(relatedModel.isManyRelation()) {
+        return relatedModel.findById(fk).destroy();
+      }
+      throw new LoopbackException("Its not a many relation");
+    } catch (Throwable e) {
+      return null;
+    }
+  }
+
+  @Override
+  public PersistedModel replaceRelatedEntity(String id, String relationRestPath, String fk,
+                                             Map<String, Object> data,
+                                             ContainerRequestContext requestContext) {
+    try {
+      T model = findById(id, null, requestContext);
+      Relation relation = model.getRelationByRestPath(relationRestPath);
+      RelatedModel relatedModel = model.getRelatedModel(relation);
+      if(relatedModel.isManyRelation()) {
+        PersistedModel transientInstance = relatedModel.getRelation().getInstance(data);
+        return relatedModel.replaceById(transientInstance, fk);
+      }
+      throw new LoopbackException("Its not a many relation");
+    } catch (Throwable e) {
+      return null;
+    }
+  }
+
+  @Override
+  public PersistedModel patchRelatedEntity(String id, String relationRestPath, String fk,
+                                           Map<String, Object> data,
+                                           ContainerRequestContext requestContext) {
+    try {
+      T model = findById(id, null, requestContext);
+      Relation relation = model.getRelationByRestPath(relationRestPath);
+      RelatedModel relatedModel = model.getRelatedModel(relation);
+      PersistedModel relatedInstance = relatedModel.updateAttributes(fk, data);
+      return relatedInstance;
     } catch (Throwable e) {
       return null;
     }
