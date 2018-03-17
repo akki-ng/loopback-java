@@ -34,23 +34,63 @@ public class RelatedModel extends Model {
     return relationType == RelationType.HAS_MANY || relationType == RelationType.HAS_MANY_THROUGH;
   }
 
-  public WhereFilter getScope() throws IllegalAccessException, IOException, LoopbackException {
-    Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
+  private WhereFilter _getHasOneScope() throws IllegalAccessException, LoopbackException {
+    Object value = fromModel.getPropertyValue(relation.getFromPropertyName());
+    if(value != null) {
+      Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
+      String filterString = "{\"" + relation.getToPropertyName() + "\" : " +
+          value.toString() + "}";
+      return new WhereFilter(filterString);
+    }
+
+    // TODO no related entity associated - exception
+    throw new LoopbackException("Not found");
+  }
+
+  private WhereFilter _getHasManyScope() throws IllegalAccessException, LoopbackException {
+    Object value = fromModel.getPropertyValue(relation.getFromPropertyName());
+    if(value != null) {
+      Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
+      String filterString = "{\"" + relation.getToPropertyName() + "\" : " +
+          value.toString() + "}";
+      return new WhereFilter(filterString);
+    }
+    throw new LoopbackException("Not found");
+  }
+
+  private WhereFilter _getHasManyThroughScope() throws IllegalAccessException, LoopbackException {
+    // TODO
+    // Fetch through model
+    // For each fetch related entity
 
     Object value = fromModel.getPropertyValue(relation.getFromPropertyName());
+    if(value != null) {
+      Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
+      String filterString = "{\"" + relation.getToPropertyName() + "\" : " +
+          value.toString() + "}";
+      return new WhereFilter(filterString);
+    }
+    throw new LoopbackException("Not found");
+  }
 
-    if (relation.getRelationType() == RelationType.HAS_ONE || relation.getRelationType() ==
-        RelationType.HAS_MANY || relation.getRelationType() == RelationType.BELONGS_TO) {
+  private  WhereFilter _getBelongsToScope() throws IllegalAccessException, LoopbackException {
+    Object value = fromModel.getPropertyValue(relation.getFromPropertyName());
+    if(value != null) {
+      Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
       String filterString = "{\"" + relation.getToPropertyName() + "\" : " +
           value.toString() + "}";
       return new WhereFilter(filterString);
-    } else if (relation.getRelationType() == RelationType.HAS_MANY_THROUGH) {
-      // TODO
-      // Fetch through model
-      // For each fetch related entity
-      String filterString = "{\"" + relation.getToPropertyName() + "\" : " +
-          value.toString() + "}";
-      return new WhereFilter(filterString);
+    }
+    throw new LoopbackException("Not found");
+  }
+
+  public WhereFilter getScope() throws IllegalAccessException, IOException, LoopbackException {
+    RelationType relationType = relation.getRelationType();
+    switch (relationType) {
+      case HAS_ONE: return _getHasOneScope();
+      case HAS_MANY: return _getHasManyScope();
+      case HAS_MANY_THROUGH: return _getHasManyThroughScope();
+      case BELONGS_TO: return _getBelongsToScope();
     }
     throw new LoopbackException("Invalid relation");
   }
@@ -64,14 +104,14 @@ public class RelatedModel extends Model {
       relatedModelfilter.setWhere(new WhereFilter("{}"));
     }
     WhereFilter scope = getScope();
-
     relatedModelfilter.setWhere(relatedModelfilter.getWhere().merge(scope));
+
     Class<? extends PersistedModel> relatedModelClass = relation.getRelatedModelClass();
+
     if (relation.getRelationType() == RelationType.HAS_ONE || relation.getRelationType() ==
         RelationType.BELONGS_TO) {
-
       return (T) PersistedModel.findOne(relatedModelClass, relatedModelfilter);
-    } else {
+    }else {
       // HAS_MANY, HAS_MANY_THROUGH
       return (T) PersistedModel.find(relatedModelClass, relatedModelfilter);
     }
@@ -82,7 +122,7 @@ public class RelatedModel extends Model {
       IOException, LoopbackException {
     if (relation.getRelationType() == RelationType.HAS_ONE || relation.getRelationType() ==
         RelationType.BELONGS_TO) {
-      throw new LoopbackException("Relation must be ");
+      throw new LoopbackException("Relation must be HAS_MANY or HAS_MANY_THROUGH relation ");
     }
     Class<? extends PersistedModel> relModelClass = relation.getRelatedModelClass();
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
@@ -146,8 +186,7 @@ public class RelatedModel extends Model {
     if(patchData.containsKey(idPropertyName) && patchData.get(idPropertyName) != null) {
       // Id exists
       relatedInstance = (R) R.findById(relation.getRelatedModelClass(),null, (Serializable)
-          patchData.get
-          (idPropertyName));
+          patchData.get(idPropertyName));
       relatedInstance = (R) relatedInstance.updateAttributes(patchData);
     }else {
       // Try create
@@ -178,6 +217,10 @@ public class RelatedModel extends Model {
     }
     WhereFilter scope = getScope();
     where = where.merge(scope);
+    if(this.relation.getRelationType() == RelationType.HAS_ONE) {
+      // Foreign key constraint / remove dependency
+      fromModel.setAttribute(relation.getFromPropertyName(), null).save();
+    }
     long count = PersistedModel.destroyAll(relation.getRelatedModelClass(), where);
     return count;
   }
