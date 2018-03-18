@@ -11,9 +11,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
@@ -82,7 +82,7 @@ public class JPAConnector extends Connector {
   @Override
   public <M extends PersistedModel> List<M> create(List<M> models) throws ConnectorException {
     if (models != null) {
-      for(int i = 0; i < models.size(); i++) {
+      for (int i = 0; i < models.size(); i++) {
         models.set(i, this.create(models.get(i)));
       }
     }
@@ -178,6 +178,8 @@ public class JPAConnector extends Connector {
       TypedQuery<M> typedQuery = QueryGenerator.getInstance().getSelectTypedQuery(em, modelClass,
           idFilter);
       return typedQuery.getSingleResult();
+    } catch (NoResultException e) {
+      return null;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }

@@ -1,5 +1,6 @@
 package com.flipkart.loopback.resources;
 
+import com.flipkart.loopback.dropwizard.exception.WrapperException;
 import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
@@ -30,14 +31,14 @@ public interface DWResource<T extends PersistedModel> {
   @PATCH
   @Path("/")
   public T patchOrInsert(Map<String, Object> patchData, @Context ContainerRequestContext
-      requestContext);
+      requestContext) throws WrapperException;
 
   /*
     Find all instances of the model matched by filter from the data source.
    */
   @GET
   @Path("/")
-  public List<T> getAll(@QueryParam("filter") Filter filter, @Context ContainerRequestContext requestContext);
+  public List<T> getAll(@QueryParam("filter") Filter filter, @Context ContainerRequestContext requestContext) throws WrapperException;
 
   /*
     Replace an existing model instance or insert a new one into the data source.
@@ -45,28 +46,28 @@ public interface DWResource<T extends PersistedModel> {
   @PUT
   @Path("/")
   //TODO
-  public T replaceOrCreate(T model, @Context ContainerRequestContext requestContext);
+  public T replaceOrCreate(T model, @Context ContainerRequestContext requestContext) throws WrapperException;
 
   /*
     Create a new instance of the model and persist it into the data source.
    */
   @POST
   @Path("/")
-  public T create(T model, @Context ContainerRequestContext requestContext);
+  public T create(T model, @Context ContainerRequestContext requestContext) throws WrapperException;
 
   /*
     Create bulk instances of the model and persist them into the data source.
    */
   @POST
   @Path("/bulk")
-  public List<T> create(List<T> models, @Context ContainerRequestContext requestContext);
+  public List<T> create(List<T> models, @Context ContainerRequestContext requestContext) throws WrapperException;
 
   /*
     Patch attributes for a model instance and persist it into the data source.
    */
   @PATCH
   @Path("/{id}")
-  public T updateAttributes(@PathParam("id") String id, Map<String, Object> patchData, @Context ContainerRequestContext requestContext);
+  public T updateAttributes(@PathParam("id") String id, Map<String, Object> patchData, @Context ContainerRequestContext requestContext) throws WrapperException;
 
   /*
     Find a model instance by {{id}} from the data source.
@@ -74,7 +75,7 @@ public interface DWResource<T extends PersistedModel> {
   @GET
   @Path("/{id}")
   public T findById(@PathParam("id") String id, @QueryParam("filter") Filter filter, @Context
-      ContainerRequestContext requestContext);
+      ContainerRequestContext requestContext) throws WrapperException;
 
   // TODO
   /*
@@ -85,7 +86,7 @@ public interface DWResource<T extends PersistedModel> {
    */
   @HEAD
   @Path("/{id}")
-  public boolean existsByHead(@PathParam("id") String id, @Context ContainerRequestContext requestContext);
+  public boolean existsByHead(@PathParam("id") String id, @Context ContainerRequestContext requestContext) throws WrapperException;
 
   // TODO
   /*
@@ -96,28 +97,28 @@ public interface DWResource<T extends PersistedModel> {
    */
   @GET
   @Path("/{id}/exists")
-  public boolean exists(@PathParam("id") String id, @Context ContainerRequestContext requestContext);
+  public boolean exists(@PathParam("id") String id, @Context ContainerRequestContext requestContext) throws WrapperException;
 
   /*
     Replace attributes for a model instance and persist it into the data source.
    */
   @PUT
   @Path("/{id}")
-  public T replaceByPut(@PathParam("id") String id, T model, @Context ContainerRequestContext requestContext);
+  public T replaceByPut(@PathParam("id") String id, T model, @Context ContainerRequestContext requestContext) throws WrapperException;
 
   /*
    Replace attributes for a model instance and persist it into the data source.
   */
   @POST
   @Path("/{id}/replace")
-  public T replaceByPost(@PathParam("id") String id, T model, @Context ContainerRequestContext requestContext);
+  public T replaceByPost(@PathParam("id") String id, T model, @Context ContainerRequestContext requestContext) throws WrapperException;
 
   /*
    Delete a model instance by {{id}} from the data source.
   */
   @DELETE
   @Path("/{id}")
-  public T deleteById(@PathParam("id") String id, @Context ContainerRequestContext requestContext);
+  public T deleteById(@PathParam("id") String id, @Context ContainerRequestContext requestContext) throws WrapperException;
 
   /*
     Count instances of the model matched by where from the data source.
@@ -125,21 +126,21 @@ public interface DWResource<T extends PersistedModel> {
   @GET
   @Path("/count")
   public long count(@QueryParam("filter") WhereFilter where, @Context ContainerRequestContext
-      requestContext);
+      requestContext) throws WrapperException;
 
   /*
     Update instances of the model matched by {{where}} from the data source.
    */
   @POST
   @Path("/update")
-  public long update(@QueryParam("where") WhereFilter where, T model, @Context ContainerRequestContext requestContext);
+  public long update(@QueryParam("where") WhereFilter where, T model, @Context ContainerRequestContext requestContext) throws WrapperException;
 
   /*
     Update an existing model instance or insert a new one into the data source based on the where criteria.
    */
   @POST
   @Path("/upsertWithWhere") T upsertWithWhere(@QueryParam("where") WhereFilter where, T model
-      , @Context ContainerRequestContext requestContext);
+      , @Context ContainerRequestContext requestContext) throws WrapperException;
 
 //  /*
 //    Fetches hasOne relation
@@ -167,14 +168,14 @@ public interface DWResource<T extends PersistedModel> {
   public Object getOnRelatedModel(@PathParam("id") String id,
                                                                @PathParam
       ("relation") String relationRestPath, @QueryParam("filter") Filter relatedModelfilter, @Context
-                                        ContainerRequestContext requestContext);
+                                        ContainerRequestContext requestContext) throws WrapperException;
 
   @GET
   @Path("/{id}/{relation}/{fk}")
   public PersistedModel fineOneRelatedModelEntity(@PathParam("id") String id,
                                   @PathParam ("relation") String relationRestPath, @PathParam("fk")
                                               String fk, @Context ContainerRequestContext
-                                                      requestContext);
+                                                      requestContext) throws WrapperException;
 
   /*
    Create a new instance of the related model and persist it into the data source.
@@ -183,7 +184,7 @@ public interface DWResource<T extends PersistedModel> {
   @Path("/{id}/{relation}")
   public PersistedModel createRelatedEntity(@PathParam("id") String id,@PathParam
       ("relation") String relationRestPath, Map<String, Object> data, @Context
-      ContainerRequestContext requestContext);
+      ContainerRequestContext requestContext) throws WrapperException;
 
   /*
     Replace an existing related model instance or insert a new one into the data source.
@@ -192,7 +193,7 @@ public interface DWResource<T extends PersistedModel> {
   @Path("/{id}/{relation}")
   //TODO
   public PersistedModel patchOrInsertRelatedEntity(@PathParam("id") String id,@PathParam
-      ("relation") String relationRestPath, Map<String, Object> data, @Context ContainerRequestContext requestContext);
+      ("relation") String relationRestPath, Map<String, Object> data, @Context ContainerRequestContext requestContext) throws WrapperException;
 
 
   /*
@@ -204,7 +205,7 @@ public interface DWResource<T extends PersistedModel> {
       ("relation") String relationRestPath, @QueryParam("filter") WhereFilter where, Map<String,
                                        Object> data,
                                        @Context
-                                                ContainerRequestContext requestContext) throws LoopbackException, IOException, IllegalAccessException;
+                                                ContainerRequestContext requestContext)  throws WrapperException;
 
   /*
     Delete one related entity
@@ -214,7 +215,7 @@ public interface DWResource<T extends PersistedModel> {
   public PersistedModel deleteOneRelatedModelEntity(@PathParam("id") String id,
                                                   @PathParam ("relation") String relationRestPath, @PathParam("fk")
                                                       String fk, @Context ContainerRequestContext
-                                                      requestContext);
+                                                      requestContext) throws WrapperException;
 
   /*
    Replace an existing instance of the related model and persist it into the data source.
@@ -223,7 +224,7 @@ public interface DWResource<T extends PersistedModel> {
   @Path("/{id}/{relation}/{fk}")
   public PersistedModel replaceRelatedEntity(@PathParam("id") String id,@PathParam
       ("relation") String relationRestPath, @PathParam("fk")
-      String fk, Map<String, Object> data, @Context ContainerRequestContext requestContext);
+      String fk, Map<String, Object> data, @Context ContainerRequestContext requestContext) throws WrapperException;
 
 
   /*
@@ -233,5 +234,5 @@ public interface DWResource<T extends PersistedModel> {
   @Path("/{id}/{relation}/{fk}")
   public PersistedModel patchRelatedEntity(@PathParam("id") String id,@PathParam
       ("relation") String relationRestPath, @PathParam("fk")
-                                                 String fk, Map<String, Object> data, @Context ContainerRequestContext requestContext);
+                                                 String fk, Map<String, Object> data, @Context ContainerRequestContext requestContext) throws WrapperException;
 }

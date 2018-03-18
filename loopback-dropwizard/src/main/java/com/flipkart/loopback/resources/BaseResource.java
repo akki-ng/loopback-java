@@ -1,9 +1,6 @@
 package com.flipkart.loopback.resources;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flipkart.loopback.configuration.ModelConfiguration;
-import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
-import com.flipkart.loopback.constants.RelationType;
+import com.flipkart.loopback.dropwizard.exception.WrapperException;
 import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
@@ -14,7 +11,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Context;
 
 /**
  * Created by akshaya.sharma on 06/03/18
@@ -24,100 +20,150 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
   public abstract <C extends PersistedModel> Class<C> getModelClass();
 
   @Override
-  public T patchOrInsert(Map<String, Object> patchData, ContainerRequestContext requestContext) {
-
+  public T patchOrInsert(Map<String, Object> patchData,
+      ContainerRequestContext requestContext) throws WrapperException {
     try {
       return T.updateOrCreate(getModelClass(), patchData);
     } catch (LoopbackException e) {
-      e.printStackTrace();
+      throw new WrapperException(e);
     }
-    return null;
   }
 
   @Override
-  public List<T> getAll(Filter filter, ContainerRequestContext requestContext) {
-    return T.find(getModelClass(), filter);
+  public List<T> getAll(Filter filter,
+      ContainerRequestContext requestContext) throws WrapperException {
+    try {
+      return T.find(getModelClass(), filter);
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
+    }
   }
 
   @Override
-  public T replaceOrCreate(T model, ContainerRequestContext requestContext) {
-    return T.replaceOrCreate(model);
+  public T replaceOrCreate(T model,
+      ContainerRequestContext requestContext) throws WrapperException {
+    try {
+      return T.replaceOrCreate(model);
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
+    }
   }
 
   @Override
-  public T create(T model, ContainerRequestContext requestContext) {
-    return T.create(model);
+  public T create(T model, ContainerRequestContext requestContext) throws WrapperException {
+    try {
+      return T.create(model);
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
+    }
   }
 
   @Override
-  public List<T> create(List<T> models, ContainerRequestContext requestContext) {
-    return T.create(models);
+  public List<T> create(List<T> models,
+      ContainerRequestContext requestContext) throws WrapperException {
+    try {
+      return T.create(models);
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
+    }
   }
 
   @Override
   public T updateAttributes(String id, Map<String, Object> patchData,
-                            ContainerRequestContext requestContext) {
+      ContainerRequestContext requestContext) throws WrapperException {
     try {
       T model = T.findById(getModelClass(), null, id);
       return (T) model.updateAttributes(patchData);
     } catch (LoopbackException e) {
-      e.printStackTrace();
+      throw new WrapperException(e);
     }
-    return null;
   }
 
   @Override
-  public T findById(String id, Filter filter, ContainerRequestContext requestContext) {
-    T model = T.findById(getModelClass(), filter, id);
-    if (model == null) {
-      // 404
+  public T findById(String id, Filter filter,
+      ContainerRequestContext requestContext) throws WrapperException {
+    try {
+      T model = T.findById(getModelClass(), filter, id);
+      return model;
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
     }
-    return model;
   }
 
   @Override
-  public boolean existsByHead(String id, ContainerRequestContext requestContext) {
+  public boolean existsByHead(String id,
+      ContainerRequestContext requestContext) throws WrapperException {
     return exists(id, requestContext);
   }
 
   @Override
-  public boolean exists(String id, ContainerRequestContext requestContext) {
-    return T.exists(getModelClass(), id);
+  public boolean exists(String id, ContainerRequestContext requestContext) throws WrapperException {
+    try {
+      return T.exists(getModelClass(), id);
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
+    }
   }
 
   @Override
-  public T replaceByPut(String id, T model, ContainerRequestContext requestContext) {
+  public T replaceByPut(String id, T model,
+      ContainerRequestContext requestContext) throws WrapperException {
     return replaceByPost(id, model, requestContext);
   }
 
   @Override
-  public T replaceByPost(String id, T model, ContainerRequestContext requestContext) {
-    return T.replaceById(model, id);
+  public T replaceByPost(String id, T model,
+      ContainerRequestContext requestContext) throws WrapperException {
+    try {
+      return T.replaceById(model, id);
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
+    }
   }
 
   @Override
-  public T deleteById(String id, ContainerRequestContext requestContext) {
-    return T.destroyById(getModelClass(), id);
+  public T deleteById(String id, ContainerRequestContext requestContext) throws WrapperException {
+    try {
+      return T.destroyById(getModelClass(), id);
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
+    }
   }
 
   @Override
-  public long count(WhereFilter where, ContainerRequestContext requestContext) {
-    return T.count(getModelClass(), where);
+  public long count(WhereFilter where,
+      ContainerRequestContext requestContext) throws WrapperException {
+    try {
+      return T.count(getModelClass(), where);
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
+    }
   }
 
   @Override
-  public long update(WhereFilter where, T model, ContainerRequestContext requestContext) {
-    return T.updateAll(model.getClass(), where, model.getFieldMap());
+  public long update(WhereFilter where, T model,
+      ContainerRequestContext requestContext) throws WrapperException {
+    try {
+      return T.updateAll(model.getClass(), where, model.getFieldMap());
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
+    }
   }
 
   @Override
-  public T upsertWithWhere(WhereFilter where, T model, ContainerRequestContext requestContext) {
-    return (T) T.upsertWithWhere(getModelClass(), where, model.getFieldMap());
+  public T upsertWithWhere(WhereFilter where, T model,
+      ContainerRequestContext requestContext) throws WrapperException {
+    try {
+      return (T) T.upsertWithWhere(getModelClass(), where, model.getFieldMap());
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
+    }
   }
 
 //  @Override
 //  public <R extends PersistedModel> R getHasOneRelatedModel(String id, String relationRestPath,
-//                                                ContainerRequestContext requestContext) {
+//                                                ContainerRequestContext requestContext) throws
+// WrapperException {
 //    try {
 //      T model = findById(id, requestContext);
 //      Relation r = model.getRelationByRestPath(relationRestPath);
@@ -129,7 +175,8 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
 //
 //  @Override
 //  public <R extends PersistedModel> List<R> getHasManyRelatedModel(String id, String
-//      relationRestPath, Filter filter, ContainerRequestContext requestContext) {
+//      relationRestPath, Filter filter, ContainerRequestContext requestContext) throws
+// WrapperException {
 //    try {
 //      T model = findById(id, requestContext);
 //      Relation r = model.getRelationByRestPath(relationRestPath);
@@ -141,127 +188,117 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
 
   @Override
   public Object getOnRelatedModel(String id, String relationRestPath, Filter relatedModelfilter,
-                                  ContainerRequestContext
-                                      requestContext) {
+      ContainerRequestContext requestContext) throws WrapperException {
     try {
       T model = findById(id, null, requestContext);
       Relation relation = model.getRelationByRestPath(relationRestPath);
-      RelatedModel relatedModel = model.getRelatedModel(relation);
-      if(relatedModel.isManyRelation()) {
+      RelatedModel relatedModel = model.getRelatedModel(relation.getName());
+      if (relatedModel.isManyRelation()) {
         List<PersistedModel> result = relatedModel.find(relatedModelfilter);
         return result;
       }
       PersistedModel result = relatedModel.find(relatedModelfilter);
       return result;
-    } catch (Throwable e) {
-      return null;
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
     }
   }
 
   @Override
-  public PersistedModel fineOneRelatedModelEntity(String id, String relationRestPath,
-                                                String fk, ContainerRequestContext requestContext) {
+  public PersistedModel fineOneRelatedModelEntity(String id, String relationRestPath, String fk,
+      ContainerRequestContext requestContext) throws WrapperException {
     try {
       T model = findById(id, null, requestContext);
       Relation relation = model.getRelationByRestPath(relationRestPath);
-      RelatedModel relatedModel = model.getRelatedModel(relation);
-      if(relatedModel.isManyRelation()) {
-        return relatedModel.findById(fk);
-      }
-      throw new LoopbackException("Its not a many relation");
-    } catch (Throwable e) {
-      return null;
+      RelatedModel relatedModel = model.getRelatedModel(relation.getName());
+      return relatedModel.findById(fk);
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
     }
   }
 
   @Override
   public PersistedModel createRelatedEntity(String id, String relationRestPath,
-                                                          Map<String, Object> data,
-                                                          ContainerRequestContext requestContext) {
+      Map<String, Object> data, ContainerRequestContext requestContext) throws WrapperException {
     try {
       T model = findById(id, null, requestContext);
       Relation relation = model.getRelationByRestPath(relationRestPath);
-      RelatedModel relatedModel = model.getRelatedModel(relation);
+      RelatedModel relatedModel = model.getRelatedModel(relation.getName());
 
       PersistedModel transientInstance = relatedModel.getRelation().getInstance(data);
       transientInstance = relatedModel.create(transientInstance);
       return transientInstance;
-    } catch (Throwable e) {
-      return null;
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
     }
   }
 
   @Override
-  public PersistedModel patchOrInsertRelatedEntity(String id, String relationRestPath, Map<String, Object> data,
-                           ContainerRequestContext requestContext) {
+  public PersistedModel patchOrInsertRelatedEntity(String id, String relationRestPath,
+      Map<String, Object> data, ContainerRequestContext requestContext) throws WrapperException {
     try {
       T model = findById(id, null, requestContext);
       Relation relation = model.getRelationByRestPath(relationRestPath);
-      RelatedModel relatedModel = model.getRelatedModel(relation);
+      RelatedModel relatedModel = model.getRelatedModel(relation.getName());
       PersistedModel relatedInstance = relatedModel.updateOrCreate(data);
       return relatedInstance;
-    } catch (Throwable e) {
-      return null;
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
     }
   }
 
   @Override
   public long destroyAllRelatedEntities(String id, String relationRestPath, WhereFilter where,
-                                       Map<String, Object> data,
-                                       ContainerRequestContext requestContext) throws
-      LoopbackException, IOException, IllegalAccessException {
-    T model = findById(id, null, requestContext);
-    Relation relation = model.getRelationByRestPath(relationRestPath);
-    RelatedModel relatedModel = model.getRelatedModel(relation);
-    return relatedModel.destroyAll(where);
+      Map<String, Object> data,
+      ContainerRequestContext requestContext) throws WrapperException {
+    try {
+      T model = findById(id, null, requestContext);
+      Relation relation = model.getRelationByRestPath(relationRestPath);
+      RelatedModel relatedModel = model.getRelatedModel(relation.getName());
+      return relatedModel.destroyAll(where);
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
+    }
   }
 
   @Override
   public PersistedModel deleteOneRelatedModelEntity(String id, String relationRestPath, String fk,
-                                                    ContainerRequestContext requestContext) {
+      ContainerRequestContext requestContext) throws WrapperException {
     try {
       T model = findById(id, null, requestContext);
       Relation relation = model.getRelationByRestPath(relationRestPath);
-      RelatedModel relatedModel = model.getRelatedModel(relation);
-      if(relatedModel.isManyRelation()) {
-        return relatedModel.findById(fk).destroy();
-      }
-      throw new LoopbackException("Its not a many relation");
-    } catch (Throwable e) {
-      return null;
+      RelatedModel relatedModel = model.getRelatedModel(relation.getName());
+      return relatedModel.findById(fk).destroy();
+    }catch (LoopbackException e) {
+      throw new WrapperException(e);
     }
   }
 
   @Override
   public PersistedModel replaceRelatedEntity(String id, String relationRestPath, String fk,
-                                             Map<String, Object> data,
-                                             ContainerRequestContext requestContext) {
+      Map<String, Object> data, ContainerRequestContext requestContext) throws WrapperException {
     try {
       T model = findById(id, null, requestContext);
       Relation relation = model.getRelationByRestPath(relationRestPath);
-      RelatedModel relatedModel = model.getRelatedModel(relation);
-      if(relatedModel.isManyRelation()) {
-        PersistedModel transientInstance = relatedModel.getRelation().getInstance(data);
-        return relatedModel.replaceById(transientInstance, fk);
-      }
-      throw new LoopbackException("Its not a many relation");
-    } catch (Throwable e) {
-      return null;
+      RelatedModel relatedModel = model.getRelatedModel(relation.getName());
+      PersistedModel transientInstance = relatedModel.getRelation().getInstance(data);
+      return relatedModel.replaceById(transientInstance, fk);
+    }catch (LoopbackException e) {
+      throw new WrapperException(e);
     }
   }
 
   @Override
   public PersistedModel patchRelatedEntity(String id, String relationRestPath, String fk,
-                                           Map<String, Object> data,
-                                           ContainerRequestContext requestContext) {
+      Map<String, Object> data, ContainerRequestContext requestContext) throws WrapperException {
     try {
       T model = findById(id, null, requestContext);
       Relation relation = model.getRelationByRestPath(relationRestPath);
-      RelatedModel relatedModel = model.getRelatedModel(relation);
+      RelatedModel relatedModel = model.getRelatedModel(relation.getName());
       PersistedModel relatedInstance = relatedModel.updateAttributes(fk, data);
       return relatedInstance;
-    } catch (Throwable e) {
-      return null;
+    } catch (LoopbackException e) {
+      throw new WrapperException(e);
     }
   }
 }

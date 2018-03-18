@@ -2,6 +2,7 @@ package com.flipkart.sample.aspect.persistence;
 
 import com.flipkart.loopback.annotation.Transaction;
 import com.flipkart.loopback.connector.Connector;
+import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.model.Model;
 import java.util.Arrays;
 import javax.persistence.EntityManager;
@@ -21,8 +22,7 @@ public class TransactionAspect {
   Logger log = LoggerFactory.getLogger(TransactionAspect.class);
 
   @Around("execution(@Transaction * * (..)) && @annotation(transactionAnno)")
-  public Object encloseMethodWithTransaction(ProceedingJoinPoint thisJoinPoint, Transaction transactionAnno)
-  {
+  public Object encloseMethodWithTransaction(ProceedingJoinPoint thisJoinPoint, Transaction transactionAnno) throws LoopbackException {
     try{
       System.out.println(thisJoinPoint);
       System.out.println("Starting Transaction Aspect");
@@ -74,7 +74,11 @@ public class TransactionAspect {
         o = thisJoinPoint.proceed();
       }
       return o;
-    }catch (Throwable e) {
+    }catch (LoopbackException e) {
+      e.printStackTrace();
+      throw e;
+    }
+    catch (Throwable e) {
       e.printStackTrace();
     }
     return null;

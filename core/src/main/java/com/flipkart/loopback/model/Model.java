@@ -12,11 +12,11 @@ import com.flipkart.loopback.model.provider.ModelProvider;
 /**
  * Created by akshaya.sharma on 02/03/18
  */
-  public abstract class Model<T extends Model<T, CM>, CM extends ModelConfigurationManager> {
+public abstract class Model<T extends Model<T, CM>, CM extends ModelConfigurationManager> {
 
   @JsonIgnore
-  protected static Connector getConnector(Class<? extends PersistedModel> modelClass) throws
-      InternalError {
+  protected static Connector getConnector(
+      Class<? extends PersistedModel> modelClass) throws InternalError {
     try {
       return ModelProvider.getInstance().getConnectorFor(modelClass);
     } catch (ConnectorNotFoundException | ModelNotConfiguredException e) {
@@ -26,13 +26,21 @@ import com.flipkart.loopback.model.provider.ModelProvider;
   }
 
   @JsonIgnore
+  public Connector getConnector() throws InternalError {
+    if (this instanceof PersistedModel) {
+      return getConnector((Class<PersistedModel>) this.getClass());
+    }
+    throw new InternalError(PersistedModel.class, new Throwable("Connector not found"));
+  }
+
+  @JsonIgnore
   public static <CM extends ModelConfigurationManager> CM getConfigurationManager() {
     return (CM) CM.getInstance();
   }
 
   @JsonIgnore
-  protected static ModelConfiguration getConfiguration(Class<? extends PersistedModel>
-                                                             modelClass) throws InternalError {
+  protected static ModelConfiguration getConfiguration(
+      Class<? extends PersistedModel> modelClass) throws InternalError {
     try {
       return ModelProvider.getInstance().getConfigurationFor(modelClass);
     } catch (ModelNotConfiguredException e) {
