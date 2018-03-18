@@ -2,6 +2,7 @@ package com.flipkart.loopback.connector;
 
 import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
+import com.flipkart.loopback.exception.ConnectorException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
@@ -13,7 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
@@ -52,100 +52,125 @@ public class JPAConnector extends Connector {
 
   @Override
   public <M extends PersistedModel, W extends WhereFilter> long count(Class<M> modelClass,
-      W where) {
-    EntityManager em = getEntityManager();
-    TypedQuery<Long> typedQuery = QueryGenerator.getInstance().getCountTypedQuery(em, modelClass,
-        where);
-    return typedQuery.getSingleResult();
-  }
-
-  @Override
-  public <M extends PersistedModel> M create(M model) {
-    if (model.getId() != null) {
-
+      W where) throws ConnectorException {
+    try {
+      EntityManager em = getEntityManager();
+      TypedQuery<Long> typedQuery = QueryGenerator.getInstance().getCountTypedQuery(em, modelClass,
+          where);
+      return typedQuery.getSingleResult();
+    } catch (Throwable e) {
+      throw new ConnectorException(e);
     }
-    EntityManager em = getEntityManager();
-//    em.getTransaction().begin();
-    em.persist(model);
-//    em.getTransaction().commit();
-    return model;
   }
 
   @Override
-  public <M extends PersistedModel> List<M> create(List<M> models) {
+  public <M extends PersistedModel> M create(M model) throws ConnectorException {
+    try {
+      if (model.getId() != null) {
+
+      }
+      EntityManager em = getEntityManager();
+//    em.getTransaction().begin();
+      em.persist(model);
+//    em.getTransaction().commit();
+      return model;
+    } catch (Throwable e) {
+      throw new ConnectorException(e);
+    }
+  }
+
+  @Override
+  public <M extends PersistedModel> List<M> create(List<M> models) throws ConnectorException {
     if (models != null) {
-      List<M> persisted = models.stream().map(model -> {
-        return (M) this.create(model);
-      }).collect(Collectors.toList());
-      return persisted;
+      for(int i = 0; i < models.size(); i++) {
+        models.set(i, this.create(models.get(i)));
+      }
     }
     return models;
   }
 
   @Override
   public <M extends PersistedModel> long patchMultipleWithWhere(Class<M> modelClass,
-      WhereFilter where, Map<String, Object> data) {
-    // TODO
-    return 0;
+      WhereFilter where, Map<String, Object> data) throws ConnectorException {
+    try {// TODO
+      return 0;
+    } catch (Throwable e) {
+      throw new ConnectorException(e);
+    }
   }
 
   @Override
   public <M extends PersistedModel, W extends WhereFilter> long updateAll(Class<M> modelClass,
-      W filter, Map<String, Object> data) {
-    // TODO
-    return 0;
+      W filter, Map<String, Object> data) throws ConnectorException {
+    try { // TODO
+      return 0;
+    } catch (Throwable e) {
+      throw new ConnectorException(e);
+    }
   }
 
   @Override
   public <M extends PersistedModel, F extends Filter> M updateAttributes(M model, F filter,
-      Map<String, Object> data) {
-    // TODO must be implemented by connector only
-    return null;
+      Map<String, Object> data) throws ConnectorException {
+    try {// TODO must be implemented by connector only
+      return null;
+    } catch (Throwable e) {
+      throw new ConnectorException(e);
+    }
   }
 
   @Override
-  public <M extends PersistedModel> M replaceById(M model, Object id) {
-    EntityManager em = getEntityManager();
-//    em.getTransaction().begin();
-    em.merge(model);
-//    em.getTransaction().commit();
-    return model;
-  }
-
-  @Override
-  public <M extends PersistedModel> boolean exists(Class<M> modelClass, Object id) {
-    ModelConfiguration configuration = ModelConfigurationManager.getInstance()
-        .getModelConfiguration(
-        modelClass);
-    EntityManager em = getEntityManager();
+  public <M extends PersistedModel> M replaceById(M model, Object id) throws ConnectorException {
     try {
+      EntityManager em = getEntityManager();
+//    em.getTransaction().begin();
+      em.merge(model);
+//    em.getTransaction().commit();
+      return model;
+    } catch (Throwable e) {
+      throw new ConnectorException(e);
+    }
+  }
+
+  @Override
+  public <M extends PersistedModel> boolean exists(Class<M> modelClass,
+      Object id) throws ConnectorException {
+    try {
+      ModelConfiguration configuration = ModelConfigurationManager.getInstance()
+          .getModelConfiguration(
+          modelClass);
+      EntityManager em = getEntityManager();
       WhereFilter where = new WhereFilter(
           "{\"" + configuration.getIdPropertyName() + "\": " + id + "}");
       long count = count(modelClass, where);
       return count > 0;
-    } catch (NoResultException e) {
-      e.printStackTrace();
+    } catch (Throwable e) {
+      throw new ConnectorException(e);
     }
-    return false;
   }
 
   @Override
-  public <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass, F filter) {
-    EntityManager em = getEntityManager();
-    TypedQuery<M> typedQuery = QueryGenerator.getInstance().getSelectTypedQuery(em, modelClass,
-        filter);
-    List<M> data = typedQuery.getResultList();
-    return data;
+  public <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass,
+      F filter) throws ConnectorException {
+    try {
+      EntityManager em = getEntityManager();
+      TypedQuery<M> typedQuery = QueryGenerator.getInstance().getSelectTypedQuery(em, modelClass,
+          filter);
+      List<M> data = typedQuery.getResultList();
+      return data;
+    } catch (Throwable e) {
+      throw new ConnectorException(e);
+    }
   }
 
   @Override
   public <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter,
-      Serializable id) {
-    ModelConfiguration configuration = ModelConfigurationManager.getInstance()
-        .getModelConfiguration(
-        modelClass);
-    EntityManager em = getEntityManager();
+      Serializable id) throws ConnectorException {
     try {
+      ModelConfiguration configuration = ModelConfigurationManager.getInstance()
+          .getModelConfiguration(
+          modelClass);
+      EntityManager em = getEntityManager();
 
       Filter idFilter = new Filter(
           "{\"where\": {\"" + configuration.getIdPropertyName() + "\": " + id + "}}");
@@ -154,35 +179,46 @@ public class JPAConnector extends Connector {
           idFilter);
       return typedQuery.getSingleResult();
     } catch (Throwable e) {
-      e.printStackTrace();
-      return null;
+      throw new ConnectorException(e);
     }
   }
 
   @Override
-  public <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass, F filter) {
-    EntityManager em = getEntityManager();
-    TypedQuery<M> typedQuery = QueryGenerator.getInstance().getSelectTypedQuery(em, modelClass,
-        filter);
-    return typedQuery.getSingleResult();
+  public <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass,
+      F filter) throws ConnectorException {
+    try {
+      EntityManager em = getEntityManager();
+      TypedQuery<M> typedQuery = QueryGenerator.getInstance().getSelectTypedQuery(em, modelClass,
+          filter);
+      return typedQuery.getSingleResult();
+    } catch (Throwable e) {
+      throw new ConnectorException(e);
+    }
   }
 
   @Override
-  public <M extends PersistedModel> M destroy(M model) {
-    EntityManager em = getEntityManager();
+  public <M extends PersistedModel> M destroy(M model) throws ConnectorException {
+    try {
+      EntityManager em = getEntityManager();
 //    em.getTransaction().begin();
-    em.remove(model);
+      em.remove(model);
 //    em.remove(em.contains(model) ? model : em.merge(model));
 //    em.getTransaction().commit();
-    return model;
+      return model;
+    } catch (Throwable e) {
+      throw new ConnectorException(e);
+    }
   }
 
   @Override
   public <M extends PersistedModel, W extends WhereFilter> long destroyAll(Class<M> modelClass,
-      W where) {
-    // TODO
-    EntityManager em = getEntityManager();
-    Query query = QueryGenerator.getInstance().getDeleteQuery(em, modelClass, where);
-    return query.executeUpdate();
+      W where) throws ConnectorException {
+    try {// TODO
+      EntityManager em = getEntityManager();
+      Query query = QueryGenerator.getInstance().getDeleteQuery(em, modelClass, where);
+      return query.executeUpdate();
+    } catch (Throwable e) {
+      throw new ConnectorException(e);
+    }
   }
 }
