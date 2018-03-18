@@ -6,12 +6,16 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.flipkart.loopback.constants.LogicalOperator;
 import com.flipkart.loopback.constants.QueryOperator;
+import com.flipkart.loopback.exception.InvalidFilterException;
+import com.flipkart.loopback.exception.InvalidOperatorException;
 import com.flipkart.loopback.exception.LoopbackException;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by akshaya.sharma on 07/03/18
@@ -20,26 +24,25 @@ public class WhereFilter{
   @Getter
   private JsonNode value;
 
-  public WhereFilter(){
+  public WhereFilter() throws InvalidFilterException {
     this("{}");
   }
 
-  public WhereFilter(String whr) {
+  public WhereFilter(@NotNull String whr) throws InvalidFilterException {
+    ObjectMapper mapper = new ObjectMapper();
     try {
-      ObjectMapper mapper = new ObjectMapper();
       value = mapper.readTree(whr);
-      _validateWhereFilter();
-    }catch (Throwable e) {
-      e.printStackTrace();
-      // throw e
+    } catch (IOException e) {
+      throw new InvalidFilterException(e.getMessage());
     }
+    _validateWhereFilter();
   }
 
-  public WhereFilter(JsonNode whereNode) {
+  public WhereFilter(@NotNull  JsonNode whereNode) throws InvalidFilterException {
     this(whereNode.toString());
   }
 
-  private void _validateWhereFilter() throws LoopbackException {
+  private void _validateWhereFilter() throws InvalidFilterException {
     if(value == null) {
       return;
     }
@@ -47,9 +50,10 @@ public class WhereFilter{
       Iterator<Map.Entry<String,JsonNode>> nodeItr = value.fields();
       while(nodeItr.hasNext()) {
         Map.Entry<String,JsonNode> entry = nodeItr.next();
-        // check if key is a condition
-        LogicalOperator operator = LogicalOperator.fromValue(entry.getKey());
-        if(operator != null) {
+
+        try {
+          // check if key is a condition
+          LogicalOperator operator = LogicalOperator.fromValue(entry.getKey());
           JsonNode value = entry.getValue();
           if(value.isArray()) {
             Iterator<JsonNode> condItr = value.iterator();
@@ -58,47 +62,55 @@ public class WhereFilter{
               _validatePrimitive(cond.fields());
             }
           }else {
-            throw new LoopbackException("Invalid where filter, " + operator.getValue() + " expects an"
-                + " array of conditions");
+            throw new InvalidFilterException(operator.getValue() + " expects an array of "
+                + "conditions");
           }
-        }else {
+        } catch (InvalidOperatorException e) {
+          e.printStackTrace();
+
           // validate primitive
           JsonNode value = entry.getValue();
           _validatePrimitive(entry);
+        } catch (InvalidFilterException e) {
+          e.printStackTrace();
+          throw e;
         }
       }
     }else {
-      throw new LoopbackException("Invalid where filter");
+      throw new InvalidFilterException("Invalid where filter");
     }
   }
 
-  private void _validatePrimitive(Iterator<Map.Entry<String,JsonNode>> keyValueItr) throws LoopbackException {
+  private void _validatePrimitive(Iterator<Map.Entry<String,JsonNode>> keyValueItr) throws InvalidFilterException {
     while(keyValueItr.hasNext()) {
       Map.Entry<String,JsonNode> entry = keyValueItr.next();
       _validatePrimitive(entry);
     }
   }
 
-  private void _validatePrimitive(Map.Entry<String,JsonNode> entry) throws LoopbackException {
+  private void _validatePrimitive(Map.Entry<String,JsonNode> entry) throws InvalidFilterException {
     JsonNode value = entry.getValue();
     if(value.isArray()) {
-      throw new LoopbackException("Invalid where filter");
+      throw new InvalidFilterException(entry.getKey() + " can not be an array");
     }else if(value.isObject()) {
       Iterator<Map.Entry<String,JsonNode>> keyValueItr = value.fields();
       while(keyValueItr.hasNext()) {
         Map.Entry<String,JsonNode> fieldEntry = keyValueItr.next();
-        QueryOperator queryOp = QueryOperator.fromValue(fieldEntry.getKey());
-        if(queryOp == null) {
-          throw new LoopbackException("Invalid query op in where filter");
-        }
-        if(fieldEntry.getValue().isArray() || fieldEntry.getValue().isObject()) {
-          throw new LoopbackException("Invalid query op value in where filter");
+        try {
+          QueryOperator queryOp = QueryOperator.fromValue(fieldEntry.getKey());
+          if(fieldEntry.getValue().isArray() || fieldEntry.getValue().isObject()) {
+            throw new InvalidFilterException(fieldEntry.getKey() + " can not be " + String
+                .valueOf(fieldEntry.getValue()) + " in where filter");
+          }
+        } catch (InvalidOperatorException e) {
+          e.printStackTrace();
+          throw new InvalidFilterException("Invalid key on filter " + e.getMessage());
         }
       }
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InvalidFilterException {
     String str1 = "{\"a\": [\"gt\"]}";
     WhereFilter f1 = new WhereFilter(str1);
 
@@ -110,7 +122,7 @@ public class WhereFilter{
     System.out.println(f3.getValue());
   }
 
-  public WhereFilter copy() {
+  public WhereFilter copy() throws InvalidFilterException {
     return new WhereFilter(this.value.toString());
   }
 
@@ -120,7 +132,7 @@ public class WhereFilter{
     return this;
   }
 
-  private ObjectNode _mergeNodes(final ObjectNode mainNode, final ObjectNode updateNode) {
+  private ObjectNode _mergeNodes(@NotNull final ObjectNode mainNode,@NotNull final ObjectNode updateNode) {
 //    ObjectNode result = null;
 //    if(mainNode != null) {
 //      result = mainNode.deepCopy();

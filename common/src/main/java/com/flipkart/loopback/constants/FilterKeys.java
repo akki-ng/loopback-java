@@ -1,7 +1,9 @@
 package com.flipkart.loopback.constants;
 
+import com.flipkart.loopback.exception.InvalidFilterException;
 import com.flipkart.loopback.exception.LoopbackException;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by akshaya.sharma on 08/03/18
@@ -20,12 +22,12 @@ public enum FilterKeys {
     this.value = value;
   }
 
-  public static FilterKeys fromValue(String value) throws LoopbackException {
+  public static FilterKeys fromValue(@NotNull String value) throws InvalidFilterException {
     for (FilterKeys c: FilterKeys.values()) {
       if(c.getValue().equals(value)) {
         return c;
       }
     }
-    return null;
+    throw new InvalidFilterException(value);
   }
 }

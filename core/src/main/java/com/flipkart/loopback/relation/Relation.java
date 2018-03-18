@@ -1,7 +1,9 @@
 package com.flipkart.loopback.relation;
 
 import com.flipkart.loopback.constants.RelationType;
-import com.flipkart.loopback.exception.LoopbackException;
+import com.flipkart.loopback.exception.IdFieldNotFoundException;
+import com.flipkart.loopback.exception.InternalError;
+import com.flipkart.loopback.exception.InvalidPropertyValueException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.model.PersistedModel;
 import java.util.Map;
@@ -20,7 +22,7 @@ import org.jibx.schema.codegen.extend.NameConverter;
 @AllArgsConstructor
 @Builder
 public class Relation {
-//  <R extends PersistedModel>
+  //  <R extends PersistedModel>
   private final RelationType relationType;
   private final Filter scope;
   private final String fromPropertyName;
@@ -31,16 +33,22 @@ public class Relation {
 
   public String getRestPath() {
     NameConverter nameTools = new DefaultNameConverter();
-    if(StringUtils.isBlank(restPath)) {
+    if (StringUtils.isBlank(restPath)) {
       return nameTools.pluralize(this.getName()).toLowerCase();
     }
     return restPath.toLowerCase();
   }
 
-  public <R extends PersistedModel> R getInstance(Map<String, Object> data) throws
-      IllegalAccessException, InstantiationException, LoopbackException {
-    R transientInstance = (R) getRelatedModelClass().newInstance();
-    transientInstance.setAttributes(data);
-    return transientInstance;
+  public <R extends PersistedModel> R getInstance(
+      Map<String, Object> data) throws InternalError, InvalidPropertyValueException,
+      IdFieldNotFoundException {
+    try {
+      R transientInstance = (R) getRelatedModelClass().newInstance();
+      transientInstance.setAttributes(data);
+      return transientInstance;
+    } catch (InstantiationException | IllegalAccessException e) {
+      e.printStackTrace();
+      throw new InternalError(relatedModelClass, e);
+    }
   }
 }

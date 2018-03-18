@@ -1,7 +1,9 @@
 package com.flipkart.loopback.constants;
 
+import com.flipkart.loopback.exception.InvalidOperatorException;
 import com.flipkart.loopback.exception.LoopbackException;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by akshaya.sharma on 07/03/18
@@ -31,13 +33,12 @@ public enum QueryOperator {
     this.value = value;
   }
 
-  public static QueryOperator fromValue(String value) throws LoopbackException {
+  public static QueryOperator fromValue(@NotNull String value) throws InvalidOperatorException {
     for (QueryOperator c: QueryOperator.values()) {
       if(c.getValue().equals(value)) {
         return c;
       }
     }
-    return null;
-//    throw new LoopbackException(value + " is not a valid condition");
+    throw new InvalidOperatorException(value);
   }
 }

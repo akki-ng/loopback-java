@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.connector.Connector;
+import com.flipkart.loopback.exception.ConnectorNotFoundException;
+import com.flipkart.loopback.exception.InternalError;
+import com.flipkart.loopback.exception.ModelNotConfiguredException;
 import com.flipkart.loopback.model.provider.ModelProvider;
 
 /**
@@ -12,13 +15,14 @@ import com.flipkart.loopback.model.provider.ModelProvider;
   public abstract class Model<T extends Model<T, CM>, CM extends ModelConfigurationManager> {
 
   @JsonIgnore
-  protected static Connector getConnector(Class<? extends Model> modelClass) {
-    return ModelProvider.getInstance().getConnectorFor(modelClass);
-  }
-
-  @JsonIgnore
-  public Connector getConnector() {
-    return getConnector(this.getClass());
+  protected static Connector getConnector(Class<? extends PersistedModel> modelClass) throws
+      InternalError {
+    try {
+      return ModelProvider.getInstance().getConnectorFor(modelClass);
+    } catch (ConnectorNotFoundException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(modelClass, e);
+    }
   }
 
   @JsonIgnore
@@ -27,13 +31,14 @@ import com.flipkart.loopback.model.provider.ModelProvider;
   }
 
   @JsonIgnore
-  protected static ModelConfiguration getConfiguration(Class<? extends Model> modelClass) {
-    return ModelProvider.getInstance().getConfigurationFor(modelClass);
-  }
-
-  @JsonIgnore
-  public ModelConfiguration getConfiguration() {
-    return getConfiguration(this.getClass());
+  protected static ModelConfiguration getConfiguration(Class<? extends PersistedModel>
+                                                             modelClass) throws InternalError {
+    try {
+      return ModelProvider.getInstance().getConfigurationFor(modelClass);
+    } catch (ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(modelClass, e);
+    }
   }
 
   @JsonIgnore

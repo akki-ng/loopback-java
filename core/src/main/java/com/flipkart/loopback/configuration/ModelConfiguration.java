@@ -15,7 +15,7 @@ import java.util.Map;
 
 public interface ModelConfiguration {
   @JsonIgnore
-  public abstract Connector getConnector();
+  public abstract Connector getConnector ();
 
   @JsonIgnore
   public abstract List<Relation> getRelations();

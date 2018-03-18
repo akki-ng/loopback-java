@@ -3,6 +3,7 @@ package com.flipkart.loopback.filter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flipkart.loopback.constants.FilterKeys;
+import com.flipkart.loopback.exception.InvalidFilterException;
 import com.flipkart.loopback.exception.LoopbackException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,14 +29,23 @@ public class Filter {
   // TODO List is not visible
   private ArrayList<String> fields;
 
-  public Filter(String data) throws IOException, LoopbackException {
-    System.out.println("asdas");
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode value = mapper.readTree(data);
-    _validateFilter(value);
+  public Filter() throws InvalidFilterException {
+    this("{\"where\": {}}");
   }
 
-  private void _validateFilter(JsonNode value) throws LoopbackException {
+  public Filter(String data) throws InvalidFilterException {
+
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+      JsonNode value = mapper.readTree(data);
+      _validateFilter(value);
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new InvalidFilterException(e.getMessage());
+    }
+  }
+
+  private void _validateFilter(JsonNode value) throws InvalidFilterException {
     if(value == null) {
       return;
     }
@@ -44,33 +54,33 @@ public class Filter {
       while(nodeItr.hasNext()) {
         Map.Entry<String,JsonNode> entry = nodeItr.next();
         // check if key is a condition
-        FilterKeys filterKey = FilterKeys.fromValue(entry.getKey());
-        if(filterKey != null) {
+        try {
+          FilterKeys filterKey = FilterKeys.fromValue(entry.getKey());
           if(filterKey == FilterKeys.WHERE) {
             this.where = new WhereFilter(entry.getValue());
           }else if(filterKey == FilterKeys.LIMIT) {
             if(!entry.getValue().isInt()) {
-              throw new LoopbackException("value for limit must be a number");
+              throw new InvalidFilterException("value for limit must be a number");
             }
             this.limit = entry.getValue().asInt();
           }else if(filterKey == FilterKeys.SKIP) {
             if(!entry.getValue().isInt()) {
-              throw new LoopbackException("value for limit must be a number");
+              throw new InvalidFilterException("value for skip must be a number");
             }
             this.skip = entry.getValue().asInt();
           }else if(filterKey == FilterKeys.FIELDS) {
             if(!entry.getValue().isArray()) {
-              throw new LoopbackException("Fields expects a list of strings");
+              throw new InvalidFilterException("Fields expects a list of strings");
             }
-            this.fields = new ObjectMapper().convertValue(entry.getValue(), ArrayList
-                .class);
+            this.fields = new ObjectMapper().convertValue(entry.getValue(), ArrayList.class);
           }
-        }else {
-          throw new LoopbackException("Invalid key in filter");
+        } catch (InvalidFilterException e) {
+          e.printStackTrace();
+          throw e;
         }
       }
     }else {
-      throw new LoopbackException("Invalid filter");
+      throw new InvalidFilterException("Invalid filter object");
     }
   }
 

@@ -1,7 +1,9 @@
 package com.flipkart.loopback.configuration.manager;
 
 import com.flipkart.loopback.configuration.ModelConfiguration;
+import com.flipkart.loopback.exception.ModelNotConfiguredException;
 import com.flipkart.loopback.model.Model;
+import com.flipkart.loopback.model.PersistedModel;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,15 +13,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ModelConfigurationManager {
   private static ModelConfigurationManager instance;
-  private Map<Class<? extends Model>, ModelConfiguration> config = new
-      ConcurrentHashMap<Class<? extends Model>, ModelConfiguration>();
+  private Map<Class<? extends PersistedModel>, ModelConfiguration> config = new
+      ConcurrentHashMap<Class<? extends PersistedModel>, ModelConfiguration>();
 
-  public void configureModel(Class<? extends Model> modelClass, ModelConfiguration configuration) {
+  public void configureModel(Class<? extends PersistedModel> modelClass, ModelConfiguration configuration) {
     config.put(modelClass, configuration);
   }
 
-  public ModelConfiguration getModelConfiguration(Class<? extends Model> modelClass) {
-    return config.get(modelClass);
+  public ModelConfiguration getModelConfiguration(Class<? extends PersistedModel> modelClass) throws ModelNotConfiguredException {
+    if(config.containsKey(modelClass)) {
+      return config.get(modelClass);
+    }
+    throw new ModelNotConfiguredException(modelClass);
   }
 
   protected ModelConfigurationManager() {

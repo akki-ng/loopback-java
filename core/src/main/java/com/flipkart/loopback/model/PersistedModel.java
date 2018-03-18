@@ -7,15 +7,25 @@ import com.flipkart.loopback.annotation.Transaction;
 import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.connector.Connector;
-import com.flipkart.loopback.constants.RelationType;
-import com.flipkart.loopback.exception.LoopbackException;
+import com.flipkart.loopback.exception.ConnectorException;
+import com.flipkart.loopback.exception.ConnectorNotFoundException;
+import com.flipkart.loopback.exception.CouldNotPerformException;
+import com.flipkart.loopback.exception.IdFieldNotFoundException;
+import com.flipkart.loopback.exception.InternalError;
+import com.flipkart.loopback.exception.InvalidPropertyValueException;
+import com.flipkart.loopback.exception.ModelNotConfiguredException;
+import com.flipkart.loopback.exception.ModelNotFoundException;
+import com.flipkart.loopback.exception.OperationNotAllowedException;
+import com.flipkart.loopback.exception.PropertyNotFoundException;
+import com.flipkart.loopback.exception.ReadOnlyPropertyException;
+import com.flipkart.loopback.exception.RelationNotFound;
+import com.flipkart.loopback.exception.TransientPropertyException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.relation.RelatedModel;
 import com.flipkart.loopback.relation.Relation;
 import com.google.common.collect.Maps;
 import java.beans.Transient;
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -26,6 +36,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by akshaya.sharma on 02/03/18
@@ -37,8 +48,13 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   @JsonIgnore
   protected abstract List<Relation> getRelations();
 
+  @JsonIgnore
+  public Connector getConnector() throws InternalError {
+    return getConnector(this.getClass());
+  }
 
-  protected static <M extends PersistedModel> void beginTransaction(Class<M> modelClass) {
+  protected static <M extends PersistedModel> void beginTransaction(
+      @NotNull Class<M> modelClass) throws InternalError {
     Connector connector = getConnector(modelClass);
     EntityManager em = connector.getEntityManager();
     EntityTransaction tx = em.getTransaction();
@@ -50,78 +66,95 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     }
   }
 
-  protected static <M extends PersistedModel> void commitTransaction(Class<M> modelClass) {
+  protected static <M extends PersistedModel> void commitTransaction(
+      @NotNull Class<M> modelClass) throws InternalError {
     Connector connector = getConnector(modelClass);
     EntityManager em = connector.getEntityManager();
     EntityTransaction tx = em.getTransaction();
     boolean newEm = !tx.isActive() || !em.isOpen();
 
-    try
-    {
+    try {
       if (em.isOpen() && tx.isActive()) {
         tx.commit();
       }
-    }
-    catch (Throwable e)
-    {
+    } catch (Throwable e) {
       if (tx.isActive()) {
         em.getTransaction().rollback();
       }
       throw e;
-    }
-    finally
-    {
-      if (newEm)
-      {
+    } finally {
+      if (newEm) {
         connector.clearEntityManager();
-        if (em.isOpen())
+        if (em.isOpen()) {
           em.close();
+        }
       }
     }
   }
 
-  @Override
-  public ModelConfiguration getConfiguration() {
-    return M.getConfigurationManager().getModelConfiguration(this.getClass());
+  @JsonIgnore
+  public ModelConfiguration getConfiguration() throws InternalError {
+    return getConfiguration(this.getClass());
   }
 
   @Transaction
-  public static <M extends PersistedModel, W extends WhereFilter> long count(Class<M> modelClass, W
-      where) {
-    return getProvider().count(modelClass, where);
-  }
-
-  @Transaction
-  public static <M extends PersistedModel> M create(M model) {
-    beginTransaction(model.getClass());
-    model = getProvider().create(model);
-    commitTransaction(model.getClass());
-    return model;
-  }
-
-
-  @Transaction
-  public static <M extends PersistedModel> List<M> create(List<M> models) {
-    if(models != null && models.size() > 0) {
-      beginTransaction(models.get(0).getClass());
-      models = getProvider().create(models);
-      commitTransaction(models.get(0).getClass());
+  public static <M extends PersistedModel, W extends WhereFilter> long count(
+      @NotNull Class<M> modelClass, W where) throws InternalError {
+    try {
+      return getProvider().count(modelClass, where);
+    } catch (ConnectorNotFoundException | ModelNotConfiguredException | ConnectorException e) {
+      e.printStackTrace();
+      throw new InternalError(modelClass, e);
     }
-    return models;
   }
 
   @Transaction
-  public static <M extends PersistedModel> M updateOrCreate(Class<M> modelClass, Map<String,
-      Object> patchData) throws LoopbackException {
+  public static <M extends PersistedModel> M create(
+      @NotNull M model) throws CouldNotPerformException, InternalError {
+    try {
+      beginTransaction(model.getClass());
+      model = getProvider().create(model);
+      commitTransaction(model.getClass());
+      return model;
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(model.getClass(), e);
+    }
+  }
+
+
+  @Transaction
+  public static <M extends PersistedModel> List<M> create(
+      @NotNull List<M> models) throws InternalError, CouldNotPerformException {
+    try {
+      if (models != null && models.size() > 0) {
+        beginTransaction(models.get(0).getClass());
+        models = getProvider().create(models);
+        commitTransaction(models.get(0).getClass());
+        return models;
+      }
+      // TODO - type errasue
+      throw new CouldNotPerformException(PersistedModel.class, "create",
+          new NullPointerException("models are null or empty"));
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(PersistedModel.class, e);
+    }
+  }
+
+  @Transaction
+  public static <M extends PersistedModel> M updateOrCreate(@NotNull Class<M> modelClass,
+      @NotNull Map<String, Object> patchData) throws InternalError, ModelNotFoundException,
+      InvalidPropertyValueException, CouldNotPerformException, IdFieldNotFoundException {
     beginTransaction(modelClass);
-    ModelConfiguration configuration = M.getConfigurationManager().getModelConfiguration(modelClass);
+    ModelConfiguration configuration = getConfiguration(modelClass);
     String idPropertyName = configuration.getIdPropertyName();
     M model = null;
-    if(patchData.containsKey(idPropertyName) && patchData.get(idPropertyName) != null) {
+    if (patchData.containsKey(idPropertyName) && patchData.get(idPropertyName) != null) {
       // Id exists
-      model = M.findById(modelClass,null, (Serializable) patchData.get(idPropertyName));
+      model = M.findById(modelClass, null, (Serializable) patchData.get(idPropertyName));
       model = (M) model.updateAttributes(patchData);
-    }else {
+    } else {
       // Try create
       ObjectMapper mapper = new ObjectMapper();
       model = mapper.convertValue(patchData, modelClass);
@@ -132,109 +165,166 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @Transaction
-  public static <M extends PersistedModel> long patchMultipleWithWhere(Class<M> modelClass,
-                                                                    WhereFilter where, Map<String,
-      Object> data) {
-    beginTransaction(modelClass);
-    long count = getProvider().patchMultipleWithWhere(modelClass, where, data);
-    commitTransaction(modelClass);
-    return count;
+  public static <M extends PersistedModel> long patchMultipleWithWhere(@NotNull Class<M> modelClass,
+      @NotNull WhereFilter where, @NotNull Map<String, Object> data) throws InternalError {
+    try {
+      beginTransaction(modelClass);
+      long count = getProvider().patchMultipleWithWhere(modelClass, where, data);
+      commitTransaction(modelClass);
+      return count;
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(modelClass, e);
+    }
   }
 
   @Transaction
-  public static <M extends PersistedModel, W extends WhereFilter> M upsertWithWhere(Class<M>
-                                                                                        modelClass, W where,
-                                                                                    Map<String,
-                                                                                        Object>
-                                                                                        data) {
-    beginTransaction(modelClass);
-    M model = getProvider().upsertWithWhere(modelClass, where, data);
-    commitTransaction(modelClass);
-    return model;
+  public static <M extends PersistedModel, W extends WhereFilter> M upsertWithWhere(
+      @NotNull Class<M> modelClass, @NotNull W where,
+      @NotNull Map<String, Object> data) throws InternalError, OperationNotAllowedException,
+      CouldNotPerformException {
+    try {
+      beginTransaction(modelClass);
+      M model = getProvider().upsertWithWhere(modelClass, where, data);
+      commitTransaction(modelClass);
+      return model;
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(modelClass, e);
+    }
   }
 
   @Transaction
-  public static <M extends PersistedModel, F extends Filter> M findOrCreate(Class<M>
-                                                                                   modelClass, F
-      filter, Map<String,
-      Object>
-      data) {
-    beginTransaction(modelClass);
-    M model = getProvider().findOrCreate(modelClass, filter, data);
-    commitTransaction(modelClass);
-    return model;
+  public static <M extends PersistedModel, F extends Filter> M findOrCreate(
+      @NotNull Class<M> modelClass, @NotNull F filter,
+      @NotNull Map<String, Object> data) throws InternalError, OperationNotAllowedException,
+      CouldNotPerformException {
+    try {
+      beginTransaction(modelClass);
+      M model = getProvider().findOrCreate(modelClass, filter, data);
+      commitTransaction(modelClass);
+      return model;
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(modelClass, e);
+    }
   }
 
   @Transaction
-  public static <M extends PersistedModel, W extends WhereFilter> long updateAll(Class<M> modelClass, W
-      where, Map<String, Object> data) {
-    beginTransaction(modelClass);
-    long count =  getProvider().updateAll(modelClass, where, data);
-    commitTransaction(modelClass);
-    return count;
+  public static <M extends PersistedModel, W extends WhereFilter> long updateAll(
+      Class<M> modelClass, W where, Map<String, Object> data) throws InternalError {
+    try {
+      beginTransaction(modelClass);
+      long count = getProvider().updateAll(modelClass, where, data);
+      commitTransaction(modelClass);
+      return count;
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(modelClass, e);
+    }
   }
 
   @Transaction
-  public static <M extends PersistedModel> M replaceById(M model, Serializable id) {
-    beginTransaction(model.getClass());
-    model = getProvider().replaceById(model, id);
-    commitTransaction(model.getClass());
-    return model;
+  public static <M extends PersistedModel> M replaceById(M model,
+      Serializable id) throws InternalError {
+    try {
+      beginTransaction(model.getClass());
+      model = getProvider().replaceById(model, id);
+      commitTransaction(model.getClass());
+      return model;
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(model.getClass(), e);
+    }
   }
 
   @Transaction
-  public static <M extends PersistedModel> M replaceOrCreate(M model) {
-    beginTransaction(model.getClass());
-    model = getProvider().replaceOrCreate(model);
-    commitTransaction(model.getClass());
-    return model;
+  public static <M extends PersistedModel> M replaceOrCreate(
+      M model) throws CouldNotPerformException, InternalError {
+    try {
+      beginTransaction(model.getClass());
+      model = getProvider().replaceOrCreate(model);
+      commitTransaction(model.getClass());
+      return model;
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(model.getClass(), e);
+    }
   }
 
   @Transaction
-  public static <M extends PersistedModel> boolean exists(Class<M> modelClass, Object id) {
-    beginTransaction(modelClass);
-    boolean exists = getProvider().exists(modelClass, id);
-    commitTransaction(modelClass);
-    return exists;
+  public static <M extends PersistedModel> boolean exists(Class<M> modelClass,
+      Object id) throws InternalError {
+    try {
+      beginTransaction(modelClass);
+      boolean exists = getProvider().exists(modelClass, id);
+      commitTransaction(modelClass);
+      return exists;
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(modelClass, e);
+    }
   }
 
   @Transaction
-  public static <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass, F
-      filter) {
-    beginTransaction(modelClass);
-    List<M> models = getProvider().find(modelClass, filter);
-    commitTransaction(modelClass);
-    return models;
+  public static <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass,
+      F filter) throws InternalError {
+    try {
+      beginTransaction(modelClass);
+      List<M> models = getProvider().find(modelClass, filter);
+      commitTransaction(modelClass);
+      return models;
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(modelClass, e);
+    }
   }
 
   @Transaction
-  public static <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Serializable id) {
-    beginTransaction(modelClass);
-    M model = getProvider().findById(modelClass, filter, id);
-    commitTransaction(modelClass);
-    return model;
+  public static <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter,
+      Serializable id) throws ModelNotFoundException, InternalError {
+    try {
+      beginTransaction(modelClass);
+      M model = getProvider().findById(modelClass, filter, id);
+      commitTransaction(modelClass);
+      return model;
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(modelClass, e);
+    }
   }
 
   @Transaction
-  public static <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass, F
-      filter) {
-    beginTransaction(modelClass);
-    M model = getProvider().findOne(modelClass, filter);
-    commitTransaction(modelClass);
-    return model;
+  public static <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass,
+      F filter) throws InternalError, ModelNotFoundException {
+    try {
+      beginTransaction(modelClass);
+      M model = getProvider().findOne(modelClass, filter);
+      commitTransaction(modelClass);
+      return model;
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(modelClass, e);
+    }
   }
 
   @Transaction
-  public static <M extends PersistedModel, W extends WhereFilter> long destroyAll(Class<M> modelClass, W
-      where) {
-    beginTransaction(modelClass);
-    long count = getProvider().destroyAll(modelClass, where);
-    commitTransaction(modelClass);
-    return count;
+  public static <M extends PersistedModel, W extends WhereFilter> long destroyAll(
+      Class<M> modelClass, W where) throws InternalError {
+    try {
+      beginTransaction(modelClass);
+      long count = getProvider().destroyAll(modelClass, where);
+      commitTransaction(modelClass);
+      return count;
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(modelClass, e);
+    }
   }
 
   @Transaction
-  public static <M extends PersistedModel> M destroyById(Class<M> modelClass, Serializable id) {
+  public static <M extends PersistedModel> M destroyById(Class<M> modelClass,
+      Serializable id) throws ModelNotFoundException, InternalError {
     beginTransaction(modelClass);
     M model = M.findById(modelClass, null, id);
     model = (M) model.destroy();
@@ -243,8 +333,13 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @Transaction
-  public <M extends PersistedModel> M  destroy() {
-    return (M)getProvider().destroy(this);
+  public <M extends PersistedModel> M destroy() throws InternalError {
+    try {
+      return (M) getProvider().destroy(this);
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(this.getClass(), e);
+    }
   }
 
   @JsonIgnore
@@ -256,19 +351,28 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @Transaction
-  public <M extends PersistedModel> M save() {
-    return (M) getProvider().replaceOrCreate(this);
+  public <M extends PersistedModel> M save() throws CouldNotPerformException, InternalError {
+    try {
+      return (M) getProvider().replaceOrCreate(this);
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(this.getClass(), e);
+    }
   }
 
   @Transaction
-  public M reload() {
-    return (M) getProvider().findById(this.getClass(), null, this.getId());
+  public M reload() throws InternalError, ModelNotFoundException {
+    try {
+      return (M) getProvider().findById(this.getClass(), null, this.getId());
+    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+      e.printStackTrace();
+      throw new InternalError(this.getClass(), e);
+    }
   }
 
   @JsonIgnore
-  public String getIdPropertyName() {
-    ModelConfiguration configuration = ModelConfigurationManager.getInstance()
-        .getModelConfiguration(this.getClass());
+  public String getIdPropertyName() throws InternalError {
+    ModelConfiguration configuration = this.getConfiguration();
     return configuration.getIdPropertyName();
   }
 
@@ -279,73 +383,79 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @Transaction
-  public <M extends PersistedModel> M updateAttributes(Map<String, Object> data)
-      throws LoopbackException {
+  public <M extends PersistedModel> M updateAttributes(
+      Map<String, Serializable> data) throws InvalidPropertyValueException,
+      IdFieldNotFoundException, CouldNotPerformException, InternalError {
     return (M) this.setAttributes(data).save();
   }
 
-  public <M extends PersistedModel> M setAttributes(Map<String, Object> data)
-      throws LoopbackException {
+  public <M extends PersistedModel> M setAttributes(
+      Map<String, Serializable> data) throws IdFieldNotFoundException,
+      InvalidPropertyValueException, InternalError {
     String idName = this.getIdPropertyName();
     if (StringUtils.isBlank(idName)) {
       // Model requires an id field name
-      throw new LoopbackException("ID field not defined for " + this
-          .getClass());
+      throw new IdFieldNotFoundException(this.getClass());
     }
-    System.out.println(getId());
 
-    if(data.containsKey(idName) && !getId().equals(data.get(idName))) {
+    if (data.containsKey(idName) && !getId().equals(data.get(idName))) {
       // Model can not update ID
-      throw new LoopbackException("ID can not be updated " + this
-          .getClass());
+      throw new ReadOnlyPropertyException(this.getClass(), idName, data.get(idName));
     }
 
-    for (Map.Entry<String, Object> e : data.entrySet()) {
+    for (Map.Entry<String, Serializable> e : data.entrySet()) {
       this.setAttribute(e.getKey(), e.getValue());
     }
     return (M) this;
   }
 
   @Transaction
-  private M updateAttribute(String attributeName, Object
-      attributeValue) throws LoopbackException {
+  private M updateAttribute(String attributeName,
+      Serializable attributeValue) throws InvalidPropertyValueException, InternalError, CouldNotPerformException {
     return this.setAttribute(attributeName, attributeValue).save();
   }
 
-  public <F extends Filter> M setAttribute(String attributeName, Object
-      attributeValue) throws LoopbackException {
+  public <F extends Filter> M setAttribute(String attributeName,
+      Serializable attributeValue) throws InvalidPropertyValueException {
 
-    try {
-      for(Field declaredField : this.getClass().getDeclaredFields()) {
+    for (Field declaredField : this.getClass().getDeclaredFields()) {
+      String fieldName = declaredField.getName();
+      JsonProperty property = declaredField.getAnnotation(JsonProperty.class);
+      if (property != null) {
+        fieldName = property.value();
+      }
+
+      try {
         Transient aTransient = declaredField.getAnnotation(Transient.class);
-        if (aTransient != null) {
-          throw new LoopbackException("Attribute " + attributeName + " can be updated");
-        }
-        String fieldName = declaredField.getName();
-        JsonProperty property = declaredField.getAnnotation(JsonProperty.class);
-        if(property != null) {
-          fieldName = property.value();
+        if (aTransient != null && fieldName.equals(attributeName)) {
+          throw new TransientPropertyException(this.getClass(), attributeName, attributeValue);
         }
 
-        if(fieldName.equals(attributeName)) {
+        if (fieldName.equals(attributeName)) {
           boolean accessible = declaredField.isAccessible();
           declaredField.setAccessible(true);
           Class toCast = declaredField.getType();
           if (!toCast.isPrimitive()) {
-            if(attributeValue != null) {
-              if(toCast == Integer.class) {
-                attributeValue = new Integer(attributeValue.toString());
-              }else if(toCast == Long.class) {
-                attributeValue = new Long(attributeValue.toString());
-              }else if(toCast == Float.class) {
-                attributeValue = new Float(attributeValue.toString());
-              }else if(toCast == Double.class) {
-                attributeValue = new Double(attributeValue.toString());
-              }else if(toCast == String.class) {
-                attributeValue = attributeValue.toString();
+            if (attributeValue != null) {
+              try {
+                if (toCast == Integer.class) {
+                  attributeValue = new Integer(attributeValue.toString());
+                } else if (toCast == Long.class) {
+                  attributeValue = new Long(attributeValue.toString());
+                } else if (toCast == Float.class) {
+                  attributeValue = new Float(attributeValue.toString());
+                } else if (toCast == Double.class) {
+                  attributeValue = new Double(attributeValue.toString());
+                } else if (toCast == String.class) {
+                  attributeValue = attributeValue.toString();
+                } else {
+                  // TODO should throw Exception??
+                }
+              } catch (Exception e) {
+                throw new InvalidPropertyValueException(this.getClass(), attributeName,
+                    attributeValue, "expected " + toCast.getSimpleName());
               }
             }
-
             declaredField.set(this, declaredField.getType().cast(attributeValue));
           } else {
             if ("int".equals(toCast.getName())) {
@@ -353,29 +463,52 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
               try {
                 val = Integer.parseInt(String.valueOf(attributeValue));
               } catch (Exception e) {
-
+                throw new InvalidPropertyValueException(this.getClass(), attributeName,
+                    attributeValue, "expected int");
+              }
+              declaredField.set(this, val);
+            } else if ("long".equals(toCast.getName())) {
+              long val = 0L;
+              try {
+                val = Long.parseLong(String.valueOf(attributeValue));
+              } catch (Exception e) {
+                throw new InvalidPropertyValueException(this.getClass(), attributeName,
+                    attributeValue, "expected long");
+              }
+              declaredField.set(this, val);
+            } else if ("float".equals(toCast.getName())) {
+              float val = 0;
+              try {
+                val = Float.parseFloat(String.valueOf(attributeValue));
+              } catch (Exception e) {
+                throw new InvalidPropertyValueException(this.getClass(), attributeName,
+                    attributeValue, "expected float");
+              }
+              declaredField.set(this, val);
+            } else if ("double".equals(toCast.getName())) {
+              double val = 0;
+              try {
+                val = Double.parseDouble(String.valueOf(attributeValue));
+              } catch (Exception e) {
+                throw new InvalidPropertyValueException(this.getClass(), attributeName,
+                    attributeValue, "expected double");
               }
               declaredField.set(this, val);
             }
-            // TODO
           }
           declaredField.setAccessible(accessible);
         }
+      } catch (IllegalAccessException e) {
+        throw new InvalidPropertyValueException(this.getClass(), attributeName, attributeValue,
+            e.getMessage());
       }
-      return (M) this;
-    } catch (SecurityException
-        | IllegalArgumentException
-        | IllegalAccessException e) {
-      throw new LoopbackException(e);
     }
+    return (M) this;
   }
 
   @JsonIgnore
   private String getFieldName(Field f) {
     JsonProperty property = f.getAnnotation(JsonProperty.class);
-    if (property != null) {
-      System.out.println(property);
-    }
     if (property != null && StringUtils.isNotEmpty(property.value())) {
       return property.value();
     }
@@ -406,34 +539,44 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @JsonIgnore
-  public Object getPropertyValue(String propertyName) throws IllegalAccessException {
-    Map<String, Field> properties = this.getProperties();
-    Field propertyField = properties.get(propertyName);
-    return getFieldValue(propertyField);
+  public Object getPropertyValue(
+      String propertyName) throws ReadOnlyPropertyException, PropertyNotFoundException {
+    try {
+      Map<String, Field> properties = this.getProperties();
+      if (properties.containsKey(propertyName)) {
+        Field propertyField = properties.get(propertyName);
+        return getFieldValue(propertyField);
+      }
+      throw new PropertyNotFoundException(this.getClass(), propertyName);
+    } catch (IllegalAccessException e) {
+      // TODO will never happen -- correct later
+      throw new ReadOnlyPropertyException(this.getClass(), propertyName, null);
+    }
   }
 
-  public Relation getRelationByName(String relationName) throws
-      LoopbackException {
+  public Relation getRelationByName(String relationName) throws RelationNotFound {
     List<Relation> relations = getRelations();
-    if(relations == null) {
-      return null;
+    if (relations != null) {
+      Optional<Relation> relationOp = relations.stream().filter(
+          rel -> rel.getName().equals(relationName)).findFirst();
+      if (relationOp.isPresent()) {
+        return (Relation) relationOp.get();
+      }
     }
-    Optional<Relation> relationOp = relations.stream()
-        .filter(rel -> rel.getName().equals(relationName))
-        .findFirst();
-    return relationOp.isPresent() ? relationOp.get() : null;
+    throw new RelationNotFound(this.getClass(), relationName, "name");
   }
 
 
-  public Relation getRelationByRestPath(String restPath) throws LoopbackException {
+  public Relation getRelationByRestPath(String restPath) throws RelationNotFound {
     List<Relation> relations = getRelations();
-    if(relations == null) {
-      return null;
+    if (relations != null) {
+      Optional<Relation> relationOp = this.getRelations().stream().filter(
+          rel -> rel.getRestPath().equals(restPath)).findFirst();
+      if (relationOp.isPresent()) {
+        return (Relation) relationOp.get();
+      }
     }
-    Optional<Relation> relOp = this.getRelations().stream()
-        .filter(rel -> rel.getRestPath().equals(restPath))
-        .findFirst();
-    return relOp.isPresent() ? (Relation)relOp.get() : null;
+    throw new RelationNotFound(this.getClass(), restPath, "rest path");
   }
 
   @JsonIgnore
@@ -442,12 +585,12 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     Field[] var2 = modelCass.getDeclaredFields();
     int var3 = var2.length;
 
-    for(int var4 = 0; var4 < var3; ++var4) {
+    for (int var4 = 0; var4 < var3; ++var4) {
       Field declaredField = var2[var4];
-      Transient aTransient = (Transient)declaredField.getAnnotation(Transient.class);
+      Transient aTransient = (Transient) declaredField.getAnnotation(Transient.class);
       if (aTransient == null) {
         String propertyName = declaredField.getName();
-        JsonProperty jsonProperty = (JsonProperty)declaredField.getAnnotation(JsonProperty.class);
+        JsonProperty jsonProperty = (JsonProperty) declaredField.getAnnotation(JsonProperty.class);
         if (jsonProperty != null) {
           propertyName = jsonProperty.value();
         }
@@ -465,13 +608,13 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @JsonIgnore
-  public RelatedModel getRelatedModel(String relationName) throws LoopbackException {
+  public RelatedModel getRelatedModel(String relationName) throws RelationNotFound {
     Relation relation = getRelationByName(relationName);
     return getRelatedModel(relation);
   }
 
   @JsonIgnore
-  public RelatedModel getRelatedModel(Relation relation) {
+  private RelatedModel getRelatedModel(Relation relation) {
     return new RelatedModel(this, relation);
   }
 }
