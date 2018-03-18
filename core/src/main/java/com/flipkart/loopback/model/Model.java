@@ -7,6 +7,7 @@ import com.flipkart.loopback.connector.Connector;
 import com.flipkart.loopback.exception.ConnectorNotFoundException;
 import com.flipkart.loopback.exception.InternalError;
 import com.flipkart.loopback.exception.ModelNotConfiguredException;
+import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.provider.ModelProvider;
 
 /**

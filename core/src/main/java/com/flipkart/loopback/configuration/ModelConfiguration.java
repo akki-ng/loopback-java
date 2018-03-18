@@ -2,6 +2,7 @@ package com.flipkart.loopback.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.flipkart.loopback.connector.Connector;
+import com.flipkart.loopback.constants.IDType;
 import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.model.PersistedModel;
 import com.flipkart.loopback.relation.Relation;
@@ -25,4 +26,7 @@ public interface ModelConfiguration {
 
   @JsonIgnore
   public String getIdPropertyName();
+
+  @JsonIgnore
+  public IDType getIDType();
 }

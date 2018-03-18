@@ -3,6 +3,11 @@ package com.flipkart.loopback.connector;
 import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.exception.ConnectorException;
+import com.flipkart.loopback.exception.InternalError;
+import com.flipkart.loopback.exception.InvalidFilterException;
+import com.flipkart.loopback.exception.InvalidPropertyValueException;
+import com.flipkart.loopback.exception.LoopbackException;
+import com.flipkart.loopback.exception.ModelNotConfiguredException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
@@ -50,6 +55,11 @@ public class JPAConnector extends Connector {
     EMProvider.clear(getIdentifier());
   }
 
+  private <M extends PersistedModel> WhereFilter createIDFilter(Class<M> modelClass, Serializable
+   id ) throws InvalidFilterException, InternalError, InvalidPropertyValueException {
+    return PersistedModel.createIDFilter(modelClass, id);
+  }
+
   @Override
   public <M extends PersistedModel, W extends WhereFilter> long count(Class<M> modelClass,
       W where) throws ConnectorException {
@@ -58,6 +68,8 @@ public class JPAConnector extends Connector {
       TypedQuery<Long> typedQuery = QueryGenerator.getInstance().getCountTypedQuery(em, modelClass,
           where);
       return typedQuery.getSingleResult();
+    } catch(LoopbackException e) {
+      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -94,6 +106,8 @@ public class JPAConnector extends Connector {
       WhereFilter where, Map<String, Object> data) throws ConnectorException {
     try {// TODO
       return 0;
+    } catch(LoopbackException e) {
+      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -104,6 +118,8 @@ public class JPAConnector extends Connector {
       W filter, Map<String, Object> data) throws ConnectorException {
     try { // TODO
       return 0;
+    } catch(LoopbackException e) {
+      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -114,13 +130,15 @@ public class JPAConnector extends Connector {
       Map<String, Object> data) throws ConnectorException {
     try {// TODO must be implemented by connector only
       return null;
+    } catch(LoopbackException e) {
+      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
   }
 
   @Override
-  public <M extends PersistedModel> M replaceById(M model, Object id) throws ConnectorException {
+  public <M extends PersistedModel> M replaceById(M model, Serializable id) throws ConnectorException {
     try {
       EntityManager em = getEntityManager();
 //    em.getTransaction().begin();
@@ -134,16 +152,17 @@ public class JPAConnector extends Connector {
 
   @Override
   public <M extends PersistedModel> boolean exists(Class<M> modelClass,
-      Object id) throws ConnectorException {
+      Serializable id) throws ConnectorException {
     try {
       ModelConfiguration configuration = ModelConfigurationManager.getInstance()
           .getModelConfiguration(
           modelClass);
       EntityManager em = getEntityManager();
-      WhereFilter where = new WhereFilter(
-          "{\"" + configuration.getIdPropertyName() + "\": " + id + "}");
+      WhereFilter where = createIDFilter(modelClass, id);
       long count = count(modelClass, where);
       return count > 0;
+    } catch(LoopbackException e) {
+      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -158,6 +177,8 @@ public class JPAConnector extends Connector {
           filter);
       List<M> data = typedQuery.getResultList();
       return data;
+    } catch(LoopbackException e) {
+      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -173,14 +194,17 @@ public class JPAConnector extends Connector {
       EntityManager em = getEntityManager();
 
       Filter idFilter = new Filter(
-          "{\"where\": {\"" + configuration.getIdPropertyName() + "\": " + id + "}}");
+          "{\"where\": {}}");
+      idFilter.setWhere(createIDFilter(modelClass, id));
 
       TypedQuery<M> typedQuery = QueryGenerator.getInstance().getSelectTypedQuery(em, modelClass,
           idFilter);
       return typedQuery.getSingleResult();
     } catch (NoResultException e) {
       return null;
-    } catch (Throwable e) {
+    } catch(LoopbackException e) {
+      throw e;
+    } catch(Throwable e) {
       throw new ConnectorException(e);
     }
   }
@@ -193,6 +217,8 @@ public class JPAConnector extends Connector {
       TypedQuery<M> typedQuery = QueryGenerator.getInstance().getSelectTypedQuery(em, modelClass,
           filter);
       return typedQuery.getSingleResult();
+    } catch(LoopbackException e) {
+      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -207,6 +233,8 @@ public class JPAConnector extends Connector {
 //    em.remove(em.contains(model) ? model : em.merge(model));
 //    em.getTransaction().commit();
       return model;
+    } catch(LoopbackException e) {
+      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -219,6 +247,8 @@ public class JPAConnector extends Connector {
       EntityManager em = getEntityManager();
       Query query = QueryGenerator.getInstance().getDeleteQuery(em, modelClass, where);
       return query.executeUpdate();
+    } catch(LoopbackException e) {
+      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }

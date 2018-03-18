@@ -3,6 +3,7 @@ package com.flipkart.sample.entity.configuration;
 import com.flipkart.loopback.configuration.ModelConfigurationImpl;
 import com.flipkart.loopback.connector.Connector;
 import com.flipkart.loopback.connector.JPAConnector;
+import com.flipkart.loopback.constants.IDType;
 import com.flipkart.loopback.constants.RelationType;
 import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.model.PersistedModel;
@@ -46,5 +47,10 @@ public class TempModelConfiguration extends ModelConfigurationImpl<TempModelConf
   @Override
   public Class<? extends PersistedModel> getModelClass() {
     return TempModel.class;
+  }
+
+  @Override
+  public IDType getIDType() {
+    return IDType.NUMBER;
   }
 }

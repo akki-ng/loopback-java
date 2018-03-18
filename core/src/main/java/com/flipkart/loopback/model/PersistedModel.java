@@ -7,11 +7,13 @@ import com.flipkart.loopback.annotation.Transaction;
 import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.connector.Connector;
+import com.flipkart.loopback.constants.IDType;
 import com.flipkart.loopback.exception.ConnectorException;
 import com.flipkart.loopback.exception.ConnectorNotFoundException;
 import com.flipkart.loopback.exception.CouldNotPerformException;
 import com.flipkart.loopback.exception.IdFieldNotFoundException;
 import com.flipkart.loopback.exception.InternalError;
+import com.flipkart.loopback.exception.InvalidFilterException;
 import com.flipkart.loopback.exception.InvalidPropertyValueException;
 import com.flipkart.loopback.exception.ModelNotConfiguredException;
 import com.flipkart.loopback.exception.ModelNotFoundException;
@@ -58,6 +60,31 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
       em.joinTransaction();
     } else {
       em.getTransaction().begin();
+    }
+  }
+
+  @JsonIgnore
+  public IDType getIDType() throws InternalError {
+    return getConfiguration().getIDType();
+  }
+
+  @JsonIgnore
+  public static <M extends PersistedModel> WhereFilter createIDFilter(Class<M> modelClass,
+      Serializable id) throws InternalError, InvalidFilterException, InvalidPropertyValueException {
+    ModelConfiguration configuration = getConfiguration(modelClass);
+    String idPropertyName = configuration.getIdPropertyName();
+    IDType idType = configuration.getIDType();
+    if(idType == IDType.NUMBER) {
+      try {
+        id = Long.parseLong(String.valueOf(id));
+        return new WhereFilter("{\"" + configuration.getIdPropertyName() + "\": " + id + "}");
+      }catch (NumberFormatException e) {
+        throw new InvalidPropertyValueException(modelClass, configuration.getIdPropertyName
+            (), String.valueOf(id), " expected a number");
+      }
+    }else {
+      return new WhereFilter(
+          "{\"" + configuration.getIdPropertyName() + "\": \"" + id + "\"}");
     }
   }
 
@@ -249,7 +276,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
 
   @Transaction
   public static <M extends PersistedModel> boolean exists(Class<M> modelClass,
-      Object id) throws InternalError {
+      Serializable id) throws InternalError {
     try {
       beginTransaction(modelClass);
       boolean exists = getProvider().exists(modelClass, id);

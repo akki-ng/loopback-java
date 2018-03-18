@@ -4,7 +4,7 @@ package com.flipkart.loopback.exception;
  * Created by akshaya.sharma on 02/03/18
  */
 
-public abstract class LoopbackException extends Throwable{
+public abstract class LoopbackException extends RuntimeException{
   @Override
   public String getLocalizedMessage() {
     return this.getMessage();

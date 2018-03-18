@@ -3,6 +3,7 @@ package com.flipkart.sample.entity.configuration;
 import com.flipkart.loopback.configuration.ModelConfigurationImpl;
 import com.flipkart.loopback.connector.Connector;
 import com.flipkart.loopback.connector.JPAConnector;
+import com.flipkart.loopback.constants.IDType;
 import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.model.PersistedModel;
 import com.flipkart.sample.entity.HasManyModel;
@@ -34,5 +35,10 @@ public class HasManyModelConfiguration extends ModelConfigurationImpl<HasManyMod
   @Override
   public Class<? extends PersistedModel> getModelClass() {
     return HasManyModel.class;
+  }
+
+  @Override
+  public IDType getIDType() {
+    return IDType.NUMBER;
   }
 }

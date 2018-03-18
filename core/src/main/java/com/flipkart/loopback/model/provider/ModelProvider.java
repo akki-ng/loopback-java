@@ -186,7 +186,7 @@ public class ModelProvider {
 
 
   public <M extends PersistedModel> boolean exists(Class<M> modelClass,
-      Object id) throws ConnectorNotFoundException, ModelNotConfiguredException,
+      Serializable id) throws ConnectorNotFoundException, ModelNotConfiguredException,
       ConnectorException {
     return getConnectorFor(modelClass).exists(modelClass, id);
   }
