@@ -68,8 +68,6 @@ public class JPAConnector extends Connector {
       TypedQuery<Long> typedQuery = QueryGenerator.getInstance().getCountTypedQuery(em, modelClass,
           where);
       return typedQuery.getSingleResult();
-    } catch(LoopbackException e) {
-      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -106,8 +104,6 @@ public class JPAConnector extends Connector {
       WhereFilter where, Map<String, Object> data) throws ConnectorException {
     try {// TODO
       return 0;
-    } catch(LoopbackException e) {
-      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -118,8 +114,6 @@ public class JPAConnector extends Connector {
       W filter, Map<String, Object> data) throws ConnectorException {
     try { // TODO
       return 0;
-    } catch(LoopbackException e) {
-      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -130,8 +124,6 @@ public class JPAConnector extends Connector {
       Map<String, Object> data) throws ConnectorException {
     try {// TODO must be implemented by connector only
       return null;
-    } catch(LoopbackException e) {
-      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -161,8 +153,6 @@ public class JPAConnector extends Connector {
       WhereFilter where = createIDFilter(modelClass, id);
       long count = count(modelClass, where);
       return count > 0;
-    } catch(LoopbackException e) {
-      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -177,8 +167,6 @@ public class JPAConnector extends Connector {
           filter);
       List<M> data = typedQuery.getResultList();
       return data;
-    } catch(LoopbackException e) {
-      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -202,8 +190,6 @@ public class JPAConnector extends Connector {
       return typedQuery.getSingleResult();
     } catch (NoResultException e) {
       return null;
-    } catch(LoopbackException e) {
-      throw e;
     } catch(Throwable e) {
       throw new ConnectorException(e);
     }
@@ -217,8 +203,6 @@ public class JPAConnector extends Connector {
       TypedQuery<M> typedQuery = QueryGenerator.getInstance().getSelectTypedQuery(em, modelClass,
           filter);
       return typedQuery.getSingleResult();
-    } catch(LoopbackException e) {
-      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -233,8 +217,6 @@ public class JPAConnector extends Connector {
 //    em.remove(em.contains(model) ? model : em.merge(model));
 //    em.getTransaction().commit();
       return model;
-    } catch(LoopbackException e) {
-      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }
@@ -247,8 +229,6 @@ public class JPAConnector extends Connector {
       EntityManager em = getEntityManager();
       Query query = QueryGenerator.getInstance().getDeleteQuery(em, modelClass, where);
       return query.executeUpdate();
-    } catch(LoopbackException e) {
-      throw e;
     } catch (Throwable e) {
       throw new ConnectorException(e);
     }

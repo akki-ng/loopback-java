@@ -420,7 +420,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
       throw new IdFieldNotFoundException(this.getClass());
     }
 
-    if (data.containsKey(idName) && !getId().equals(data.get(idName))) {
+    if (data.containsKey(idName) && !getId().toString().equals(data.get(idName).toString())) {
       // Model can not update ID
       throw new ReadOnlyPropertyException(this.getClass(), idName, data.get(idName));
     }

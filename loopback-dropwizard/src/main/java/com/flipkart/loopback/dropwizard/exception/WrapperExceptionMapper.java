@@ -16,6 +16,7 @@ import com.flipkart.loopback.exception.ModelNotConfiguredException;
 import com.flipkart.loopback.exception.ModelNotFoundException;
 import com.flipkart.loopback.exception.OperationNotAllowedException;
 import com.flipkart.loopback.exception.PropertyNotFoundException;
+import com.flipkart.loopback.exception.ReadOnlyPropertyException;
 import com.flipkart.loopback.exception.RelationNotFound;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -44,7 +45,7 @@ public class WrapperExceptionMapper implements ExceptionMapper<WrapperException>
     ConnectorException(ConnectorException.class, Code.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR"),
     ConnectorNotFoundException(ConnectorNotFoundException.class, Code.INTERNAL_SERVER_ERROR,
         "INTERNAL_ERROR"), CouldNotPerformException(CouldNotPerformException.class, Code.FORBIDDEN,
-        "OPERATION_NOT_PERFORMED"),
+        "OPERATION_NOT_PERFORMED", true),
     IdFieldNotFoundException(IdFieldNotFoundException.class, Code.UNPROCESSABLE_ENTITY,
         "INVALID_DATA", true),
     InternalError(com.flipkart.loopback.exception.InternalError.class, Code.INTERNAL_SERVER_ERROR,
@@ -58,6 +59,8 @@ public class WrapperExceptionMapper implements ExceptionMapper<WrapperException>
     ModelNotFoundException(ModelNotFoundException.class, Code.NOT_FOUND, "MODEL_NOT_FOUND", true),
     OperationNotAllowedException(OperationNotAllowedException.class, Code.FORBIDDEN,
         "OPERATION_NOT_PERMITTED", true),
+    ReadOnlyPropertyException(com.flipkart.loopback.exception.ReadOnlyPropertyException.class,
+        Code.UNPROCESSABLE_ENTITY, "OPERATION_NOT_PERMITTED", true),
     PropertyNotFoundException(PropertyNotFoundException.class, Code.UNPROCESSABLE_ENTITY,
         "INVALID_DATA", true),
     RelationNotFound(RelationNotFound.class, Code.BAD_REQUEST, "RELATION_NOT_FOUND", true);
