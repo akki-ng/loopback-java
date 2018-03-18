@@ -18,22 +18,10 @@ public interface ModelConfiguration {
   public abstract Connector getConnector ();
 
   @JsonIgnore
-  public abstract List<Relation> getRelations();
-
-  @JsonIgnore
-  public abstract Relation getRelationByName(String relationName) throws LoopbackException;
-
-  @JsonIgnore
-  public abstract Relation getRelationByRestPath(String restPath) throws LoopbackException;
-
-  @JsonIgnore
   public String getTableName();
 
   @JsonIgnore
   public Class<? extends PersistedModel> getModelClass();
-
-  @JsonIgnore
-  public Map<String, Field> getProperties();
 
   @JsonIgnore
   public String getIdPropertyName();

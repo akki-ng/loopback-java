@@ -2,22 +2,18 @@ package com.flipkart.loopback.connector;
 
 import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
-import com.flipkart.loopback.query.QueryGenerator;
-import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
-import java.io.IOException;
+import com.flipkart.loopback.query.QueryGenerator;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
-import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
@@ -33,7 +29,7 @@ public class JPAConnector extends Connector {
   }
 
   public static JPAConnector getInstance(String persistenceUnit) {
-    if(!config.containsKey(persistenceUnit)) {
+    if (!config.containsKey(persistenceUnit)) {
       config.put(persistenceUnit, new JPAConnector(persistenceUnit));
     }
     return config.get(persistenceUnit);
@@ -55,8 +51,8 @@ public class JPAConnector extends Connector {
   }
 
   @Override
-  public <M extends PersistedModel, W extends WhereFilter> long count(Class<M> modelClass, W
-      where) {
+  public <M extends PersistedModel, W extends WhereFilter> long count(Class<M> modelClass,
+      W where) {
     EntityManager em = getEntityManager();
     TypedQuery<Long> typedQuery = QueryGenerator.getInstance().getCountTypedQuery(em, modelClass,
         where);
@@ -65,7 +61,7 @@ public class JPAConnector extends Connector {
 
   @Override
   public <M extends PersistedModel> M create(M model) {
-    if(model.getId() != null) {
+    if (model.getId() != null) {
 
     }
     EntityManager em = getEntityManager();
@@ -77,35 +73,32 @@ public class JPAConnector extends Connector {
 
   @Override
   public <M extends PersistedModel> List<M> create(List<M> models) {
-    if(models != null) {
-      List<M> persisted =  models.stream()
-          .map(model -> {
-            return (M) this.create(model);
-          })
-          .collect(Collectors.toList());
+    if (models != null) {
+      List<M> persisted = models.stream().map(model -> {
+        return (M) this.create(model);
+      }).collect(Collectors.toList());
       return persisted;
     }
     return models;
   }
 
   @Override
-  public <M extends PersistedModel> long patchMultipleWithWhere(Class<M> modelClass, WhereFilter
-      where, Map<String, Object> data) {
+  public <M extends PersistedModel> long patchMultipleWithWhere(Class<M> modelClass,
+      WhereFilter where, Map<String, Object> data) {
     // TODO
     return 0;
   }
 
   @Override
   public <M extends PersistedModel, W extends WhereFilter> long updateAll(Class<M> modelClass,
-                                                                         W filter,
-                                                                         Map<String, Object> data) {
+      W filter, Map<String, Object> data) {
     // TODO
     return 0;
   }
 
   @Override
   public <M extends PersistedModel, F extends Filter> M updateAttributes(M model, F filter,
-                                                                         Map<String, Object> data) {
+      Map<String, Object> data) {
     // TODO must be implemented by connector only
     return null;
   }
@@ -122,14 +115,15 @@ public class JPAConnector extends Connector {
   @Override
   public <M extends PersistedModel> boolean exists(Class<M> modelClass, Object id) {
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
-        .getModelConfiguration(modelClass);
+        .getModelConfiguration(
+        modelClass);
     EntityManager em = getEntityManager();
     try {
-      WhereFilter where = new WhereFilter("{\"" + configuration.getIdPropertyName() + "\": "
-          + id +  "}");
+      WhereFilter where = new WhereFilter(
+          "{\"" + configuration.getIdPropertyName() + "\": " + id + "}");
       long count = count(modelClass, where);
       return count > 0;
-    } catch(NoResultException e) {
+    } catch (NoResultException e) {
       e.printStackTrace();
     }
     return false;
@@ -145,19 +139,21 @@ public class JPAConnector extends Connector {
   }
 
   @Override
-  public <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Serializable id) {
+  public <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter,
+      Serializable id) {
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
-        .getModelConfiguration(modelClass);
+        .getModelConfiguration(
+        modelClass);
     EntityManager em = getEntityManager();
     try {
 
-      Filter idFilter = new Filter("{\"where\": {\"" + configuration.getIdPropertyName() + "\": " +
-          id + "}}");
+      Filter idFilter = new Filter(
+          "{\"where\": {\"" + configuration.getIdPropertyName() + "\": " + id + "}}");
 
       TypedQuery<M> typedQuery = QueryGenerator.getInstance().getSelectTypedQuery(em, modelClass,
           idFilter);
       return typedQuery.getSingleResult();
-    }catch (Throwable e) {
+    } catch (Throwable e) {
       e.printStackTrace();
       return null;
     }
@@ -182,8 +178,8 @@ public class JPAConnector extends Connector {
   }
 
   @Override
-  public <M extends PersistedModel, W extends WhereFilter> long destroyAll(Class<M> modelClass, W
-      where) {
+  public <M extends PersistedModel, W extends WhereFilter> long destroyAll(Class<M> modelClass,
+      W where) {
     // TODO
     EntityManager em = getEntityManager();
     Query query = QueryGenerator.getInstance().getDeleteQuery(em, modelClass, where);

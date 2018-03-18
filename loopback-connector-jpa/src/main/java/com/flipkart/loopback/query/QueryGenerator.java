@@ -22,7 +22,6 @@ import javax.persistence.criteria.CommonAbstractCriteria;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
@@ -47,7 +46,8 @@ public class QueryGenerator {
 
   private <M extends PersistedModel> String buildColumnNames(Class<M> modelClass, Filter filter) {
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
-        .getModelConfiguration(modelClass);
+        .getModelConfiguration(
+        modelClass);
 
     Map<String, Field> properties = configuration.getProperties();
     JsonNode fieldsFilter = null;
@@ -62,17 +62,14 @@ public class QueryGenerator {
 
     StringBuilder sb = new StringBuilder();
 
-    List<String> columnNames = properties.values().stream()
-        .map(field -> {
-          return getColumnName(field);
-        })
-        .collect(Collectors.toList());
+    List<String> columnNames = properties.values().stream().map(field -> {
+      return getColumnName(field);
+    }).collect(Collectors.toList());
 
     return Joiner.on(",").join(columnNames);
   }
 
-  public <M extends PersistedModel> String getSelectQuery(Class<M> modelClass,
-                                                          Filter filter) {
+  public <M extends PersistedModel> String getSelectQuery(Class<M> modelClass, Filter filter) {
 //    if (!filter.) {
 //      var idNames = this.idNames(model);
 //      if (idNames && idNames.length) {
@@ -80,7 +77,8 @@ public class QueryGenerator {
 //      }
 //    }
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
-        .getModelConfiguration(modelClass);
+        .getModelConfiguration(
+        modelClass);
 
     StringBuilder sb = new StringBuilder();
 
@@ -120,10 +118,11 @@ public class QueryGenerator {
     return columnName;
   }
 
-  public <M extends PersistedModel> TypedQuery<M> getSelectTypedQuery(EntityManager em, Class<M>
-      modelClass, Filter filter) {
+  public <M extends PersistedModel> TypedQuery<M> getSelectTypedQuery(EntityManager em,
+      Class<M> modelClass, Filter filter) {
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
-        .getModelConfiguration(modelClass);
+        .getModelConfiguration(
+        modelClass);
 
 //    if (!filter.) {
 //      var idNames = this.idNames(model);
@@ -166,10 +165,11 @@ public class QueryGenerator {
     return typedQuery;
   }
 
-  public <M extends PersistedModel> TypedQuery<Long> getCountTypedQuery(EntityManager em, Class<M>
-      modelClass, WhereFilter where) {
+  public <M extends PersistedModel> TypedQuery<Long> getCountTypedQuery(EntityManager em,
+      Class<M> modelClass, WhereFilter where) {
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
-        .getModelConfiguration(modelClass);
+        .getModelConfiguration(
+        modelClass);
 
 
     CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -189,10 +189,11 @@ public class QueryGenerator {
     return typedQuery;
   }
 
-  public <M extends PersistedModel> Query getDeleteQuery(EntityManager em, Class<M>
-      modelClass, WhereFilter where) {
+  public <M extends PersistedModel> Query getDeleteQuery(EntityManager em, Class<M> modelClass,
+      WhereFilter where) {
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
-        .getModelConfiguration(modelClass);
+        .getModelConfiguration(
+        modelClass);
 
 
     CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -212,15 +213,14 @@ public class QueryGenerator {
   }
 
   public <M extends PersistedModel> List<Predicate> getWherePredicates(Root<M> root,
-                                                                       CommonAbstractCriteria query,
-                                                                       CriteriaBuilder cb, Class<M>
-      modelClass, WhereFilter where) {
+      CommonAbstractCriteria query, CriteriaBuilder cb, Class<M> modelClass, WhereFilter where) {
     List<Predicate> predicates = new ArrayList<Predicate>();
     if (where != null) {
 
       ObjectMapper mapper = new ObjectMapper();
       ModelConfiguration configuration = ModelConfigurationManager.getInstance()
-          .getModelConfiguration(modelClass);
+          .getModelConfiguration(
+          modelClass);
       Map<String, Field> properties = configuration.getProperties();
 
 

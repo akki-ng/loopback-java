@@ -17,12 +17,11 @@ public class EMProvider {
   private static Map<String, EntityManagerFactory> factories = new ConcurrentHashMap<String,
       EntityManagerFactory>();
   private static ThreadLocal<ConcurrentHashMap<String, ThreadLocal<EntityManager>>> emStore = new
-      ThreadLocal<ConcurrentHashMap<String,
-      ThreadLocal<EntityManager>>>();
+      ThreadLocal<ConcurrentHashMap<String, ThreadLocal<EntityManager>>>();
 
   private static EntityManagerFactory getEMFactory(final String persistenceUnit) {
     try {
-      if(!factories.containsKey(persistenceUnit)) {
+      if (!factories.containsKey(persistenceUnit)) {
         factories.put(persistenceUnit, Persistence.createEntityManagerFactory(persistenceUnit));
       }
       return factories.get(persistenceUnit);
@@ -33,12 +32,11 @@ public class EMProvider {
   }
 
   public static EntityManager getEm(final String persistenceUnit) {
-    if(emStore.get() == null) {
-      emStore.set(new ConcurrentHashMap<String,
-          ThreadLocal<EntityManager>>());
+    if (emStore.get() == null) {
+      emStore.set(new ConcurrentHashMap<String, ThreadLocal<EntityManager>>());
     }
-    if(!emStore.get().containsKey(persistenceUnit) || emStore.get().get(persistenceUnit) == null
-        || emStore.get().get(persistenceUnit).get() == null) {
+    if (!emStore.get().containsKey(persistenceUnit) || emStore.get().get(
+        persistenceUnit) == null || emStore.get().get(persistenceUnit).get() == null) {
       EntityManagerFactory emf = getEMFactory(persistenceUnit);
       ThreadLocal<EntityManager> localEm = new ThreadLocal<EntityManager>();
       localEm.set(emf.createEntityManager());
@@ -46,7 +44,7 @@ public class EMProvider {
     }
 
     ThreadLocal<EntityManager> localEm = emStore.get().get(persistenceUnit);
-    if(!localEm.get().isOpen()) {
+    if (!localEm.get().isOpen()) {
       localEm.remove();
       EntityManagerFactory emf = getEMFactory(persistenceUnit);
       EntityManager em = emf.createEntityManager();
@@ -57,7 +55,7 @@ public class EMProvider {
   }
 
   public static void clear(final String persistenceUnit) {
-    if(emStore.get().containsKey(persistenceUnit) || emStore.get().get(persistenceUnit) != null) {
+    if (emStore.get().containsKey(persistenceUnit) || emStore.get().get(persistenceUnit) != null) {
       emStore.get().get(persistenceUnit).remove();
     }
   }
@@ -66,12 +64,11 @@ public class EMProvider {
    * close the EM Factories and EntityManagers
    */
   public static void tearDown() {
-    factories.values()
-        .forEach(emf -> {
-          if (emf != null && emf.isOpen()) {
-            emf.close();
-          }
-        });
+    factories.values().forEach(emf -> {
+      if (emf != null && emf.isOpen()) {
+        emf.close();
+      }
+    });
     factories.clear();
   }
 
