@@ -1,5 +1,6 @@
 package com.flipkart.loopback.dropwizard.exception;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.flipkart.loopback.exception.ConfigurationException;
 import com.flipkart.loopback.exception.ConnectorException;
 import com.flipkart.loopback.exception.ConnectorNotFoundException;
@@ -32,33 +33,52 @@ public class WrapperExceptionMapper implements ExceptionMapper<WrapperException>
 
   @AllArgsConstructor
   @Getter
-  private static enum ExceptionCode {
-    UNHANDLED_EXCEPTION(LoopbackException.class,
-        Code.INTERNAL_SERVER_ERROR), InvalidFilterException(InvalidFilterException.class,
-        Code.UNPROCESSABLE_ENTITY), InvalidOperatorException(InvalidOperatorException.class,
-        Code.UNPROCESSABLE_ENTITY), ConfigurationException(ConfigurationException.class,
-        Code.INTERNAL_SERVER_ERROR), ConnectorException(ConnectorException.class,
-        Code.INTERNAL_SERVER_ERROR), ConnectorNotFoundException(ConnectorNotFoundException.class,
-        Code.INTERNAL_SERVER_ERROR), CouldNotPerformException(CouldNotPerformException.class,
-        Code.FORBIDDEN), IdFieldNotFoundException(IdFieldNotFoundException.class,
-        Code.UNPROCESSABLE_ENTITY), InternalError(
-        com.flipkart.loopback.exception.InternalError.class,
-        Code.INTERNAL_SERVER_ERROR), InvalidPropertyValueException(
-        InvalidPropertyValueException.class, Code.UNPROCESSABLE_ENTITY), InvalidScopeException(
-        InvalidScopeException.class, Code.INTERNAL_SERVER_ERROR), ModelNotConfiguredException(
-        ModelNotConfiguredException.class, Code.INTERNAL_SERVER_ERROR), ModelNotFoundException(
-        ModelNotFoundException.class, Code.NOT_FOUND), OperationNotAllowedException(
-        OperationNotAllowedException.class, Code.FORBIDDEN), PropertyNotFoundException(
-        PropertyNotFoundException.class, Code.UNPROCESSABLE_ENTITY), RelationNotFound(
-        RelationNotFound.class, Code.BAD_REQUEST);
+  private static enum ExceptionDetails {
+    UNHANDLED_EXCEPTION(LoopbackException.class, Code.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR"),
+    InvalidFilterException(InvalidFilterException.class, Code.UNPROCESSABLE_ENTITY,
+        "INVALID_FILTER", true),
+    InvalidOperatorException(InvalidOperatorException.class, Code.UNPROCESSABLE_ENTITY,
+        "INVALID_FILTER", true),
+    ConfigurationException(ConfigurationException.class, Code.INTERNAL_SERVER_ERROR,
+        "INTERNAL_ERROR"),
+    ConnectorException(ConnectorException.class, Code.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR"),
+    ConnectorNotFoundException(ConnectorNotFoundException.class, Code.INTERNAL_SERVER_ERROR,
+        "INTERNAL_ERROR"), CouldNotPerformException(CouldNotPerformException.class, Code.FORBIDDEN,
+        "OPERATION_NOT_PERFORMED"),
+    IdFieldNotFoundException(IdFieldNotFoundException.class, Code.UNPROCESSABLE_ENTITY,
+        "INVALID_DATA", true),
+    InternalError(com.flipkart.loopback.exception.InternalError.class, Code.INTERNAL_SERVER_ERROR,
+        "INTERNAL_ERROR"),
+    InvalidPropertyValueException(InvalidPropertyValueException.class, Code.UNPROCESSABLE_ENTITY,
+        "INVALID_DATA", true),
+    InvalidScopeException(InvalidScopeException.class, Code.INTERNAL_SERVER_ERROR,
+        "INTERNAL_ERROR"),
+    ModelNotConfiguredException(ModelNotConfiguredException.class, Code.INTERNAL_SERVER_ERROR,
+        "INTERNAL_ERROR"),
+    ModelNotFoundException(ModelNotFoundException.class, Code.NOT_FOUND, "MODEL_NOT_FOUND", true),
+    OperationNotAllowedException(OperationNotAllowedException.class, Code.FORBIDDEN,
+        "OPERATION_NOT_PERMITTED", true),
+    PropertyNotFoundException(PropertyNotFoundException.class, Code.UNPROCESSABLE_ENTITY,
+        "INVALID_DATA", true),
+    RelationNotFound(RelationNotFound.class, Code.BAD_REQUEST, "RELATION_NOT_FOUND", true);
 
     private final Class<? extends LoopbackException> exceptionClass;
     private final Code exceptionCode;
+    private final String errorCode;
+    private final boolean allowMessageForward;
 
-    public static ExceptionCode fromClass(Class<? extends LoopbackException> exceptionClass) {
+    ExceptionDetails(Class<? extends LoopbackException> exceptionClass, Code exceptionCode,
+        String errorCode) {
+      this.exceptionClass = exceptionClass;
+      this.exceptionCode = exceptionCode;
+      this.errorCode = errorCode;
+      this.allowMessageForward = false;
+    }
 
-      for (int i = 0; i < ExceptionCode.values().length; i++) {
-        ExceptionCode code = ExceptionCode.values()[i];
+    public static ExceptionDetails fromClass(Class<? extends LoopbackException> exceptionClass) {
+
+      for (int i = 0; i < ExceptionDetails.values().length; i++) {
+        ExceptionDetails code = ExceptionDetails.values()[i];
         if (code.getExceptionClass().equals(exceptionClass)) {
           return code;
         }
@@ -67,22 +87,42 @@ public class WrapperExceptionMapper implements ExceptionMapper<WrapperException>
     }
   }
 
-  @Data
   @AllArgsConstructor
   class HttpErrorBody {
-    private final String message;
-    private final String errorCode;
+    private final ExceptionDetails detail;
+    private final LoopbackException exception;
+
+    @JsonProperty("STATUS_CODE")
+    public int getStatusCode() {
+      return detail.getExceptionCode().getCode();
+    }
+
+    @JsonProperty("ERROR_CODE")
+    public String getErrorCode() {
+      return detail.getErrorCode();
+    }
+
+    @JsonProperty("DESCRIPTION")
+    public String getDescription() {
+      if (detail.allowMessageForward && exception != null) {
+        return exception.getMessage();
+      }
+      return getErrorCode();
+    }
   }
 
   @Override
   public Response toResponse(WrapperException e) {
-    LoopbackException ex = (LoopbackException) e.getCause();
-    if (ex instanceof InternalError) {
-      return Response.status(500).entity("INTERNAL_SERVER_ERROR").type(
-          MediaType.TEXT_PLAIN).build();
-    } else if (ex instanceof ModelNotFoundException) {
-      return Response.status(404).entity(ex.getMessage()).type(MediaType.TEXT_PLAIN).build();
+    Throwable ex = e.getCause();
+    if(ex != null && ex instanceof LoopbackException) {
+      LoopbackException castedException = (LoopbackException) ex;
+      ExceptionDetails detail = ExceptionDetails.fromClass(castedException.getClass());
+      return Response.status(detail.getExceptionCode().getCode()).entity
+          (new HttpErrorBody(detail, castedException))
+          .build();
     }
-    return Response.status(500).entity("INTERNAL_SERVER_ERROR").type(MediaType.TEXT_PLAIN).build();
+    return Response.status(ExceptionDetails.InternalError.getExceptionCode().getCode())
+        .entity
+        (new HttpErrorBody(ExceptionDetails.InternalError, null)).build();
   }
 }

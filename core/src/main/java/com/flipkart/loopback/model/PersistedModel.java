@@ -50,41 +50,41 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
 
   protected static <M extends PersistedModel> void beginTransaction(
       @NotNull Class<M> modelClass) throws InternalError {
-//    Connector connector = getConnector(modelClass);
-//    EntityManager em = connector.getEntityManager();
-//    EntityTransaction tx = em.getTransaction();
-//    boolean newEm = !tx.isActive() || !em.isOpen();
-//    if (!newEm) {
-//      em.joinTransaction();
-//    } else {
-//      em.getTransaction().begin();
-//    }
+    Connector connector = getConnector(modelClass);
+    EntityManager em = connector.getEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    boolean newEm = !tx.isActive() || !em.isOpen();
+    if (!newEm) {
+      em.joinTransaction();
+    } else {
+      em.getTransaction().begin();
+    }
   }
 
   protected static <M extends PersistedModel> void commitTransaction(
       @NotNull Class<M> modelClass) throws InternalError {
-//    Connector connector = getConnector(modelClass);
-//    EntityManager em = connector.getEntityManager();
-//    EntityTransaction tx = em.getTransaction();
-//    boolean newEm = !tx.isActive() || !em.isOpen();
-//
-//    try {
-//      if (em.isOpen() && tx.isActive()) {
-//        tx.commit();
-//      }
-//    } catch (Throwable e) {
-//      if (tx.isActive()) {
-//        em.getTransaction().rollback();
-//      }
-//      throw e;
-//    } finally {
-//      if (newEm) {
-//        connector.clearEntityManager();
-//        if (em.isOpen()) {
-//          em.close();
-//        }
-//      }
-//    }
+    Connector connector = getConnector(modelClass);
+    EntityManager em = connector.getEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    boolean newEm = !tx.isActive() || !em.isOpen();
+
+    try {
+      if (em.isOpen() && tx.isActive()) {
+        tx.commit();
+      }
+    } catch (Throwable e) {
+      if (tx.isActive()) {
+        em.getTransaction().rollback();
+      }
+      throw e;
+    } finally {
+      if (newEm) {
+        connector.clearEntityManager();
+        if (em.isOpen()) {
+          em.close();
+        }
+      }
+    }
   }
 
   @JsonIgnore
