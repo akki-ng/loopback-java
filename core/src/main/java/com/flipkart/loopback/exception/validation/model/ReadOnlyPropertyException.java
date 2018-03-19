@@ -12,7 +12,7 @@ public class ReadOnlyPropertyException extends InvalidPropertyValueException {
 
   public ReadOnlyPropertyException(
       Class<? extends PersistedModel> modelClass,
-      String propertyName, Serializable propertyValue) {
+      String propertyName, Object propertyValue) {
     super(modelClass, propertyName, propertyValue, "Read-Only property");
   }
 }

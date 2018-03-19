@@ -37,6 +37,8 @@ public abstract class Connector {
 
   public abstract <M extends PersistedModel> M create(M model) throws ConnectorException;
 
+  public abstract <M extends PersistedModel> M replaceById(M model, Serializable id) throws ConnectorException;
+
   public abstract <M extends PersistedModel> List<M> create(List<M> models) throws ConnectorException;
 
 //  public abstract <M extends PersistedModel> M updateOrCreate(M model);

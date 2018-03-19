@@ -1,37 +1,35 @@
 package com.flipkart.sample.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.constants.RelationType;
-import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.model.PersistedModel;
 import com.flipkart.loopback.relation.Relation;
 import com.google.common.collect.Lists;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import lombok.NoArgsConstructor;
-import java.util.List;
 
 
 @Entity(name = "temp")
 @NoArgsConstructor
 public class TempModel extends PersistedModel<TempModel, ModelConfigurationManager> {
   private static List<Relation> relations = Lists.<Relation>newArrayList(
-      Relation.builder().name("test").fromPropertyName("testId").toPropertyName("id")
-          .relatedModelClass(TestModel.class).relationType(RelationType.HAS_ONE).build(),
-      Relation.builder().name("many").fromPropertyName("id").toPropertyName("tempId")
-          .relatedModelClass(HasManyModel.class).relationType(RelationType.HAS_MANY).build()
-  );
+      Relation.builder().name("test").fromPropertyName("testId").toPropertyName(
+          "id").relatedModelClass(TestModel.class).relationType(RelationType.HAS_ONE).build(),
+      Relation.builder().name("many").fromPropertyName("id").toPropertyName(
+          "tempId").relatedModelClass(HasManyModel.class).relationType(
+          RelationType.HAS_MANY).build());
 
   @JsonProperty("id")
   @Id //signifies the primary key
@@ -70,6 +68,14 @@ public class TempModel extends PersistedModel<TempModel, ModelConfigurationManag
   public static void main(String[] args) throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
     TempModel m = new TempModel();
-    System.out.println(mapper.writeValueAsString(m));
+    Map<String, Serializable> modelAsMap = mapper.convertValue(m,
+        new TypeReference<Map<String, Serializable>>() {
+        });
+    Map<String, Serializable> data = new HashMap<>();
+    data.put("id", 11);
+    modelAsMap.putAll(data);
+
+    m = mapper.convertValue(modelAsMap, m.getClass());
+    System.out.println(m.getId());
   }
 }

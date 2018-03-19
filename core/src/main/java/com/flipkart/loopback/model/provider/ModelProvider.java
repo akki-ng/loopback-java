@@ -110,7 +110,7 @@ public class ModelProvider {
     // Try create
     ObjectMapper mapper = new ObjectMapper();
     M model = mapper.convertValue(patchData, modelClass);
-    return M.create(model);
+    return create(model);
   }
 
   public <M extends PersistedModel> long patchMultipleWithWhere(Class<M> modelClass,
@@ -149,7 +149,7 @@ public class ModelProvider {
     // create
     ObjectMapper mapper = new ObjectMapper();
     M model = (M) mapper.convertValue(data, modelClass);
-    return M.create(model);
+    return create(model);
   }
 
   public <M extends PersistedModel, F extends Filter> M findOrCreate(Class<M> modelClass, F filter,
@@ -166,10 +166,19 @@ public class ModelProvider {
     return getConnectorFor(modelClass).updateAll(modelClass, where, data);
   }
 
+  public <M extends PersistedModel> M replace(M model) {
+//    model = (M) model.setAttribute(model.getIdPropertyName(), id);
+    return getConnectorFor(model.getClass()).replaceById(model, model.getId());
+  }
 
-  public <M extends PersistedModel> M replaceById(M model, Serializable id) {
-    model = (M) model.setAttribute(model.getIdPropertyName(), id);
-    return replaceById(model, id);
+  public <M extends PersistedModel> M replaceById(M model, Serializable id) throws CouldNotPerformException, ModelNotFoundException {
+//    model = (M) model.setAttribute(model.getIdPropertyName(), id);
+    if (model == null) {
+      throw new CouldNotPerformException(PersistedModel.class, "replaceOrCreate",
+          new NullPointerException("model is null"));
+    }
+    M persisted = (M) findById(model.getClass(), model.getId());
+    return replace(model);
   }
 
   public <M extends PersistedModel> M replaceOrCreate(
@@ -179,7 +188,7 @@ public class ModelProvider {
           new NullPointerException("model is null"));
     }
     try {
-      M persisted = (M) M.findById(model.getClass(), null, model.getId());
+      M persisted = (M) findById(model.getClass(), model.getId());
       return replaceById(model, persisted.getId());
     } catch (ModelNotFoundException e) {
       // Continue create
@@ -200,6 +209,13 @@ public class ModelProvider {
   public <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass,
       F filter) throws ModelNotFoundException {
     return getConnectorFor(modelClass).findOne(modelClass, filter);
+  }
+
+  public <M extends PersistedModel, F extends Filter> M findById(Class<M> modelClass,
+      Serializable id) throws ModelNotFoundException {
+    Filter idFilter = new Filter();
+    idFilter.setWhere(PersistedModel.createIDFilter(modelClass, id));
+    return (M) findOne(modelClass, idFilter);
   }
 
   public <M extends PersistedModel, W extends WhereFilter> long destroyAll(Class<M> modelClass,

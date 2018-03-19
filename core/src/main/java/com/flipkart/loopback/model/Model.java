@@ -11,8 +11,7 @@ import java.io.Serializable;
 /**
  * Created by akshaya.sharma on 02/03/18
  */
-public abstract class Model<T extends Model<T, CM>, CM extends ModelConfigurationManager>
-    implements Serializable {
+public abstract class Model<T extends Model<T, CM>, CM extends ModelConfigurationManager> {
 
   @JsonIgnore
   public static Connector getConnector(Class<? extends PersistedModel> modelClass) {

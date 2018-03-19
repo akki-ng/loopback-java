@@ -32,7 +32,6 @@ public class WrapperExceptionMapper implements ExceptionMapper<WrapperException>
   @AllArgsConstructor
   @Getter
   private static enum ExceptionDetails {
-    UNHANDLED_EXCEPTION(LoopbackException.class, Code.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR"),
     InvalidFilterException(InvalidFilterException.class, Code.UNPROCESSABLE_ENTITY,
         "INVALID_FILTER", true),
     InvalidOperatorException(InvalidOperatorException.class, Code.UNPROCESSABLE_ENTITY,
@@ -60,7 +59,8 @@ public class WrapperExceptionMapper implements ExceptionMapper<WrapperException>
         "OPERATION_NOT_PERMITTED", true),
     PropertyNotFoundException(PropertyNotFoundException.class, Code.UNPROCESSABLE_ENTITY,
         "INVALID_DATA", true),
-    RelationNotFound(RelationNotFound.class, Code.BAD_REQUEST, "RELATION_NOT_FOUND", true);
+    RelationNotFound(RelationNotFound.class, Code.BAD_REQUEST, "RELATION_NOT_FOUND", true),
+    UNHANDLED_EXCEPTION(Throwable.class, Code.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR");
 
     private final Class<? extends Throwable> exceptionClass;
     private final Code exceptionCode;
@@ -114,6 +114,7 @@ public class WrapperExceptionMapper implements ExceptionMapper<WrapperException>
   @Override
   public Response toResponse(WrapperException e) {
     Throwable ex = e.getCause();
+    ex.printStackTrace();
     ExceptionDetails detail = ExceptionDetails.fromClass(ex.getClass());
     return Response.status(detail.getExceptionCode().getCode()).entity(
         new HttpErrorBody(detail, ex)).build();

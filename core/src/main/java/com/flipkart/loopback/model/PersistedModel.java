@@ -195,7 +195,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
 
   @Transaction
   public static <M extends PersistedModel> M replaceById(M model,
-      Serializable id) throws ModelNotFoundException {
+      Serializable id) throws ModelNotFoundException, CouldNotPerformException {
     beginTransaction(model.getClass());
     M existingModel = (M) findById(model.getClass(), null, id);
     model = (M) model.setAttribute(model.getIdPropertyName(), existingModel.getId());
@@ -307,14 +307,21 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
       throw new IdFieldNotFoundException(this.getClass());
     }
 
-    if (data.containsKey(idName) && !getId().toString().equals(data.get(idName).toString())) {
+    Serializable id = data.containsKey(idName) ? data.get(idName) : null;
+    IDType idType = getConfiguration().getIDType();
+    if (id != null && !idType.isConvertible(id)) {
+      throw new InvalidPropertyValueException(getClass(), getConfiguration().getIdPropertyName(),
+          String.valueOf(id), " expected a " + idType);
+    }
+
+    if (getId() != null && !getId().toString().equals(id.toString())) {
       // Model can not update ID`
       throw new ReadOnlyPropertyException(this.getClass(), idName, data.get(idName));
     }
 
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> modelAsMap = mapper.convertValue(this,
-        new TypeReference<Map<String, Serializable>>() {
+        new TypeReference<Map<String, Object>>() {
         });
     modelAsMap.putAll(data);
     return (M) mapper.convertValue(modelAsMap, this.getClass());

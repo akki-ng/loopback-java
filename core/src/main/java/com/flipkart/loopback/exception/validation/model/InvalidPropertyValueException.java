@@ -15,7 +15,7 @@ import lombok.AllArgsConstructor;
 public class InvalidPropertyValueException extends LoopbackRuntimeException {
   protected final Class<? extends PersistedModel> modelClass;
   protected final String propertyName;
-  protected final Serializable propertyValue;
+  protected final Object propertyValue;
   protected final String reason;
 
   @Override

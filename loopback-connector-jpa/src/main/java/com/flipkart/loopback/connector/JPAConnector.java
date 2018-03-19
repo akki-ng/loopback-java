@@ -2,6 +2,7 @@ package com.flipkart.loopback.connector;
 
 import com.flipkart.loopback.exception.external.ConnectorException;
 import com.flipkart.loopback.exception.model.persistence.ModelNotFoundException;
+import com.flipkart.loopback.exception.validation.model.InvalidPropertyValueException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
@@ -82,6 +83,17 @@ public class JPAConnector extends Connector {
       persistedModels.add(create(models.get(i)));
     }
     return persistedModels;
+  }
+
+  @Override
+  public <M extends PersistedModel> M replaceById(M model, Serializable id) throws ConnectorException {
+    if(model.getId() == null || !model.getId().toString().equals(id.toString())) {
+      throw new InvalidPropertyValueException(model.getClass(), model.getIdPropertyName(),
+          model.getId(), " id must be a valid value to use replcaeById");
+    }
+    EntityManager em = getEntityManager();
+    em.merge(model);
+    return model;
   }
 
   @Override

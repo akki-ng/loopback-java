@@ -111,11 +111,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
   @Override
   public T replaceByPut(String id, T model,
       ContainerRequestContext requestContext) throws WrapperException {
-    try {
-      return replaceByPost(id, model, requestContext);
-    } catch (Throwable e) {
-      throw new WrapperException(e);
-    }
+    return replaceByPost(id, model, requestContext);
   }
 
   @Override

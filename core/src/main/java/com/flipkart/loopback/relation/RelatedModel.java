@@ -208,8 +208,7 @@ public class RelatedModel extends Model {
 
   @Transaction
   public <R extends PersistedModel> R replaceById(R relatedModel,
-      Serializable relatedModelId) throws OperationNotAllowedException, InternalError,
-      ModelNotFoundException {
+      Serializable relatedModelId) throws OperationNotAllowedException, InternalError, ModelNotFoundException, CouldNotPerformException {
     try {
       if (relation.getRelationType() == RelationType.HAS_ONE || relation.getRelationType() ==
           RelationType.BELONGS_TO) {
