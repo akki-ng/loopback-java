@@ -248,13 +248,16 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
 
   @Transaction
   public static <M extends PersistedModel> M replaceById(M model,
-      Serializable id) throws InternalError {
+      Serializable id) throws InternalError, ModelNotFoundException {
     try {
       beginTransaction(model.getClass());
+      M existingModel = (M) findById(model.getClass(), null, id);
+      model.setAttribute(model.getIdPropertyName(), existingModel.getId());
       model = getProvider().replaceById(model, id);
       commitTransaction(model.getClass());
       return model;
-    } catch (ConnectorNotFoundException | ConnectorException | ModelNotConfiguredException e) {
+    } catch (ConnectorNotFoundException | InvalidPropertyValueException | ConnectorException |
+        ModelNotConfiguredException e) {
       e.printStackTrace();
       throw new InternalError(model.getClass(), e);
     }

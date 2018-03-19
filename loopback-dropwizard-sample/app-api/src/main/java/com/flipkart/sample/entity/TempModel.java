@@ -64,7 +64,7 @@ public class TempModel extends PersistedModel<TempModel, ModelConfigurationManag
 //  private TestModel test;
 
   @JsonProperty("testId")
-  @Column(name = "test_id", nullable = false, length = 50)
+  @Column(name = "test_id", nullable = true, length = 50)
   private Long testId;
 
   public static void main(String[] args) throws JsonProcessingException {

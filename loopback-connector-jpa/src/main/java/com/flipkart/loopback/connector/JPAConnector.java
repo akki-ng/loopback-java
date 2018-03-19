@@ -132,6 +132,10 @@ public class JPAConnector extends Connector {
   @Override
   public <M extends PersistedModel> M replaceById(M model, Serializable id) throws ConnectorException {
     try {
+      if(model.getId() == null || !model.getId().toString().equals(id.toString())) {
+        throw new InvalidPropertyValueException(model.getClass(), model.getIdPropertyName(),
+            model.getId(), " id must be a valid value to use replcaeById");
+      }
       EntityManager em = getEntityManager();
 //    em.getTransaction().begin();
       em.merge(model);
