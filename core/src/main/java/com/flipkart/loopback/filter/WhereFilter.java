@@ -11,12 +11,14 @@ import com.flipkart.loopback.exception.validation.filter.InvalidOperatorExceptio
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import lombok.Data;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by akshaya.sharma on 07/03/18
  */
+@Data
 public class WhereFilter{
   @Getter
   private JsonNode value;
@@ -63,13 +65,10 @@ public class WhereFilter{
                 + "conditions");
           }
         } catch (InvalidOperatorException e) {
-          e.printStackTrace();
-
           // validate primitive
           JsonNode value = entry.getValue();
           _validatePrimitive(entry);
         } catch (InvalidFilterException e) {
-          e.printStackTrace();
           throw e;
         }
       }
@@ -100,7 +99,6 @@ public class WhereFilter{
                 .valueOf(fieldEntry.getValue()) + " in where filter");
           }
         } catch (InvalidOperatorException e) {
-          e.printStackTrace();
           throw new InvalidFilterException("Invalid key on filter " + e.getMessage());
         }
       }

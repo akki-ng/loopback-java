@@ -22,7 +22,8 @@ public class TransactionAspect {
   Logger log = LoggerFactory.getLogger(TransactionAspect.class);
 
   @Around("execution(@Transaction * * (..)) && @annotation(transactionAnno)")
-  public Object encloseMethodWithTransaction(ProceedingJoinPoint thisJoinPoint, Transaction transactionAnno) throws LoopbackException {
+  public Object encloseMethodWithTransaction(ProceedingJoinPoint thisJoinPoint, Transaction
+      transactionAnno) throws Throwable {
     try{
       System.out.println(thisJoinPoint);
       System.out.println("Starting Transaction Aspect");
@@ -74,13 +75,9 @@ public class TransactionAspect {
         o = thisJoinPoint.proceed();
       }
       return o;
-    }catch (LoopbackException e) {
-      e.printStackTrace();
-      throw e;
     }
     catch (Throwable e) {
-      e.printStackTrace();
+      throw e;
     }
-    return null;
   }
 }

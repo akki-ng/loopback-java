@@ -79,7 +79,7 @@ public class WrapperExceptionMapper implements ExceptionMapper<WrapperException>
 
       for (int i = 0; i < ExceptionDetails.values().length; i++) {
         ExceptionDetails code = ExceptionDetails.values()[i];
-        if (code.getExceptionClass().isAssignableFrom(exceptionClass)) {
+        if (exceptionClass.isAssignableFrom(code.getExceptionClass())) {
           return code;
         }
       }

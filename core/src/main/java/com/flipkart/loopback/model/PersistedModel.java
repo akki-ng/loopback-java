@@ -76,7 +76,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     }
 
     IDType idType = configuration.getIDType();
-    if (!idType.isValidSubclass(id.getClass())) {
+    if (!idType.isConvertible(id)) {
       throw new InvalidPropertyValueException(modelClass, configuration.getIdPropertyName(),
           String.valueOf(id), " expected a " + idType);
     }

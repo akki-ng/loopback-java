@@ -1,5 +1,6 @@
 package com.flipkart.loopback.constants;
 
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -13,7 +14,21 @@ public enum IDType {
   @Getter
   private Class javaType;
 
-  public boolean isValidSubclass(Class clazz) {
-    return clazz.isAssignableFrom(javaType);
+  public boolean isConvertible(Serializable id) {
+    if(id == null) {
+      return false;
+    }
+    Class clazz = id.getClass();
+    if(clazz.isAssignableFrom(javaType)) {
+      return true;
+    }
+    if(javaType.equals(Number.class)) {
+      try {
+        Number num = Long.parseLong(id.toString());
+      }catch (NumberFormatException e) {
+        return false;
+      }
+    }
+    return true;
   }
 }
