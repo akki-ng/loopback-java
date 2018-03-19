@@ -5,17 +5,17 @@ import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.connector.Connector;
 import com.flipkart.loopback.constants.RelationType;
-import com.flipkart.loopback.exception.CouldNotPerformException;
-import com.flipkart.loopback.exception.IdFieldNotFoundException;
-import com.flipkart.loopback.exception.InternalError;
-import com.flipkart.loopback.exception.InvalidFilterException;
-import com.flipkart.loopback.exception.InvalidPropertyValueException;
-import com.flipkart.loopback.exception.InvalidScopeException;
-import com.flipkart.loopback.exception.ModelNotConfiguredException;
-import com.flipkart.loopback.exception.ModelNotFoundException;
-import com.flipkart.loopback.exception.OperationNotAllowedException;
-import com.flipkart.loopback.exception.PropertyNotFoundException;
-import com.flipkart.loopback.exception.ReadOnlyPropertyException;
+import com.flipkart.loopback.exception.configuration.ModelNotConfiguredException;
+import com.flipkart.loopback.exception.model.CouldNotPerformException;
+import com.flipkart.loopback.exception.model.InternalError;
+import com.flipkart.loopback.exception.model.OperationNotAllowedException;
+import com.flipkart.loopback.exception.model.persistence.ModelNotFoundException;
+import com.flipkart.loopback.exception.model.relation.InvalidScopeException;
+import com.flipkart.loopback.exception.validation.filter.InvalidFilterException;
+import com.flipkart.loopback.exception.validation.model.IdFieldNotFoundException;
+import com.flipkart.loopback.exception.validation.model.InvalidPropertyValueException;
+import com.flipkart.loopback.exception.validation.model.PropertyNotFoundException;
+import com.flipkart.loopback.exception.validation.model.ReadOnlyPropertyException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.Model;
@@ -126,7 +126,7 @@ public class RelatedModel extends Model {
   }
 
   public <T extends Object> T find(
-      Filter relatedModelfilter) throws InternalError, ModelNotFoundException,
+      Filter relatedModelfilter) throws ModelNotFoundException,
       CouldNotPerformException {
     try {
       if (relatedModelfilter == null) {
@@ -154,7 +154,7 @@ public class RelatedModel extends Model {
   }
 
   public <T extends PersistedModel> T findById(
-      Serializable relatedModelId) throws OperationNotAllowedException, InternalError,
+      Serializable relatedModelId) throws OperationNotAllowedException,
       ModelNotFoundException {
     try {
       if (relation.getRelationType() == RelationType.HAS_ONE || relation.getRelationType() ==
@@ -185,7 +185,7 @@ public class RelatedModel extends Model {
 
   @Transaction
   public <R extends PersistedModel> R create(
-      R relatedModel) throws OperationNotAllowedException, InternalError, CouldNotPerformException {
+      R relatedModel) throws OperationNotAllowedException, CouldNotPerformException {
     try {
       Class<? extends PersistedModel> relModelClass = relation.getRelatedModelClass();
       if (!relModelClass.isInstance(relatedModel)) {
@@ -208,7 +208,8 @@ public class RelatedModel extends Model {
 
   @Transaction
   public <R extends PersistedModel> R replaceById(R relatedModel,
-      Serializable relatedModelId) throws OperationNotAllowedException, InternalError, ModelNotFoundException {
+      Serializable relatedModelId) throws OperationNotAllowedException, InternalError,
+      ModelNotFoundException {
     try {
       if (relation.getRelationType() == RelationType.HAS_ONE || relation.getRelationType() ==
           RelationType.BELONGS_TO) {

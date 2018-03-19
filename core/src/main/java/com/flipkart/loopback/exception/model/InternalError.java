@@ -1,5 +1,7 @@
-package com.flipkart.loopback.exception;
+package com.flipkart.loopback.exception.model;
 
+import com.flipkart.loopback.exception.LoopbackException;
+import com.flipkart.loopback.exception.LoopbackRuntimeException;
 import com.flipkart.loopback.model.PersistedModel;
 import java.text.MessageFormat;
 import lombok.AllArgsConstructor;
@@ -8,7 +10,7 @@ import lombok.AllArgsConstructor;
  * Created by akshaya.sharma on 18/03/18
  */
 @AllArgsConstructor
-public class InternalError extends LoopbackException {
+public class InternalError extends LoopbackRuntimeException {
   private final Class<? extends PersistedModel> modelClass;
   private Throwable error;
 

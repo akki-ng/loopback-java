@@ -1,9 +1,9 @@
 package com.flipkart.loopback.relation;
 
 import com.flipkart.loopback.constants.RelationType;
-import com.flipkart.loopback.exception.IdFieldNotFoundException;
-import com.flipkart.loopback.exception.InternalError;
-import com.flipkart.loopback.exception.InvalidPropertyValueException;
+import com.flipkart.loopback.exception.validation.model.IdFieldNotFoundException;
+import com.flipkart.loopback.exception.model.InternalError;
+import com.flipkart.loopback.exception.validation.model.InvalidPropertyValueException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.model.PersistedModel;
 import java.util.Map;

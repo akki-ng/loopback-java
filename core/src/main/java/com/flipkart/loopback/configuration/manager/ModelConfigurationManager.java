@@ -1,8 +1,7 @@
 package com.flipkart.loopback.configuration.manager;
 
 import com.flipkart.loopback.configuration.ModelConfiguration;
-import com.flipkart.loopback.exception.ModelNotConfiguredException;
-import com.flipkart.loopback.model.Model;
+import com.flipkart.loopback.exception.configuration.ModelNotConfiguredException;
 import com.flipkart.loopback.model.PersistedModel;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

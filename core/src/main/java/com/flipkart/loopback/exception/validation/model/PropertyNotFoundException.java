@@ -1,5 +1,7 @@
-package com.flipkart.loopback.exception;
+package com.flipkart.loopback.exception.validation.model;
 
+import com.flipkart.loopback.exception.LoopbackException;
+import com.flipkart.loopback.exception.LoopbackRuntimeException;
 import com.flipkart.loopback.model.PersistedModel;
 import java.text.MessageFormat;
 import lombok.AllArgsConstructor;
@@ -8,7 +10,7 @@ import lombok.AllArgsConstructor;
  * Created by akshaya.sharma on 17/03/18
  */
 @AllArgsConstructor
-public class PropertyNotFoundException extends LoopbackException{
+public class PropertyNotFoundException extends LoopbackRuntimeException {
   protected final Class<? extends PersistedModel> modelClass;
   protected final String propertyName;
 

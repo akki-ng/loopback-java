@@ -1,5 +1,6 @@
-package com.flipkart.loopback.exception;
+package com.flipkart.loopback.exception.validation.filter;
 
+import com.flipkart.loopback.exception.LoopbackException;
 import java.text.MessageFormat;
 import lombok.AllArgsConstructor;
 

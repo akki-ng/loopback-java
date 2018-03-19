@@ -6,15 +6,12 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.flipkart.loopback.constants.LogicalOperator;
 import com.flipkart.loopback.constants.QueryOperator;
-import com.flipkart.loopback.exception.InvalidFilterException;
-import com.flipkart.loopback.exception.InvalidOperatorException;
-import com.flipkart.loopback.exception.LoopbackException;
+import com.flipkart.loopback.exception.validation.filter.InvalidFilterException;
+import com.flipkart.loopback.exception.validation.filter.InvalidOperatorException;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 /**

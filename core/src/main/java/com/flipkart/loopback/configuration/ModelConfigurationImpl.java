@@ -1,16 +1,8 @@
 package com.flipkart.loopback.configuration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.flipkart.loopback.exception.ConfigurationException;
 import com.flipkart.loopback.exception.LoopbackException;
-import com.flipkart.loopback.relation.Relation;
-import com.google.common.collect.Maps;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 

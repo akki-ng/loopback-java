@@ -1,7 +1,6 @@
 package com.flipkart.loopback.constants;
 
-import com.flipkart.loopback.exception.InvalidOperatorException;
-import com.flipkart.loopback.exception.LoopbackException;
+import com.flipkart.loopback.exception.validation.filter.InvalidOperatorException;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 

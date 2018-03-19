@@ -1,6 +1,7 @@
 package com.flipkart.loopback.connector;
 
-import com.flipkart.loopback.exception.ConnectorException;
+import com.flipkart.loopback.exception.external.ConnectorException;
+import com.flipkart.loopback.exception.model.persistence.ModelNotFoundException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
@@ -52,20 +53,13 @@ public abstract class Connector {
   public abstract <M extends PersistedModel, F extends Filter> M updateAttributes(M model, F filter, Map<String, Object>
       data) throws ConnectorException;
 
-  public abstract <M extends PersistedModel> M replaceById(M model, Serializable id) throws ConnectorException;
-
-
   public abstract <M extends PersistedModel> boolean exists(Class<M> modelClass, Serializable id) throws
       ConnectorException;
 
   public abstract <M extends PersistedModel, F extends Filter> List<M> find(Class<M> modelClass, F filter) throws ConnectorException;
 
-  public abstract <M extends PersistedModel> M findById(Class<M> modelClass, Filter filter, Serializable id) throws ConnectorException;
-
-  public abstract <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass, F filter) throws ConnectorException;
-
-
-
+  public abstract <M extends PersistedModel, F extends Filter> M findOne(Class<M> modelClass, F
+      filter) throws ConnectorException, ModelNotFoundException;
 
   public abstract <M extends PersistedModel> M destroy(M model) throws ConnectorException;
 

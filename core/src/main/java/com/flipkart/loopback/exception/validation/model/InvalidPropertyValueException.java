@@ -1,5 +1,7 @@
-package com.flipkart.loopback.exception;
+package com.flipkart.loopback.exception.validation.model;
 
+import com.flipkart.loopback.exception.LoopbackException;
+import com.flipkart.loopback.exception.LoopbackRuntimeException;
 import com.flipkart.loopback.model.PersistedModel;
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -10,7 +12,7 @@ import lombok.AllArgsConstructor;
  */
 
 @AllArgsConstructor
-public class InvalidPropertyValueException extends LoopbackException {
+public class InvalidPropertyValueException extends LoopbackRuntimeException {
   protected final Class<? extends PersistedModel> modelClass;
   protected final String propertyName;
   protected final Serializable propertyValue;

@@ -1,5 +1,6 @@
-package com.flipkart.loopback.exception;
+package com.flipkart.loopback.exception.configuration;
 
+import com.flipkart.loopback.exception.LoopbackRuntimeException;
 import com.flipkart.loopback.model.PersistedModel;
 import java.text.MessageFormat;
 import lombok.AllArgsConstructor;
@@ -9,11 +10,11 @@ import lombok.AllArgsConstructor;
  */
 
 @AllArgsConstructor
-public class IdFieldNotFoundException extends LoopbackException {
+public class ConnectorNotFoundException extends LoopbackRuntimeException {
   protected final Class<? extends PersistedModel> modelClass;
 
   @Override
   public String getMessage() {
-    return MessageFormat.format("No id field exists for model {0}", modelClass.getSimpleName());
+    return MessageFormat.format("No connector defined for model {0}", modelClass.getSimpleName());
   }
 }

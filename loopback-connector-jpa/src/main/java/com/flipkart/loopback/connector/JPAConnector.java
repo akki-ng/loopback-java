@@ -1,5 +1,6 @@
 package com.flipkart.loopback.connector;
 
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.exception.ConnectorException;

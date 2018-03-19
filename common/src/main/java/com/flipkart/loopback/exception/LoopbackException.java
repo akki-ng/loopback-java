@@ -11,11 +11,6 @@ public abstract class LoopbackException extends Throwable{
   }
 
   @Override
-  public synchronized Throwable getCause() {
-    return this;
-  }
-
-  @Override
   public String toString() {
     return this.getMessage();
   }

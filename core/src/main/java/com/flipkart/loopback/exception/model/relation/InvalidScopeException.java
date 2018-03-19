@@ -1,5 +1,6 @@
-package com.flipkart.loopback.exception;
+package com.flipkart.loopback.exception.model.relation;
 
+import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.model.PersistedModel;
 import com.flipkart.loopback.relation.RelatedModel;
 import com.flipkart.loopback.relation.Relation;

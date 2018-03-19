@@ -1,8 +1,8 @@
-package com.flipkart.loopback.exception;
+package com.flipkart.loopback.exception.validation.model;
 
+import com.flipkart.loopback.exception.validation.model.InvalidPropertyValueException;
 import com.flipkart.loopback.model.PersistedModel;
 import java.io.Serializable;
-import java.text.MessageFormat;
 
 /**
  * Created by akshaya.sharma on 17/03/18
