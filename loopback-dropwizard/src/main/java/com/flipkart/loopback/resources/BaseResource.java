@@ -1,13 +1,12 @@
 package com.flipkart.loopback.resources;
 
 import com.flipkart.loopback.dropwizard.exception.WrapperException;
-import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
 import com.flipkart.loopback.relation.RelatedModel;
 import com.flipkart.loopback.relation.Relation;
-import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -20,11 +19,11 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
   public abstract <C extends PersistedModel> Class<C> getModelClass();
 
   @Override
-  public T patchOrInsert(Map<String, Object> patchData,
+  public T patchOrInsert(Map<String, Serializable> patchData,
       ContainerRequestContext requestContext) throws WrapperException {
     try {
       return T.updateOrCreate(getModelClass(), patchData);
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -34,7 +33,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       ContainerRequestContext requestContext) throws WrapperException {
     try {
       return T.find(getModelClass(), filter);
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -44,7 +43,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       ContainerRequestContext requestContext) throws WrapperException {
     try {
       return T.replaceOrCreate(model);
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -53,7 +52,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
   public T create(T model, ContainerRequestContext requestContext) throws WrapperException {
     try {
       return T.create(model);
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -63,7 +62,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       ContainerRequestContext requestContext) throws WrapperException {
     try {
       return T.create(models);
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -74,7 +73,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
     try {
       T model = T.findById(getModelClass(), null, id);
       return (T) model.updateAttributes(patchData);
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -85,7 +84,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
     try {
       T model = T.findById(getModelClass(), filter, id);
       return model;
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -93,14 +92,18 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
   @Override
   public boolean existsByHead(String id,
       ContainerRequestContext requestContext) throws WrapperException {
-    return exists(id, requestContext);
+    try {
+      return exists(id, requestContext);
+    } catch (Throwable e) {
+      throw new WrapperException(e);
+    }
   }
 
   @Override
   public boolean exists(String id, ContainerRequestContext requestContext) throws WrapperException {
     try {
       return T.exists(getModelClass(), id);
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -108,7 +111,11 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
   @Override
   public T replaceByPut(String id, T model,
       ContainerRequestContext requestContext) throws WrapperException {
-    return replaceByPost(id, model, requestContext);
+    try {
+      return replaceByPost(id, model, requestContext);
+    } catch (Throwable e) {
+      throw new WrapperException(e);
+    }
   }
 
   @Override
@@ -116,7 +123,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       ContainerRequestContext requestContext) throws WrapperException {
     try {
       return T.replaceById(model, id);
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -125,7 +132,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
   public T deleteById(String id, ContainerRequestContext requestContext) throws WrapperException {
     try {
       return T.destroyById(getModelClass(), id);
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -135,7 +142,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       ContainerRequestContext requestContext) throws WrapperException {
     try {
       return T.count(getModelClass(), where);
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -145,7 +152,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       ContainerRequestContext requestContext) throws WrapperException {
     try {
       return T.updateAll(model.getClass(), where, model.getFieldMap());
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -155,7 +162,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       ContainerRequestContext requestContext) throws WrapperException {
     try {
       return (T) T.upsertWithWhere(getModelClass(), where, model.getFieldMap());
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -199,7 +206,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       }
       PersistedModel result = relatedModel.find(relatedModelfilter);
       return result;
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -212,7 +219,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       Relation relation = model.getRelationByRestPath(relationRestPath);
       RelatedModel relatedModel = model.getRelatedModel(relation.getName());
       return relatedModel.findById(fk);
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -228,7 +235,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       PersistedModel transientInstance = relatedModel.getRelation().getInstance(data);
       transientInstance = relatedModel.create(transientInstance);
       return transientInstance;
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -242,21 +249,20 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       RelatedModel relatedModel = model.getRelatedModel(relation.getName());
       PersistedModel relatedInstance = relatedModel.updateOrCreate(data);
       return relatedInstance;
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
 
   @Override
   public long destroyAllRelatedEntities(String id, String relationRestPath, WhereFilter where,
-      Map<String, Object> data,
-      ContainerRequestContext requestContext) throws WrapperException {
+      Map<String, Object> data, ContainerRequestContext requestContext) throws WrapperException {
     try {
       T model = findById(id, null, requestContext);
       Relation relation = model.getRelationByRestPath(relationRestPath);
       RelatedModel relatedModel = model.getRelatedModel(relation.getName());
       return relatedModel.destroyAll(where);
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -269,7 +275,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       Relation relation = model.getRelationByRestPath(relationRestPath);
       RelatedModel relatedModel = model.getRelatedModel(relation.getName());
       return relatedModel.findById(fk).destroy();
-    }catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -283,7 +289,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       RelatedModel relatedModel = model.getRelatedModel(relation.getName());
       PersistedModel transientInstance = relatedModel.getRelation().getInstance(data);
       return relatedModel.replaceById(transientInstance, fk);
-    }catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }
@@ -297,7 +303,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       RelatedModel relatedModel = model.getRelatedModel(relation.getName());
       PersistedModel relatedInstance = relatedModel.updateAttributes(fk, data);
       return relatedInstance;
-    } catch (LoopbackException e) {
+    } catch (Throwable e) {
       throw new WrapperException(e);
     }
   }

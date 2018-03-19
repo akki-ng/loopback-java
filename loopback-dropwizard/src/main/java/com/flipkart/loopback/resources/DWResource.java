@@ -6,6 +6,7 @@ import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.DELETE;
@@ -30,7 +31,7 @@ public interface DWResource<T extends PersistedModel> {
    */
   @PATCH
   @Path("/")
-  public T patchOrInsert(Map<String, Object> patchData, @Context ContainerRequestContext
+  public T patchOrInsert(Map<String, Serializable> patchData, @Context ContainerRequestContext
       requestContext) throws WrapperException;
 
   /*

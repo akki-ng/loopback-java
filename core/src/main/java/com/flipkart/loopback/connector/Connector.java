@@ -50,9 +50,6 @@ public abstract class Connector {
   public abstract <M extends PersistedModel, W extends WhereFilter> long updateAll(Class<M> modelClass, W filter, Map<String, Object>
       data) throws ConnectorException;
 
-  public abstract <M extends PersistedModel, F extends Filter> M updateAttributes(M model, F filter, Map<String, Object>
-      data) throws ConnectorException;
-
   public abstract <M extends PersistedModel> boolean exists(Class<M> modelClass, Serializable id) throws
       ConnectorException;
 

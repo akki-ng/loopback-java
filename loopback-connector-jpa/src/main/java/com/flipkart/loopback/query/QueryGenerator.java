@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
-import com.flipkart.loopback.exception.ModelNotConfiguredException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
@@ -45,7 +44,7 @@ public class QueryGenerator {
     return instance;
   }
 
-  private <M extends PersistedModel> String buildColumnNames(Class<M> modelClass, Filter filter) throws ModelNotConfiguredException {
+  private <M extends PersistedModel> String buildColumnNames(Class<M> modelClass, Filter filter){
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
         .getModelConfiguration(
         modelClass);
@@ -70,7 +69,7 @@ public class QueryGenerator {
     return Joiner.on(",").join(columnNames);
   }
 
-  public <M extends PersistedModel> String getSelectQuery(Class<M> modelClass, Filter filter) throws ModelNotConfiguredException {
+  public <M extends PersistedModel> String getSelectQuery(Class<M> modelClass, Filter filter) {
 //    if (!filter.) {
 //      var idNames = this.idNames(model);
 //      if (idNames && idNames.length) {
@@ -120,7 +119,7 @@ public class QueryGenerator {
   }
 
   public <M extends PersistedModel> TypedQuery<M> getSelectTypedQuery(EntityManager em,
-      Class<M> modelClass, Filter filter) throws ModelNotConfiguredException {
+      Class<M> modelClass, Filter filter) {
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
         .getModelConfiguration(
         modelClass);
@@ -167,7 +166,7 @@ public class QueryGenerator {
   }
 
   public <M extends PersistedModel> TypedQuery<Long> getCountTypedQuery(EntityManager em,
-      Class<M> modelClass, WhereFilter where) throws ModelNotConfiguredException {
+      Class<M> modelClass, WhereFilter where) {
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
         .getModelConfiguration(
         modelClass);
@@ -191,7 +190,7 @@ public class QueryGenerator {
   }
 
   public <M extends PersistedModel> Query getDeleteQuery(EntityManager em, Class<M> modelClass,
-      WhereFilter where) throws ModelNotConfiguredException {
+      WhereFilter where) {
 
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
         .getModelConfiguration(
@@ -215,7 +214,7 @@ public class QueryGenerator {
   }
 
   public <M extends PersistedModel> List<Predicate> getWherePredicates(Root<M> root,
-      CommonAbstractCriteria query, CriteriaBuilder cb, Class<M> modelClass, WhereFilter where) throws ModelNotConfiguredException {
+      CommonAbstractCriteria query, CriteriaBuilder cb, Class<M> modelClass, WhereFilter where) {
     List<Predicate> predicates = new ArrayList<Predicate>();
     if (where != null) {
 
