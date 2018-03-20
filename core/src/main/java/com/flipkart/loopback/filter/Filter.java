@@ -26,6 +26,7 @@ public class Filter {
 
   private Integer skip;
 
+  private OrderFilter order;
   // TODO List is not visible
   private ArrayList<String> fields;
 
@@ -73,6 +74,8 @@ public class Filter {
               throw new InvalidFilterException("Fields expects a list of strings");
             }
             this.fields = new ObjectMapper().convertValue(entry.getValue(), ArrayList.class);
+          }else if(filterKey == FilterKeys.ORDER) {
+            this.order = new OrderFilter(entry.getValue());
           }
         } catch (InvalidFilterException e) {
           e.printStackTrace();

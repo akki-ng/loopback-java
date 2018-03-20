@@ -12,7 +12,8 @@ public enum FilterKeys {
   WHERE("where"),
   LIMIT("limit"),
   SKIP("skip"),
-  FIELDS("fields");
+  FIELDS("fields"),
+  ORDER("order");
 
   @Getter
   private String value;
