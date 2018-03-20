@@ -21,5 +21,4 @@ public class TempResource extends BaseResource<TempModel> {
     return TempModel.class;
   }
 
-
 }

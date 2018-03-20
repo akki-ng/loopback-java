@@ -39,21 +39,21 @@
             <artifactId>dropwizard-core</artifactId>
             <version>${dep.dropwizard.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.smoketurner</groupId>
-            <artifactId>dropwizard-swagger</artifactId>
-            <version>${dep.dropwizard-swagger.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.smoketurner</groupId>-->
+            <!--<artifactId>dropwizard-swagger</artifactId>-->
+            <!--<version>${dep.dropwizard-swagger.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
             <version>${dep.swagger.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-jaxrs</artifactId>
-            <version>${dep.swagger.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>io.swagger</groupId>-->
+            <!--<artifactId>swagger-jaxrs</artifactId>-->
+            <!--<version>${dep.swagger.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>io.loopback</groupId>
             <artifactId>core</artifactId>

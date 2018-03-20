@@ -48,6 +48,22 @@
             <artifactId>dropwizard-hibernate</artifactId>
             <version>1.2.4</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.wordnik/swagger-jaxrs -->
+        <!--<dependency>-->
+            <!--<groupId>com.wordnik</groupId>-->
+            <!--<artifactId>swagger-jaxrs</artifactId>-->
+            <!--<version>1.5.3-M1</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>com.wordnik</groupId>-->
+            <!--<artifactId>swagger-jersey-jaxrs</artifactId>-->
+            <!--<version>1.5.3-M1</version>-->
+        <!--</dependency>-->
+        <dependency>
+            <groupId>com.smoketurner</groupId>
+            <artifactId>dropwizard-swagger</artifactId>
+            <version>${dep.dropwizard-swagger.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -61,6 +77,53 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <!--<plugin>-->
+                <!--<groupId>com.github.kongchen</groupId>-->
+                <!--<artifactId>swagger-maven-plugin</artifactId>-->
+                <!--<version>3.1.6</version>-->
+                <!--<configuration>-->
+                    <!--<apiSources>-->
+                        <!--<apiSource>-->
+                            <!--<info>-->
+                                <!--<title>Swagger Maven Plugin Sample</title>-->
+                                <!--<version>v1</version>-->
+                                <!--&lt;!&ndash; use markdown here because I'm using markdown for output,-->
+                                <!--if you need to use html or other markup language, you need to use your target language,-->
+                                 <!--and note escape your description for xml &ndash;&gt;-->
+                                <!--<description>-->
+                                    <!--This is a sample.-->
+                                <!--</description>-->
+                                <!--<termsOfService>-->
+                                    <!--http://www.github.com/kongchen/swagger-maven-plugin-->
+                                <!--</termsOfService>-->
+                                <!--<contact>-->
+                                    <!--<email>kongchen@gmail.com</email>-->
+                                    <!--<name>Kong Chen</name>-->
+                                    <!--<url>http://kongch.com</url>-->
+                                <!--</contact>-->
+                                <!--<license>-->
+                                    <!--<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>-->
+                                    <!--<name>Apache 2.0</name>-->
+                                <!--</license>-->
+                            <!--</info>-->
+                            <!--<locations>-->
+                                <!--<location>com.flipkart.sample.resources.TempResource</location>-->
+                                <!--<location>com.flipkart.sample.resources.TestResource</location>-->
+                            <!--</locations>-->
+                            <!--<swaggerDirectory>${project.build.directory}/generated/swagger-ui</swaggerDirectory>-->
+                            <!--<attachSwaggerArtifact>true</attachSwaggerArtifact>-->
+                        <!--</apiSource>-->
+                    <!--</apiSources>-->
+                <!--</configuration>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<phase>compile</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>generate</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 </project>

@@ -4,6 +4,8 @@ import com.flipkart.fdp.dws.wrapper.app.DWApp;
 import com.flipkart.fdp.dws.wrapper.app.GuiceModulesProvider;
 import com.flipkart.fdp.dws.wrapper.app.JerseyResourcesProvider;
 import io.dropwizard.setup.Bootstrap;
+import io.federecio.dropwizard.swagger.SwaggerBundle;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import java.io.IOException;
 
 /**

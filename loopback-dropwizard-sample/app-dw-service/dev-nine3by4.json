@@ -41,7 +41,7 @@
       ]
     },
     "swagger": {
-      "resourcePackage": "com.flipkart.fdp.resources,com.flipkart.nine3by4.server.resources"
+      "resourcePackage": "com.flipkart.fdp.resources,com.flipkart.resources, com.flipkart.loopback.resources, com.flipkart.sample.resources"
     }
   },
   "appConf.path": "/tmp/ssi-config.yml",

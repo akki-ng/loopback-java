@@ -5,7 +5,6 @@ import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +23,6 @@ import javax.ws.rs.core.Context;
 /**
  * Created by akshaya.sharma on 06/03/18
  */
-
 public interface DWResource<T extends PersistedModel> {
   /*
     Patch an existing model instance or insert a new one into the data source
