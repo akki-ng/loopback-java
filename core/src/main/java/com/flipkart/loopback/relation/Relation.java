@@ -24,12 +24,16 @@ import org.jibx.schema.codegen.extend.NameConverter;
 public class Relation {
   //  <R extends PersistedModel>
   private final RelationType relationType;
-  private final Filter scope;
   private final String fromPropertyName;
   private final String toPropertyName;
+
+  private final String toThroughPropertyName;
+  private final String fromThroughPropertyName;
+
   private final String name;
   private final String restPath;
   private Class<? extends PersistedModel> relatedModelClass;
+  private Class<? extends PersistedModel> throughModelClass;
 
   public String getRestPath() {
     NameConverter nameTools = new DefaultNameConverter();
@@ -44,7 +48,7 @@ public class Relation {
       IdFieldNotFoundException {
     try {
       R transientInstance = (R) getRelatedModelClass().newInstance();
-      transientInstance.setAttributes(data);
+      transientInstance = (R) transientInstance.setAttributes(data);
       return transientInstance;
     } catch (InstantiationException | IllegalAccessException e) {
       e.printStackTrace();

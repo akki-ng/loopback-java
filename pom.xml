@@ -33,6 +33,7 @@
         <dep.jibx-tools.version>1.3.1</dep.jibx-tools.version>
         <dep.checkerframework.version>2.4.0</dep.checkerframework.version>
         <dep.jetbrains-annotation.version>15.0</dep.jetbrains-annotation.version>
+        <dep.json.version>20180130</dep.json.version>
         <!--<annotatedJdk>${org.checkerframework:jdk8:jar}</annotatedJdk>-->
     </properties>
 
@@ -82,6 +83,11 @@
                 <groupId>org.jibx</groupId>
                 <artifactId>jibx-tools</artifactId>
                 <version>${dep.jibx-tools.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${dep.json.version}</version>
             </dependency>
             <!--<dependency>-->
                 <!--<groupId>org.checkerframework</groupId>-->

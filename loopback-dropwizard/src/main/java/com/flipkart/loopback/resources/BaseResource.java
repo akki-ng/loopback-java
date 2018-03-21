@@ -197,10 +197,10 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       Relation relation = model.getRelationByRestPath(relationRestPath);
       RelatedModel relatedModel = model.getRelatedModel(relation.getName());
       if (relatedModel.isManyRelation()) {
-        List<PersistedModel> result = relatedModel.find(relatedModelfilter);
+        List<PersistedModel> result = relatedModel.find(relatedModelfilter, null);
         return result;
       }
-      PersistedModel result = relatedModel.find(relatedModelfilter);
+      PersistedModel result = relatedModel.find(relatedModelfilter, null);
       return result;
     } catch (Throwable e) {
       throw new WrapperException(e);
@@ -214,7 +214,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       T model = findById(id, null, requestContext);
       Relation relation = model.getRelationByRestPath(relationRestPath);
       RelatedModel relatedModel = model.getRelatedModel(relation.getName());
-      return relatedModel.findById(fk);
+      return relatedModel.findByFk(fk);
     } catch (Throwable e) {
       throw new WrapperException(e);
     }
@@ -243,8 +243,8 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       T model = findById(id, null, requestContext);
       Relation relation = model.getRelationByRestPath(relationRestPath);
       RelatedModel relatedModel = model.getRelatedModel(relation.getName());
-      PersistedModel relatedInstance = relatedModel.updateOrCreate(data);
-      return relatedInstance;
+//      PersistedModel relatedInstance = relatedModel.create(data);
+      return null;
     } catch (Throwable e) {
       throw new WrapperException(e);
     }
@@ -257,7 +257,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       T model = findById(id, null, requestContext);
       Relation relation = model.getRelationByRestPath(relationRestPath);
       RelatedModel relatedModel = model.getRelatedModel(relation.getName());
-      return relatedModel.destroyAll(where);
+      return relatedModel.destroyAll(where, null);
     } catch (Throwable e) {
       throw new WrapperException(e);
     }
@@ -270,7 +270,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       T model = findById(id, null, requestContext);
       Relation relation = model.getRelationByRestPath(relationRestPath);
       RelatedModel relatedModel = model.getRelatedModel(relation.getName());
-      return relatedModel.findById(fk).destroy();
+      return relatedModel.findByFk(fk).destroy();
     } catch (Throwable e) {
       throw new WrapperException(e);
     }
@@ -284,7 +284,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       Relation relation = model.getRelationByRestPath(relationRestPath);
       RelatedModel relatedModel = model.getRelatedModel(relation.getName());
       PersistedModel transientInstance = relatedModel.getRelation().getInstance(data);
-      return relatedModel.replaceById(transientInstance, fk);
+      return relatedModel.replaceByFk(transientInstance, fk);
     } catch (Throwable e) {
       throw new WrapperException(e);
     }

@@ -309,12 +309,12 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
 
     Serializable id = data.containsKey(idName) ? data.get(idName) : null;
     IDType idType = getConfiguration().getIDType();
-    if (id != null && !idType.isConvertible(id)) {
+    if ((id != null) && !idType.isConvertible(id)) {
       throw new InvalidPropertyValueException(getClass(), getConfiguration().getIdPropertyName(),
           String.valueOf(id), " expected a " + idType);
     }
 
-    if (getId() != null && !getId().toString().equals(id.toString())) {
+    if ((id != null) && (getId() != null) && !getId().toString().equals(id.toString())) {
       // Model can not update ID`
       throw new ReadOnlyPropertyException(this.getClass(), idName, data.get(idName));
     }

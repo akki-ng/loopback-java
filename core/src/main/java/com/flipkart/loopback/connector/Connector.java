@@ -64,4 +64,11 @@ public abstract class Connector {
 
   public abstract <M extends PersistedModel, W extends WhereFilter> long destroyAll(Class<M> modelClass, W
       where) throws ConnectorException;
+
+
+  /*
+  Relation specific
+   */
+
+
 }

@@ -55,6 +55,7 @@
     <orderEntry type="library" name="Maven: com.google.errorprone:error_prone_annotations:2.1.3" level="project" />
     <orderEntry type="library" name="Maven: com.google.j2objc:j2objc-annotations:1.1" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.mojo:animal-sniffer-annotations:1.14" level="project" />
+    <orderEntry type="library" name="Maven: org.json:json:20180130" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.21" level="project" />
     <orderEntry type="library" name="Maven: io.loopback:loopback-connector-jpa:0.1" level="project" />
     <orderEntry type="library" name="Maven: io.loopback:loopback-dropwizard:0.1" level="project" />

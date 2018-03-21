@@ -14,6 +14,7 @@ import java.util.Map;
 import lombok.Data;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
 /**
  * Created by akshaya.sharma on 07/03/18
@@ -39,6 +40,10 @@ public class WhereFilter{
 
   public WhereFilter(@NotNull  JsonNode whereNode) throws InvalidFilterException {
     this(whereNode.toString());
+  }
+
+  public WhereFilter(@NotNull JSONObject object) throws InvalidFilterException {
+    this(object.toString());
   }
 
   private void _validateWhereFilter() throws InvalidFilterException {
