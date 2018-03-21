@@ -30,9 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.GeneratedValue;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -125,9 +125,21 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
     return getProvider().count(modelClass, where);
   }
 
+  @JsonIgnore
+  public boolean isGeneratedId() {
+    String idPropertyName = getIdPropertyName();
+    Map<String, Field> properties = this.getProperties();
+    Field idField = properties.get(idPropertyName);
+    GeneratedValue generatedValue = idField.getAnnotation(GeneratedValue.class);
+    return generatedValue != null;
+  }
+
   @Transaction
   public static <M extends PersistedModel> M create(
       @NotNull M model) throws CouldNotPerformException {
+    if (model.isGeneratedId()) {
+      model = (M) model.setAttribute(model.getIdPropertyName(), null);
+    }
     beginTransaction(model.getClass());
     model = getProvider().create(model);
     commitTransaction(model.getClass());
@@ -335,7 +347,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
 
   public <F extends Filter> M setAttribute(String attributeName, Serializable attributeValue) {
 
-    Map<String, Serializable> dataMap = new ConcurrentHashMap<>();
+    Map<String, Serializable> dataMap = new HashMap<>();
     dataMap.put(attributeName, attributeValue);
     return (M) setAttributes(dataMap);
   }
@@ -377,8 +389,7 @@ public abstract class PersistedModel<M extends PersistedModel<M, CM>, CM extends
   }
 
   @JsonIgnore
-  public Object getPropertyValue(
-      String propertyName) throws PropertyNotFoundException {
+  public Object getPropertyValue(String propertyName) throws PropertyNotFoundException {
     Map<String, Field> properties = this.getProperties();
     if (properties.containsKey(propertyName)) {
       Field propertyField = properties.get(propertyName);
