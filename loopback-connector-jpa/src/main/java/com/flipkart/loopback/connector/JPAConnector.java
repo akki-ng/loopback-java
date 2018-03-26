@@ -7,6 +7,7 @@ import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
 import com.flipkart.loopback.query.QueryGenerator;
+import com.flipkart.loopback.relation.Relation;
 import com.google.common.collect.Lists;
 import java.io.Serializable;
 import java.util.List;
@@ -154,5 +155,16 @@ public class JPAConnector extends Connector {
     EntityManager em = getEntityManager();
     Query query = QueryGenerator.getInstance().getDeleteQuery(em, modelClass, where);
     return query.executeUpdate();
+  }
+
+
+  @Override
+  public <M extends PersistedModel> Map<Class<? extends PersistedModel>, List<? extends PersistedModel>> findThroughRelatedEntities(
+      WhereFilter relationScope, Relation relation, Filter throughFilter) {
+    EntityManager em = getEntityManager();
+    TypedQuery typedQuery = QueryGenerator.getInstance().getSelectTypedQueryThrough(em, relationScope,
+        relation, throughFilter);
+    List abc = typedQuery.getResultList();
+    return null;
   }
 }

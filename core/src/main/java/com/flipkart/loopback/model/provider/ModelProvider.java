@@ -12,6 +12,7 @@ import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.Model;
 import com.flipkart.loopback.model.PersistedModel;
+import com.flipkart.loopback.relation.Relation;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -225,5 +226,12 @@ public class ModelProvider {
 
   public <M extends PersistedModel> M destroy(M model) {
     return getConnectorFor(model.getClass()).destroy(model);
+  }
+
+  public <M extends PersistedModel> Map<Class<? extends PersistedModel>,List<? extends
+      PersistedModel>> findThroughRelatedEntities(WhereFilter relationScope, Relation relation,
+      Filter throughFilter) {
+    return getConnectorFor(relation.getThroughModelClass()).findThroughRelatedEntities(relationScope, relation,
+        throughFilter);
   }
 }

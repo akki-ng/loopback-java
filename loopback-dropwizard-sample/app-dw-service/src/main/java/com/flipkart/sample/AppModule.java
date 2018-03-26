@@ -6,10 +6,14 @@ import com.flipkart.loopback.connector.Connector;
 import com.flipkart.loopback.exception.LoopbackException;
 import com.flipkart.loopback.model.PersistedModel;
 import com.flipkart.sample.entity.HasManyModel;
+import com.flipkart.sample.entity.RoleMasterModel;
 import com.flipkart.sample.entity.TempModel;
+import com.flipkart.sample.entity.TempRoles;
 import com.flipkart.sample.entity.TestModel;
 import com.flipkart.sample.entity.configuration.HasManyModelConfiguration;
+import com.flipkart.sample.entity.configuration.RoleModelConfiguration;
 import com.flipkart.sample.entity.configuration.TempModelConfiguration;
+import com.flipkart.sample.entity.configuration.TempRoleConfiguration;
 import com.flipkart.sample.entity.configuration.TestModelConfiguration;
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
@@ -34,6 +38,8 @@ public class AppModule extends AbstractModule {
       cm.configureModel(TempModel.class, new TempModelConfiguration());
       cm.configureModel(TestModel.class, new TestModelConfiguration());
       cm.configureModel(HasManyModel.class, new HasManyModelConfiguration());
+      cm.configureModel(RoleMasterModel.class, new RoleModelConfiguration());
+      cm.configureModel(TempRoles.class, new TempRoleConfiguration());
     } catch (LoopbackException e) {
       e.printStackTrace();
     }

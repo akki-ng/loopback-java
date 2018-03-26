@@ -29,7 +29,12 @@ public class TempModel extends PersistedModel<TempModel, ModelConfigurationManag
           "id").relatedModelClass(TestModel.class).relationType(RelationType.HAS_ONE).build(),
       Relation.builder().name("many").fromPropertyName("id").toPropertyName(
           "tempId").relatedModelClass(HasManyModel.class).relationType(
-          RelationType.HAS_MANY).build());
+          RelationType.HAS_MANY).build(),
+      Relation.builder().name("roles").fromPropertyName("id").toThroughPropertyName("tempId")
+      .fromThroughPropertyName("roleId").toPropertyName("id").relatedModelClass(RoleMasterModel
+          .class).relationType(RelationType.HAS_MANY_THROUGH).throughModelClass(TempRoles.class)
+          .build()
+      );
 
   @JsonProperty("id")
   @Id //signifies the primary key

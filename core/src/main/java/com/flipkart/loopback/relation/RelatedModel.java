@@ -53,8 +53,9 @@ public class RelatedModel extends Model {
       obj.put(relation.getToPropertyName(), this.fromModel.getPropertyValue(relation.getFromPropertyName()));
       return new WhereFilter(obj);
     }else if(relation.getRelationType() == RelationType.HAS_MANY_THROUGH) {
+      // Scope for internal through model
       JSONObject obj = new JSONObject();
-      obj.put(relation.getToPropertyName(), this.fromModel.getPropertyValue(relation.getFromPropertyName()));
+      obj.put(relation.getToThroughPropertyName(), this.fromModel.getPropertyValue(relation.getFromPropertyName()));
       return new WhereFilter(obj);
     }
     return null;
@@ -99,7 +100,9 @@ public class RelatedModel extends Model {
       }
     }else if(relation.getRelationType() == RelationType.HAS_MANY_THROUGH){
 //      return Model.getProvider().find(this);
-      return null;
+      Map<Class<? extends PersistedModel>, List<? extends PersistedModel>> result = Model
+          .getProvider().findThroughRelatedEntities(relationScope, relation, throughFilter);
+      return (T) result.values();
     }
     throw new ModelNotConfiguredException(fromModel.getClass());
   }

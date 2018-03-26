@@ -9,6 +9,7 @@ import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.OrderBy;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
+import com.flipkart.loopback.relation.Relation;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import java.lang.reflect.Field;
@@ -26,6 +27,7 @@ import javax.persistence.criteria.CommonAbstractCriteria;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -283,5 +285,65 @@ public class QueryGenerator {
       }
     }
     return predicates;
+  }
+
+  public <M extends PersistedModel> TypedQuery getSelectTypedQueryThrough(EntityManager em,
+      WhereFilter relationScope,
+      Relation relation, Filter throughFilter) {
+
+    ModelConfiguration configuration = ModelConfigurationManager.getInstance()
+        .getModelConfiguration(relation.getThroughModelClass());
+
+//    if (!filter.) {
+//      var idNames = this.idNames(model);
+//      if (idNames && idNames.length) {
+//        filter.order = idNames;
+//      }
+//    }
+
+    CriteriaBuilder cb = em.getCriteriaBuilder();
+    CriteriaQuery query = cb.createQuery(relation.getThroughModelClass());
+    Root throughtRoot = query.from(relation.getThroughModelClass());
+    Root relatedRoot = query.from(relation.getRelatedModelClass());
+
+    Map<String, Field> properties = PersistedModel.getProperties(relation.getThroughModelClass());
+    Field joinField = properties.get(relation.getFromThroughPropertyName());
+
+    Join relatedEntity = throughtRoot.join(joinField.getName());
+
+
+    if (relationScope != null) {
+      List<Predicate> predicates = getWherePredicates(throughtRoot, query, cb, relation.getThroughModelClass(),
+          relationScope);
+      if (predicates.size() > 0) {
+        query.where(predicates.toArray(new Predicate[] {}));
+      }
+    }
+
+    query.multiselect(throughtRoot, relatedRoot);
+
+//    if(filter != null && filter.getOrder() != null && filter.getOrder().getOrderBy() != null) {
+//      Map<String, Field> properties = PersistedModel.getProperties(modelClass);
+//      List<Order> orders = Lists.newArrayList();
+//
+//      for(int i = 0; i < filter.getOrder().getOrderBy().size(); i++) {
+//        OrderBy orderBy = filter.getOrder().getOrderBy().get(i);
+//        Field field = properties.get(orderBy.getProperty());
+//        String fieldName = field.getName();
+//        if(orderBy.getType() == OrderType.DESC) {
+//          orders.add(cb.desc(root.get(fieldName)));
+//        }else {
+//          orders.add(cb.asc(root.get(fieldName)));
+//        }
+//      }
+//      if(orders.size() > 0) {
+//        Order[] orderArray = new Order[orders.size()];
+//        orderArray = orders.toArray(orderArray);
+//        query = query.orderBy(orderArray);
+//      }
+//    }
+
+    TypedQuery typedQuery = em.createQuery(query);
+    return typedQuery;
   }
 }

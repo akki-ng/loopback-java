@@ -6,6 +6,8 @@
         <class>com.flipkart.sample.entity.TempModel</class>
         <class>com.flipkart.sample.entity.TestModel</class>
         <class>com.flipkart.sample.entity.HasManyModel</class>
+        <class>com.flipkart.sample.entity.RoleMasterModel</class>
+        <class>com.flipkart.sample.entity.TempRoles</class>
 
         <properties>
             <property name="javax.persistence.jdbc.driver"

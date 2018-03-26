@@ -5,6 +5,7 @@ import com.flipkart.loopback.exception.model.persistence.ModelNotFoundException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
+import com.flipkart.loopback.relation.Relation;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -65,10 +66,12 @@ public abstract class Connector {
   public abstract <M extends PersistedModel, W extends WhereFilter> long destroyAll(Class<M> modelClass, W
       where) throws ConnectorException;
 
-
   /*
   Relation specific
    */
 
+  public abstract <M extends PersistedModel> Map<Class<? extends PersistedModel>,List<? extends
+      PersistedModel>> findThroughRelatedEntities(WhereFilter relationScope, Relation relation,
+      Filter throughFilter);
 
 }
