@@ -5,6 +5,7 @@ import com.flipkart.loopback.exception.model.persistence.ModelNotFoundException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
+import com.flipkart.loopback.relation.RelatedThroughEntity;
 import com.flipkart.loopback.relation.Relation;
 import java.io.Serializable;
 import java.util.List;
@@ -70,8 +71,7 @@ public abstract class Connector {
   Relation specific
    */
 
-  public abstract <M extends PersistedModel> Map<Class<? extends PersistedModel>,List<? extends
-      PersistedModel>> findThroughRelatedEntities(WhereFilter relationScope, Relation relation,
-      Filter throughFilter);
+  public abstract <M extends PersistedModel> List<RelatedThroughEntity> findThroughRelatedEntities(WhereFilter relationScope, Relation relation,
+      Filter throughFilter, Filter toFilter);
 
 }

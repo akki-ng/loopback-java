@@ -100,9 +100,9 @@ public class RelatedModel extends Model {
       }
     }else if(relation.getRelationType() == RelationType.HAS_MANY_THROUGH){
 //      return Model.getProvider().find(this);
-      Map<Class<? extends PersistedModel>, List<? extends PersistedModel>> result = Model
-          .getProvider().findThroughRelatedEntities(relationScope, relation, throughFilter);
-      return (T) result.values();
+      List<RelatedThroughEntity> result = Model
+          .getProvider().findThroughRelatedEntities(relationScope, relation, throughFilter, filter);
+      return (T) result;
     }
     throw new ModelNotConfiguredException(fromModel.getClass());
   }

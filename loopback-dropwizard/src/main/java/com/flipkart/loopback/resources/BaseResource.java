@@ -191,13 +191,13 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
 
   @Override
   public Object getOnRelatedModel(String id, String relationRestPath, Filter relatedModelfilter,
-      ContainerRequestContext requestContext) throws WrapperException {
+      Filter throughFilter, ContainerRequestContext requestContext) throws WrapperException {
     try {
       T model = findById(id, null, requestContext);
       Relation relation = model.getRelationByRestPath(relationRestPath);
       RelatedModel relatedModel = model.getRelatedModel(relation.getName());
       if (relatedModel.isManyRelation()) {
-        List<PersistedModel> result = relatedModel.find(relatedModelfilter, null);
+        List<PersistedModel> result = relatedModel.find(relatedModelfilter, throughFilter);
         return result;
       }
       PersistedModel result = relatedModel.find(relatedModelfilter, null);

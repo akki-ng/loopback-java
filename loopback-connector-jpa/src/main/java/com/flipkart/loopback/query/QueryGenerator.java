@@ -9,12 +9,12 @@ import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.OrderBy;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
+import com.flipkart.loopback.relation.RelatedThroughEntity;
 import com.flipkart.loopback.relation.Relation;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +27,8 @@ import javax.persistence.criteria.CommonAbstractCriteria;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
@@ -51,7 +51,7 @@ public class QueryGenerator {
     return instance;
   }
 
-  private <M extends PersistedModel> String buildColumnNames(Class<M> modelClass, Filter filter){
+  private <M extends PersistedModel> String buildColumnNames(Class<M> modelClass, Filter filter) {
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
         .getModelConfiguration(
         modelClass);
@@ -169,21 +169,21 @@ public class QueryGenerator {
 
     query.select(root);
 
-    if(filter != null && filter.getOrder() != null && filter.getOrder().getOrderBy() != null) {
+    if (filter != null && filter.getOrder() != null && filter.getOrder().getOrderBy() != null) {
       Map<String, Field> properties = PersistedModel.getProperties(modelClass);
       List<Order> orders = Lists.newArrayList();
 
-      for(int i = 0; i < filter.getOrder().getOrderBy().size(); i++) {
+      for (int i = 0; i < filter.getOrder().getOrderBy().size(); i++) {
         OrderBy orderBy = filter.getOrder().getOrderBy().get(i);
         Field field = properties.get(orderBy.getProperty());
         String fieldName = field.getName();
-        if(orderBy.getType() == OrderType.DESC) {
+        if (orderBy.getType() == OrderType.DESC) {
           orders.add(cb.desc(root.get(fieldName)));
-        }else {
+        } else {
           orders.add(cb.asc(root.get(fieldName)));
         }
       }
-      if(orders.size() > 0) {
+      if (orders.size() > 0) {
         Order[] orderArray = new Order[orders.size()];
         orderArray = orders.toArray(orderArray);
         query = query.orderBy(orderArray);
@@ -288,11 +288,19 @@ public class QueryGenerator {
   }
 
   public <M extends PersistedModel> TypedQuery getSelectTypedQueryThrough(EntityManager em,
-      WhereFilter relationScope,
-      Relation relation, Filter throughFilter) {
+      WhereFilter relationScope, Relation relation, Filter throughFilter, Filter toFilter) {
+    if(throughFilter == null) {
+      throughFilter = new Filter();
+    }
+    if(toFilter == null) {
+      toFilter = new Filter();
+    }
+
+    throughFilter.setWhere(throughFilter.getWhere().merge(relationScope));
 
     ModelConfiguration configuration = ModelConfigurationManager.getInstance()
-        .getModelConfiguration(relation.getThroughModelClass());
+        .getModelConfiguration(
+        relation.getThroughModelClass());
 
 //    if (!filter.) {
 //      var idNames = this.idNames(model);
@@ -302,19 +310,28 @@ public class QueryGenerator {
 //    }
 
     CriteriaBuilder cb = em.getCriteriaBuilder();
-    CriteriaQuery query = cb.createQuery(relation.getThroughModelClass());
+    CriteriaQuery query = cb.createQuery(RelatedThroughEntity.class);
     Root throughtRoot = query.from(relation.getThroughModelClass());
-    Root relatedRoot = query.from(relation.getRelatedModelClass());
 
     Map<String, Field> properties = PersistedModel.getProperties(relation.getThroughModelClass());
-    Field joinField = properties.get(relation.getFromThroughPropertyName());
+    Field throughFromField = properties.get(relation.getFromThroughPropertyName());
 
-    Join relatedEntity = throughtRoot.join(joinField.getName());
+    Path throughFromPath = throughtRoot.get(throughFromField.getName());
+
+    Root relatedRoot = query.from(relation.getRelatedModelClass());
+
+
+//    query.select(relatedRoot);
+//    query.select(throughtRoot);
 
 
     if (relationScope != null) {
-      List<Predicate> predicates = getWherePredicates(throughtRoot, query, cb, relation.getThroughModelClass(),
-          relationScope);
+      List<Predicate> predicates = getWherePredicates(throughtRoot, query, cb,
+          relation.getThroughModelClass(), throughFilter.getWhere());
+      predicates.add(cb.equal(throughFromPath, relatedRoot));
+      List<Predicate> toPredicates = getWherePredicates(relatedRoot, query, cb,
+          relation.getRelatedModelClass(), toFilter.getWhere());
+      predicates.addAll(toPredicates);
       if (predicates.size() > 0) {
         query.where(predicates.toArray(new Predicate[] {}));
       }

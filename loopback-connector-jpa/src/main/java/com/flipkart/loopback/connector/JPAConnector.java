@@ -7,6 +7,7 @@ import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.WhereFilter;
 import com.flipkart.loopback.model.PersistedModel;
 import com.flipkart.loopback.query.QueryGenerator;
+import com.flipkart.loopback.relation.RelatedThroughEntity;
 import com.flipkart.loopback.relation.Relation;
 import com.google.common.collect.Lists;
 import java.io.Serializable;
@@ -159,12 +160,12 @@ public class JPAConnector extends Connector {
 
 
   @Override
-  public <M extends PersistedModel> Map<Class<? extends PersistedModel>, List<? extends PersistedModel>> findThroughRelatedEntities(
-      WhereFilter relationScope, Relation relation, Filter throughFilter) {
+  public <M extends PersistedModel> List<RelatedThroughEntity> findThroughRelatedEntities(
+      WhereFilter relationScope, Relation relation, Filter throughFilter, Filter toFilter) {
     EntityManager em = getEntityManager();
     TypedQuery typedQuery = QueryGenerator.getInstance().getSelectTypedQueryThrough(em, relationScope,
-        relation, throughFilter);
-    List abc = typedQuery.getResultList();
-    return null;
+        relation, throughFilter, toFilter);
+    List<RelatedThroughEntity> result = typedQuery.getResultList();
+    return result;
   }
 }
