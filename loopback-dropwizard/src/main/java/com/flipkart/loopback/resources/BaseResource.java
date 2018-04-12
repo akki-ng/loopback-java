@@ -257,7 +257,7 @@ public abstract class BaseResource<T extends PersistedModel> implements DWResour
       T model = findById(id, null, requestContext);
       Relation relation = model.getRelationByRestPath(relationRestPath);
       RelatedModel relatedModel = model.getRelatedModel(relation.getName());
-      return relatedModel.destroyAll(where, null);
+      return relatedModel.destroyAll(where);
     } catch (Throwable e) {
       throw new WrapperException(e);
     }

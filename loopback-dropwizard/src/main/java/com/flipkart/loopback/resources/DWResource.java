@@ -209,7 +209,7 @@ public interface DWResource<T extends PersistedModel> {
 
 
   /*
-   Delete all instances of a relation.
+   Delete all instances of a relation matching the where filter.
   */
   @DELETE
   @Path("/{id}/{relation}")

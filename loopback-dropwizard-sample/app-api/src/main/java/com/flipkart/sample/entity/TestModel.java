@@ -7,6 +7,8 @@ import com.flipkart.loopback.relation.Relation;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +21,7 @@ import lombok.NoArgsConstructor;
 public class TestModel extends PersistedModel<TestModel, ModelConfigurationManager> {
 
   @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
   @JsonProperty("id")
   private Long id;
 

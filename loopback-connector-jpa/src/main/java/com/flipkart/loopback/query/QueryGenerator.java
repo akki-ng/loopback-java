@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flipkart.loopback.configuration.ModelConfiguration;
 import com.flipkart.loopback.configuration.manager.ModelConfigurationManager;
 import com.flipkart.loopback.constants.OrderType;
+import com.flipkart.loopback.exception.validation.model.PropertyNotFoundException;
 import com.flipkart.loopback.filter.Filter;
 import com.flipkart.loopback.filter.OrderBy;
 import com.flipkart.loopback.filter.WhereFilter;
@@ -280,7 +281,7 @@ public class QueryGenerator {
             }
           }
         } else {
-          // TODO no field property with this name
+          throw new PropertyNotFoundException(modelClass, fieldCondition.getKey());
         }
       }
     }

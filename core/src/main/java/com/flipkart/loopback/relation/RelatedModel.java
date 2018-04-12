@@ -49,8 +49,12 @@ public class RelatedModel extends Model {
   private WhereFilter _buildRelationScope() {
     if(relation.getRelationType() == RelationType.HAS_ONE || relation.getRelationType() ==
         RelationType.BELONGS_TO || relation.getRelationType() == RelationType.HAS_MANY) {
+      Object fromPropertyValue = this.fromModel.getPropertyValue(relation.getFromPropertyName());
+      if(fromPropertyValue == null && relation.getRelationType() == RelationType.HAS_ONE) {
+        return null;
+      }
       JSONObject obj = new JSONObject();
-      obj.put(relation.getToPropertyName(), this.fromModel.getPropertyValue(relation.getFromPropertyName()));
+      obj.put(relation.getToPropertyName(), fromPropertyValue);
       return new WhereFilter(obj);
     }else if(relation.getRelationType() == RelationType.HAS_MANY_THROUGH) {
       // Scope for internal through model
@@ -81,6 +85,9 @@ public class RelatedModel extends Model {
    */
   public <T extends Object> T find(Filter filter, Filter throughFilter) throws
       ModelNotFoundException {
+    if(relation.getRelationType() == RelationType.HAS_ONE && relationScope == null) {
+      throw new ModelNotFoundException(relation.getRelatedModelClass(), filter);
+    }
     if(relation.getRelationType() == RelationType.HAS_ONE || relation.getRelationType() ==
         RelationType.BELONGS_TO || relation.getRelationType() == RelationType.HAS_MANY) {
       if(filter == null) {
@@ -134,11 +141,11 @@ public class RelatedModel extends Model {
               "Model already exists. Please update using update api");
         } catch (ModelNotFoundException e) {
           // Continue create
-          PersistedModel persisted = PersistedModel.create(relatedModel);
+          M persisted = PersistedModel.create(relatedModel);
           fromModel = fromModel.setAttribute(relation.getFromPropertyName(), (Serializable)
               persisted.getPropertyValue(relation.getToPropertyName()));
           fromModel = fromModel.save();
-          return relatedModel;
+          return persisted;
         }
       }
     }
@@ -146,24 +153,23 @@ public class RelatedModel extends Model {
     return null;
   }
 
-  public <M extends PersistedModel> long destroyAll(WhereFilter where,
-      WhereFilter throughWhere) throws OperationNotAllowedException {
+  public <M extends PersistedModel> long destroyAll(WhereFilter where) throws OperationNotAllowedException {
     if(relation.getRelationType() == RelationType.BELONGS_TO) {
       Class<? extends PersistedModel> relModelClass = relation.getRelatedModelClass();
       throw new OperationNotAllowedException(relModelClass, "destroyAll", "can not destroyAll a belongs "
           + "to entity");
     }
+    Class<? extends PersistedModel> destroyModelClass = null;
     if(relation.getRelationType() == RelationType.HAS_ONE || relation.getRelationType() == RelationType.HAS_MANY) {
-      Class<? extends PersistedModel> relModelClass = relation.getRelatedModelClass();
-      if(where == null) {
-        where = new WhereFilter();
-      }
-      where = where.merge(relationScope);
-      return PersistedModel.destroyAll(relModelClass, where);
+      destroyModelClass = relation.getRelatedModelClass();
+    }else if(relation.getRelationType() == RelationType.HAS_MANY_THROUGH) {
+      destroyModelClass = relation.getThroughModelClass();
     }
-    // TODO destroy of hasmanythrouh
-
-    return 0;
+    if(where == null) {
+      where = new WhereFilter();
+    }
+    where = where.merge(relationScope);
+    return PersistedModel.destroyAll(destroyModelClass, where);
   }
 
   public <M extends PersistedModel> M findByFk(@NotNull Serializable fk) throws ModelNotFoundException,
